@@ -8,7 +8,6 @@ A comprehensive survey management system consisting of two main applications: **
 survey-app/
 ├── survey-builder/     # Survey creation and management application
 ├── survey-taker/       # Survey administration and response collection
-├── images/            # Documentation and UI images
 ├── .github/           # GitHub Actions and workflows
 └── README.md          # This file
 ```
