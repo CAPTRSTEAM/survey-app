@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey App</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333333;
+        }
+        #root {
+            min-height: 100vh;
+        }
+        .survey-container {
+            padding: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .survey-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .survey-title {
+            margin: 0;
+            color: #1976d2;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .question-counter {
+            padding: 8px 16px;
+            background-color: #1976d2;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .question-card {
+            background-color: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .question-text {
+            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #333333;
+            line-height: 1.4;
+        }
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        .text-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        .radio-option {
+            display: block;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .radio-option:hover {
+            border-color: #1976d2;
+            background-color: #f8f9fa;
+        }
+        .radio-option input {
+            margin-right: 12px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+        .button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+        }
+        .button-primary {
+            background-color: #1976d2;
+            color: white;
+        }
+        .button-primary:hover:not(:disabled) {
+            background-color: #1565c0;
+        }
+        .button-secondary {
+            background-color: white;
+            color: #1976d2;
+            border: 2px solid #1976d2;
+        }
+        .button-secondary:hover:not(:disabled) {
+            background-color: #f8f9fa;
+        }
+        .button:disabled {
+            background-color: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+        }
+        .welcome-screen, .thank-you-screen {
+            text-align: center;
+            padding: 80px 40px;
+            max-width: 700px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .welcome-screen::before, .thank-you-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
+            border-radius: 20px 20px 0 0;
+        }
+        .welcome-screen .survey-title, .thank-you-screen .survey-title {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+        .welcome-message, .thank-you-message {
+            font-size: 20px;
+            line-height: 1.7;
+            color: #4a5568;
+            margin: 32px 0;
+            font-weight: 300;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .branding {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+        .company-name {
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .powered-by {
+            margin-top: 4px;
+            font-style: italic;
+        }
+        .error-message {
+            padding: 24px;
+            margin: 24px;
+            background-color: #ffebee;
+            color: #c62828;
+            border-radius: 8px;
+            border: 1px solid #ffcdd2;
+            text-align: center;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            font-size: 18px;
+            color: #666;
+        }
+        .mode-indicator {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background-color: #1976d2;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module">
+        import React from 'https://esm.sh/react@18';
+        import ReactDOM from 'https://esm.sh/react-dom@18';
+        
+        // SPA API Provider - Platform Integration
+        class ApiProvider {
+            constructor() {
+                this.gameConfig = null;
+                this.gameData = null;
+                this.isReady = false;
+                this.listeners = [];
+                this.setupMessageListener();
+            }
+
+            setupMessageListener() {
+                window.addEventListener('message', (event) => {
+                    console.log('Platform message received:', event.data);
+                    
+                    if (event.data.type === 'CONFIG') {
+                        this.handleConfigMessage(event.data);
+                    }
+                });
+            }
+
+            handleConfigMessage(data) {
+                console.log('=== CONFIG MESSAGE DEBUG ===');
+                console.log('Handling CONFIG message:', data);
+                console.log('CONFIG message keys:', Object.keys(data));
+                console.log('CONFIG message content:', JSON.stringify(data, null, 2));
+                
+                // Extract platform configuration
+                const { token, url, exerciseId, appInstanceId, survey, surveyConfig } = data;
+                
+                console.log('Extracted parameters:', {
+                    hasToken: !!token,
+                    hasUrl: !!url,
+                    hasExerciseId: !!exerciseId,
+                    hasAppInstanceId: !!appInstanceId,
+                    hasSurvey: !!survey,
+                    hasSurveyConfig: !!surveyConfig
+                });
+                
+                // First, check if survey data is directly in the CONFIG message
+                if (survey && this.isValidSurvey(survey)) {
+                    console.log('✅ Found survey data directly in CONFIG message');
+                    this.gameConfig = survey;
+                    this.isReady = true;
+                    this.notifyListeners();
+                    return;
+                }
+                
+                if (surveyConfig && this.isValidSurvey(surveyConfig)) {
+                    console.log('✅ Found surveyConfig data directly in CONFIG message');
+                    this.gameConfig = surveyConfig;
+                    this.isReady = true;
+                    this.notifyListeners();
+                    return;
+                }
+                
+                // Validate required parameters for API call
+                if (!url || !token) {
+                    console.warn('❌ Missing required platform parameters (url or token), using fallback');
+                    this.useFallbackSurvey();
+                    return;
+                }
+                
+                console.log('✅ Using spa-api-provider pattern to fetch game config');
+                // Use spa-api-provider pattern: getCurrentGameConfig
+                this.fetchGameConfig(url, token, exerciseId, appInstanceId);
+            }
+
+            async fetchGameConfig(platformUrl, token, exerciseId, appInstanceId) {
+                try {
+                    console.log('=== SPA-API-PROVIDER PATTERN DEBUG ===');
+                    console.log('Fetching game config using spa-api-provider pattern');
+                    console.log('Platform URL:', platformUrl);
+                    console.log('Token available:', !!token);
+                    console.log('ExerciseId available:', !!exerciseId);
+                    console.log('AppInstanceId available:', !!appInstanceId);
+                    
+                    // Use the same API call as spa-api-provider: getCurrentGameConfig
+                    // This uses GET /api/gameConfig instead of POST /api/gameStartingData
+                    const response = await fetch(`${platformUrl}/api/gameConfig`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    console.log('API Response status:', response.status);
+                    console.log('API Response headers:', Object.fromEntries(response.headers.entries()));
+                    
+                    if (!response.ok) {
+                        console.warn(`❌ API request failed with status: ${response.status}`);
+                        if (response.status === 400) {
+                            console.warn('❌ Bad Request (400) - this may be due to missing required parameters');
+                        }
+                        if (response.status === 403) {
+                            console.warn('❌ Access forbidden (403) - this may be due to CORS or authentication issues');
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const gameStartingData = await response.json();
+                    console.log('=== GAME STARTING DATA ===');
+                    console.log('Full response:', JSON.stringify(gameStartingData, null, 2));
+                    console.log('Response type:', typeof gameStartingData);
+                    console.log('Response keys:', Object.keys(gameStartingData));
+
+                    // Extract survey configuration from game data
+                    const surveyConfig = this.extractSurveyConfig(gameStartingData);
+                    
+                    if (surveyConfig) {
+                        console.log('✅ Survey config extracted successfully');
+                        console.log('Extracted survey:', JSON.stringify(surveyConfig, null, 2));
+                        this.gameConfig = surveyConfig;
+                        this.isReady = true;
+                        this.notifyListeners();
+                    } else {
+                        console.warn('❌ No survey configuration found in game data, using fallback');
+                        this.useFallbackSurvey();
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching game config:', error);
+                    console.log('Using fallback survey due to API error');
+                    this.useFallbackSurvey();
+                }
+            }
+
+            useFallbackSurvey() {
+                console.log('Loading fallback sample survey');
+                this.gameConfig = this.getSampleSurvey();
+                this.isReady = true;
+                this.notifyListeners();
+            }
+
+            extractSurveyConfig(gameStartingData) {
+                console.log('=== SURVEY EXTRACTION DEBUG ===');
+                console.log('Extracting survey config from game starting data:', gameStartingData);
+                
+                // Look for survey configuration in various possible locations
+                const possiblePaths = [
+                    'surveyConfig',
+                    'gameConfig.surveyConfig',
+                    'appConfig.surveyConfig',
+                    'configuration.surveyConfig',
+                    'data.surveyConfig',
+                    'survey',
+                    'gameConfig.survey',
+                    'appConfig.survey',
+                    'configuration.survey',
+                    'data.survey',
+                    'gameConfig',
+                    'appConfig',
+                    'configuration',
+                    'data',
+                    'config',
+                    'appData',
+                    'gameData'
+                ];
+
+                console.log('Checking possible paths:', possiblePaths);
+
+                for (const path of possiblePaths) {
+                    const value = this.getNestedValue(gameStartingData, path);
+                    console.log(`🔍 Checking path "${path}":`, value);
+                    
+                    if (value && typeof value === 'object') {
+                        // Check if this object looks like a survey
+                        if (this.isValidSurvey(value)) {
+                            console.log(`✅ Found valid survey at path "${path}"`);
+                            return value;
+                        } else {
+                            console.log(`❌ Object at path "${path}" is not a valid survey`);
+                        }
+                    } else {
+                        console.log(`❌ No object found at path "${path}"`);
+                    }
+                }
+
+                // If no survey config found, check if the entire gameStartingData is a survey
+                console.log('🔍 Checking if gameStartingData itself is a survey...');
+                if (this.isValidSurvey(gameStartingData)) {
+                    console.log('✅ Game starting data itself appears to be a valid survey');
+                    return gameStartingData;
+                }
+
+                console.warn('❌ No valid survey configuration found in any path');
+                return null;
+            }
+
+            isValidSurvey(obj) {
+                // Check if an object has the structure of a valid survey
+                if (!obj || typeof obj !== 'object') {
+                    console.log('❌ Not an object:', obj);
+                    return false;
+                }
+
+                // Must have either questions array or be a survey-like structure
+                const hasQuestions = obj.questions && Array.isArray(obj.questions) && obj.questions.length > 0;
+                const hasSurveyStructure = obj.id && obj.title && (obj.questions || obj.welcome || obj.thankYou);
+                
+                console.log('🔍 Survey validation:', {
+                    hasQuestions,
+                    hasSurveyStructure,
+                    id: obj.id,
+                    title: obj.title,
+                    questionsCount: obj.questions ? obj.questions.length : 0,
+                    hasWelcome: !!obj.welcome,
+                    hasThankYou: !!obj.thankYou
+                });
+
+                const isValid = hasQuestions || hasSurveyStructure;
+                console.log(`✅ Survey validation result: ${isValid}`);
+                return isValid;
+            }
+
+            getNestedValue(obj, path) {
+                return path.split('.').reduce((current, key) => {
+                    return current && current[key] !== undefined ? current[key] : null;
+                }, obj);
+            }
+
+            getSampleSurvey() {
+                return {
+                    "id": "sample-survey-001",
+                    "title": "Employee Satisfaction Survey",
+                    "description": "Please take a moment to provide feedback about your work experience.",
+                    "welcome": {
+                        "title": "Welcome to the Survey",
+                        "message": "Thank you for participating in our employee satisfaction survey. This will help us understand your experience and make improvements."
+                    },
+                    "thankYou": {
+                        "title": "Thank You!",
+                        "message": "Your responses have been recorded. Thank you for taking the time to provide feedback."
+                    },
+                    "settings": {
+                        "branding": {
+                            "companyName": "CAPTRS",
+                            "poweredBy": "Powered by CAPTRS"
+                        }
+                    },
+                    "questions": [
+                        {
+                            "id": "q1",
+                            "type": "radio",
+                            "question": "How satisfied are you with your current role?",
+                            "options": ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
+                            "required": true
+                        },
+                        {
+                            "id": "q2",
+                            "type": "radio",
+                            "question": "How would you rate your work-life balance?",
+                            "options": ["Excellent", "Good", "Fair", "Poor", "Very Poor"],
+                            "required": true
+                        },
+                        {
+                            "id": "q3",
+                            "type": "text",
+                            "question": "What aspects of your job do you find most rewarding?",
+                            "required": false
+                        },
+                        {
+                            "id": "q4",
+                            "type": "text",
+                            "question": "What improvements would you suggest for the workplace?",
+                            "required": false
+                        },
+                        {
+                            "id": "q5",
+                            "type": "radio",
+                            "question": "Would you recommend this company to others?",
+                            "options": ["Definitely Yes", "Probably Yes", "Not Sure", "Probably No", "Definitely No"],
+                            "required": true
+                        }
+                    ]
+                };
+            }
+
+            subscribe(callback) {
+                this.listeners.push(callback);
+                if (this.isReady) {
+                    callback(this.gameConfig);
+                }
+            }
+
+            notifyListeners() {
+                this.listeners.forEach(callback => callback(this.gameConfig));
+            }
+
+            getGameConfig() {
+                return this.gameConfig;
+            }
+
+            isGameReady() {
+                return this.isReady;
+            }
+        }
+
+        // Create API provider instance
+        const apiProvider = new ApiProvider();
+
+        const SurveyApp = () => {
+            const [survey, setSurvey] = React.useState(null);
+            const [currentQuestion, setCurrentQuestion] = React.useState(0);
+            const [answers, setAnswers] = React.useState({});
+            const [isCompleted, setIsCompleted] = React.useState(false);
+            const [appMode, setAppMode] = React.useState('loading');
+
+            // Initialize app with API provider
+            React.useEffect(() => {
+                // Check if running in iframe (platform mode)
+                if (window.parent !== window) {
+                    setAppMode('platform');
+                    
+                    // Subscribe to API provider updates
+                    apiProvider.subscribe((surveyConfig) => {
+                        console.log('Survey config received from API provider:', surveyConfig);
+                        // Process survey to flatten sections if needed
+                        const processedSurvey = processSurveyStructure(surveyConfig);
+                        setSurvey(processedSurvey);
+                    });
+
+                    // Send ready message to platform
+                    window.parent.postMessage({
+                        type: 'SURVEY_APP_READY',
+                        message: 'Survey app is ready to receive configuration'
+                    }, '*');
+                } else {
+                    // Standalone mode - load sample survey
+                    setAppMode('standalone');
+                    const sampleSurvey = apiProvider.getSampleSurvey();
+                    const processedSurvey = processSurveyStructure(sampleSurvey);
+                    setSurvey(processedSurvey);
+                }
+            }, []);
+
+            // Process survey structure to handle sections
+            const processSurveyStructure = (surveyData) => {
+                if (!surveyData) return null;
+                
+                console.log('Processing survey structure:', surveyData);
+                
+                // If survey has sections, flatten them into a single questions array
+                if (surveyData.sections && Array.isArray(surveyData.sections)) {
+                    console.log('Survey has sections, flattening questions');
+                    const flattenedQuestions = [];
+                    let questionOrder = 1;
+                    
+                    surveyData.sections.forEach((section, sectionIndex) => {
+                        if (section.questions && Array.isArray(section.questions)) {
+                            section.questions.forEach((question, questionIndex) => {
+                                // Add section info to question for context
+                                const processedQuestion = {
+                                    ...question,
+                                    sectionId: section.id,
+                                    sectionTitle: section.title,
+                                    sectionIndex: sectionIndex,
+                                    globalOrder: questionOrder++
+                                };
+                                flattenedQuestions.push(processedQuestion);
+                            });
+                        }
+                    });
+                    
+                    console.log('Flattened questions:', flattenedQuestions);
+                    
+                    return {
+                        ...surveyData,
+                        questions: flattenedQuestions
+                    };
+                }
+                
+                // If survey already has a flat questions array, use as is
+                if (surveyData.questions && Array.isArray(surveyData.questions)) {
+                    console.log('Survey already has flat questions array');
+                    return surveyData;
+                }
+                
+                console.warn('No questions found in survey structure');
+                return surveyData;
+            };
+
+            const handleAnswerChange = (questionId, value) => {
+                setAnswers(prev => ({ ...prev, [questionId]: value }));
+            };
+
+            const handleComplete = () => {
+                setIsCompleted(true);
+                
+                // Send completion data to platform
+                if (appMode === 'platform') {
+                    window.parent.postMessage({
+                        type: 'SURVEY_COMPLETE',
+                        data: {
+                            surveyId: survey.id,
+                            answers,
+                            timestamp: new Date().toISOString(),
+                            sessionId: `session_${Date.now()}`
+                        }
+                    }, '*');
+                }
+                
+                console.log('Survey completed:', { surveyId: survey.id, answers });
+            };
+
+            // Calculate current question data
+            const hasWelcome = survey?.welcome ? 1 : 0;
+            const questionIndex = currentQuestion - hasWelcome;
+            const currentQuestionData = survey?.questions?.[questionIndex];
+            const isLastQuestion = questionIndex === (survey?.questions?.length || 0) - 1;
+            const hasAnswer = currentQuestionData ? answers[currentQuestionData.id] : false;
+
+            // Show loading
+            if (!survey) {
+                return React.createElement('div', { className: 'loading' }, 'Loading survey...');
+            }
+
+            // Show welcome screen
+            if (survey.welcome && currentQuestion === 0) {
+                return React.createElement('div', { className: 'survey-container' },
+                    React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
+                    React.createElement('div', { className: 'welcome-screen' },
+                        React.createElement('h1', { className: 'survey-title' }, survey.welcome.title),
+                        React.createElement('p', { className: 'welcome-message' }, survey.welcome.message),
+                        React.createElement('button', {
+                            onClick: () => setCurrentQuestion(1),
+                            className: 'button button-primary',
+                            style: { marginTop: '32px' }
+                        }, 'Start Survey'),
+                        survey.settings?.branding && React.createElement('div', { className: 'branding' },
+                            survey.settings.branding.companyName && 
+                                React.createElement('div', { className: 'company-name' }, survey.settings.branding.companyName),
+                            survey.settings.branding.poweredBy && 
+                                React.createElement('div', { className: 'powered-by' }, survey.settings.branding.poweredBy)
+                        )
+                    )
+                );
+            }
+
+            // Show thank you screen
+            if (survey.thankYou && isCompleted) {
+                return React.createElement('div', { className: 'survey-container' },
+                    React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
+                    React.createElement('div', { className: 'thank-you-screen' },
+                        React.createElement('h1', { className: 'survey-title' }, survey.thankYou.title),
+                        React.createElement('p', { className: 'thank-you-message' }, survey.thankYou.message),
+                        survey.settings?.branding && React.createElement('div', { className: 'branding' },
+                            survey.settings.branding.companyName && 
+                                React.createElement('div', { className: 'company-name' }, survey.settings.branding.companyName),
+                            survey.settings.branding.poweredBy && 
+                                React.createElement('div', { className: 'powered-by' }, survey.settings.branding.poweredBy)
+                        )
+                    )
+                );
+            }
+
+            // Show error if no question data
+            if (!currentQuestionData) {
+                return React.createElement('div', { className: 'error-message' }, 
+                    'Error: No question data found. Please check the survey configuration.');
+            }
+
+            // Render question
+            const renderQuestion = (question) => {
+                const currentAnswer = answers[question.id];
+
+                switch (question.type) {
+                    case 'text':
+                        return React.createElement('textarea', {
+                            className: 'text-input',
+                            value: currentAnswer || '',
+                            onChange: (e) => handleAnswerChange(question.id, e.target.value),
+                            placeholder: 'Enter your answer...',
+                            required: question.required
+                        });
+
+                    case 'radio':
+                        return React.createElement('div', null,
+                            question.options?.map((option) =>
+                                React.createElement('label', {
+                                    key: option,
+                                    className: 'radio-option'
+                                },
+                                    React.createElement('input', {
+                                        type: 'radio',
+                                        name: question.id,
+                                        value: option,
+                                        checked: currentAnswer === option,
+                                        onChange: (e) => handleAnswerChange(question.id, e.target.value),
+                                        required: question.required
+                                    }),
+                                    ' ' + option
+                                )
+                            )
+                        );
+
+                    default:
+                        return React.createElement('div', { style: { color: 'red' } }, 'Unsupported question type');
+                }
+            };
+
+            return React.createElement('div', { className: 'survey-container' },
+                React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
+                
+                React.createElement('div', { className: 'survey-header' },
+                    React.createElement('h1', { className: 'survey-title' }, survey.title),
+                    React.createElement('span', { className: 'question-counter' }, 
+                        `Question ${questionIndex + 1} of ${survey.questions.length}`)
+                ),
+
+                survey.description && React.createElement('p', {
+                    style: { color: '#666', marginBottom: '24px', fontSize: '16px' }
+                }, survey.description),
+
+                React.createElement('div', { className: 'question-card' },
+                    React.createElement('h3', { className: 'question-text' }, 
+                        currentQuestionData.question + (currentQuestionData.required ? ' *' : '')),
+                    renderQuestion(currentQuestionData)
+                ),
+
+                React.createElement('div', { className: 'button-group' },
+                    React.createElement('button', {
+                        onClick: () => setCurrentQuestion(prev => prev - 1),
+                        disabled: currentQuestion <= (hasWelcome ? 1 : 0),
+                        className: 'button button-secondary'
+                    }, 'Previous'),
+
+                    isLastQuestion ?
+                        React.createElement('button', {
+                            onClick: handleComplete,
+                            disabled: !hasAnswer,
+                            className: 'button button-primary'
+                        }, 'Complete Survey') :
+                        React.createElement('button', {
+                            onClick: () => setCurrentQuestion(prev => prev + 1),
+                            disabled: !hasAnswer,
+                            className: 'button button-primary'
+                        }, 'Next')
+                )
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(
+            React.createElement(SurveyApp),
+            document.getElementById('root')
+        );
+    </script>
+</body>
+</html> 

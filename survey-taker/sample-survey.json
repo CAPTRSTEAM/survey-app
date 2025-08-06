@@ -1,0 +1,54 @@
+{
+  "id": "sample-survey-001",
+  "title": "Employee Satisfaction Survey",
+  "description": "Please take a moment to provide feedback about your work experience.",
+  "welcome": {
+    "title": "Welcome to the Survey",
+    "message": "Thank you for participating in our employee satisfaction survey. This will help us understand your experience and make improvements."
+  },
+  "thankYou": {
+    "title": "Thank You!",
+    "message": "Your responses have been recorded. Thank you for taking the time to provide feedback."
+  },
+  "settings": {
+    "branding": {
+      "companyName": "CAPTRS",
+      "poweredBy": "Powered by CAPTRS"
+    }
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "radio",
+      "question": "How satisfied are you with your current role?",
+      "options": ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
+      "required": true
+    },
+    {
+      "id": "q2",
+      "type": "radio",
+      "question": "How would you rate your work-life balance?",
+      "options": ["Excellent", "Good", "Fair", "Poor", "Very Poor"],
+      "required": true
+    },
+    {
+      "id": "q3",
+      "type": "text",
+      "question": "What aspects of your job do you find most rewarding?",
+      "required": false
+    },
+    {
+      "id": "q4",
+      "type": "text",
+      "question": "What improvements would you suggest for the workplace?",
+      "required": false
+    },
+    {
+      "id": "q5",
+      "type": "radio",
+      "question": "Would you recommend this company to others?",
+      "options": ["Definitely Yes", "Probably Yes", "Not Sure", "Probably No", "Definitely No"],
+      "required": true
+    }
+  ]
+} 

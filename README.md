@@ -1,167 +1,204 @@
-# Data Collection App
+# Survey App
 
-A React application for collecting structured data using JSON Schema definitions.
+A comprehensive survey management system consisting of two main applications: **Survey Builder** and **Survey Taker**. This repository contains both applications for creating and administering surveys.
 
-## Proof of Concept
+## 📁 Project Structure
 
-**Important Note:** This application is a proof of concept and not intended for production use. It demonstrates the capabilities of dynamic form generation from JSON Schema with custom UI components and is meant to showcase what's possible rather than provide a complete solution.
-
-## Features
-
--   Dynamic form generation from JSON Schema
--   Support for all common field types (text, number, boolean, arrays, objects)
--   Schema visualization and exploration
--   **Full support for JSON Schema references ($ref) and definitions**
--   **Custom interactive UI components for specialized data collection**
-
-## Custom UI Components
-
-This project demonstrates the ability to build custom, interactive UI components that extend beyond standard form controls:
-
-### Graph Field
-
-A custom component for positioning tokens in a triangular graph space:
-
--   Interactive drag-and-drop interface
--   Barycentric coordinate system
--   Visual representation of data points
--   Used for specialized data collection scenarios like threat assessments
-
-![Graph Field UI Component](./images/custom-ui-graph.png)
-
-### Timeline Field
-
-A specialized component for visualizing and managing project timelines with:
-
--   Interactive timeline visualization
--   Dependency management between milestones
--   Status tracking with color coding
--   Date-based organization
-
-The timeline custom ui component is just an example and does not represent a usecase for our purposes at this time.
-
-### Wizard Field
-
-A multi-step form wizard that:
-
--   Guides users through complex data entry processes
--   Validates each step before proceeding
--   Supports optional steps
--   Provides a streamlined onboarding experience
-
-The wizard custom ui component is just an example and does not represent a usecase for our purposes at this time.
-
-These custom components demonstrate how JSON Schema can be extended with specialized UI controls for complex data collection scenarios beyond what standard form controls can provide.
-
-## JSON Schema Reference Support
-
-This application supports JSON Schema with `$ref` references and `definitions` sections. This allows you to:
-
-1. Define reusable components in the `definitions` section
-2. Reference these components using `$ref` syntax
-3. Create more maintainable and DRY schemas
-
-### Example Schema with References
-
-```json
-{
-    "type": "object",
-    "title": "User Registration",
-    "properties": {
-        "user": {
-            "type": "object",
-            "properties": {
-                "name": { "type": "string" },
-                "address": { "$ref": "#/definitions/address" }
-            }
-        },
-        "shippingAddress": { "$ref": "#/definitions/address" }
-    },
-    "definitions": {
-        "address": {
-            "type": "object",
-            "properties": {
-                "street": { "type": "string" },
-                "city": { "type": "string" },
-                "zipCode": { "type": "string" }
-            }
-        }
-    }
-}
+```
+survey-app/
+├── survey-builder/     # Survey creation and management application
+├── survey-taker/       # Survey administration and response collection
+├── images/            # Documentation and UI images
+├── .github/           # GitHub Actions and workflows
+└── README.md          # This file
 ```
 
-### How It Works
+## 🏗️ Survey Builder
 
-The application includes a reference resolver that:
+The **Survey Builder** is a modern React application that allows users to create, edit, and manage surveys through an intuitive multi-step wizard interface.
 
-1. Detects `$ref` references in the schema
-2. Resolves them by looking up the referenced definition
-3. Replaces the reference with the actual schema content
-4. Preserves any additional properties on the referencing object
+### Key Features
 
-This happens automatically when rendering forms or viewing schemas.
+- **Multi-Step Wizard**: Guided survey creation with 5 intuitive steps
+- **Survey Library**: View, edit, duplicate, and delete existing surveys
+- **Section Support**: Create multiple question sections with titles and descriptions
+- **Question Types**: Text input, multiple choice, checkboxes, rating scales, and Likert scales
+- **localStorage Persistence**: Surveys are automatically saved locally
+- **Export Functionality**: Generate JSON files compatible with the survey taker
 
-## Getting Started
+### Technology Stack
 
-### Installation
+- React 19 with TypeScript
+- Material-UI (MUI) for modern UI components
+- React Context + useReducer for state management
+- Vite for fast development and building
+- localStorage for client-side persistence
+
+### Getting Started
 
 ```bash
+cd survey-builder
 npm install
-```
-
-### Development
-
-```bash
 npm run dev
 ```
 
-### Build
+The application will be available at `http://localhost:5173`
+
+For detailed documentation, see [survey-builder/README.md](./survey-builder/README.md)
+
+## 📊 Survey Taker
+
+The **Survey Taker** is a standalone HTML/JavaScript application designed for survey administration and response collection. It can be deployed as a platform application or used independently.
+
+### Key Features
+
+- **Platform Integration**: Uses spa-api-provider for seamless platform deployment
+- **Standalone Mode**: Can run independently with sample surveys
+- **Multiple Question Types**: Supports radio buttons, text inputs, and more
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Robust Error Handling**: Graceful fallback when platform integration fails
+- **Professional UI**: Welcome and thank you screens with branding support
+
+### Platform Integration
+
+The survey taker is designed to work within platform environments:
+
+- **CONFIG Messages**: Receives platform configuration with survey data
+- **API Communication**: Fetches survey configuration from platform APIs
+- **Completion Reporting**: Sends survey responses back to the platform
+- **Error Handling**: Falls back to sample survey if platform integration fails
+
+### Technology Stack
+
+- Vanilla HTML/JavaScript (no framework dependencies)
+- CSS for styling and responsive design
+- spa-api-provider pattern for platform integration
+- Self-contained assets for platform deployment
+
+### Getting Started
 
 ```bash
+cd survey-taker
+npm install
+npm run dev
+```
+
+The application will be available at `http://localhost:3001`
+
+For detailed documentation, see [survey-taker/README.md](./survey-taker/README.md)
+
+## 🔄 Workflow
+
+### Creating and Deploying Surveys
+
+1. **Create Survey**: Use the Survey Builder to create a new survey
+   - Follow the 5-step wizard to configure survey details
+   - Add sections and questions as needed
+   - Export the survey as a JSON file
+
+2. **Deploy Survey**: Use the Survey Taker to administer the survey
+   - Upload the survey JSON to the platform
+   - Configure platform settings
+   - Share the survey link with participants
+
+3. **Collect Responses**: The Survey Taker handles response collection
+   - Participants complete surveys through the web interface
+   - Responses are sent back to the platform
+   - Data can be analyzed through platform tools
+
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Local Development
+
+Both applications can be developed independently:
+
+```bash
+# Survey Builder
+cd survey-builder
+npm install
+npm run dev
+
+# Survey Taker (in another terminal)
+cd survey-taker
+npm install
+npm run dev
+```
+
+### Building for Production
+
+```bash
+# Survey Builder
+cd survey-builder
+npm run build
+
+# Survey Taker
+cd survey-taker
 npm run build
 ```
 
-### Deployment to GitHub Pages
+## 📋 Survey Data Format
 
-This project is configured for easy deployment to GitHub Pages. To deploy:
+Both applications use a consistent JSON format for survey data:
 
-1. Update the `homepage` field in `package.json` with your GitHub username:
+```json
+{
+  "id": "survey-id",
+  "title": "Survey Title",
+  "description": "Survey description",
+  "welcome": {
+    "title": "Welcome Title",
+    "message": "Welcome message"
+  },
+  "thankYou": {
+    "title": "Thank You Title",
+    "message": "Thank you message"
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "radio",
+      "question": "Question text?",
+      "options": ["Option 1", "Option 2"],
+      "required": true
+    }
+  ]
+}
+```
 
-    ```json
-    "homepage": "https://YOUR_USERNAME.github.io/data-collection"
-    ```
+## 🚀 Deployment
 
-2. Deploy manually using:
+### Survey Builder
 
-    ```bash
-    npm run deploy
-    ```
+The Survey Builder is designed for local use and development. Builds can be deployed to static hosting services.
 
-3. Alternatively, push to the main branch to trigger automatic deployment via GitHub Actions.
+### Survey Taker
 
-## Technologies
+The Survey Taker includes a deployment package (`survey-taker-spa.zip`) ready for platform deployment:
 
--   React
--   TypeScript
--   Material UI
--   Vite
+1. Upload `survey-taker-spa.zip` to the platform CMS
+2. Configure survey data in the platform
+3. The app automatically fetches survey configuration
+4. If API fails, it gracefully falls back to sample survey
 
-## Limitations and Future Work
+## 🤝 Contributing
 
-As a proof of concept, this application has several limitations:
+1. Follow the existing code structure in each application
+2. Maintain TypeScript type safety in the Survey Builder
+3. Test with various survey configurations
+4. Ensure compatibility between Survey Builder and Survey Taker
+5. Follow platform integration patterns for the Survey Taker
 
--   Limited validation capabilities compared to a production-ready solution
--   No backend integration for data persistence
--   Custom UI components are demonstrations and may need refinement for production use
--   Performance optimizations for large schemas are not fully implemented
+## 📄 License
 
-Future work could include:
+This project is part of the CAPTRS survey ecosystem.
 
--   Adding more custom UI components
--   Implementing a backend for data storage
--   Enhancing validation capabilities
--   Improving performance for large and complex schemas
+## 🔗 Related Documentation
 
-## License
-
-MIT
+- [Survey Builder Documentation](./survey-builder/README.md)
+- [Survey Taker Documentation](./survey-taker/README.md)
+- [Platform Integration Guide](./survey-taker/README.md#platform-integration)
