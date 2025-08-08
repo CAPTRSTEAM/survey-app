@@ -1,5 +1,7 @@
 // Main Survey App Entry Point
-// Note: Components are imported dynamically after React is loaded
+// Note: React and ReactDOM are loaded via script tags in HTML
+
+console.log('Survey App: app.js loaded successfully');
 
 // Global error handler
 window.addEventListener('error', (event) => {
@@ -24,48 +26,30 @@ function showErrorBoundary(message) {
     errorBoundary.style.display = 'flex';
 }
 
-// Load React and ReactDOM from CDN with fallback
-async function loadReact() {
-    try {
-        // Try to load React from CDN
-        const React = await import('https://esm.sh/react@18');
-        const ReactDOM = await import('https://esm.sh/react-dom@18');
-        
-        // Make React available globally
-        window.React = React.default || React;
-        window.ReactDOM = ReactDOM.default || ReactDOM;
-        
-        return true;
-    } catch (error) {
-        console.error('Failed to load React from CDN:', error);
-        
-        // Try alternative CDN
-        try {
-            const React = await import('https://unpkg.com/react@18/umd/react.production.min.js');
-            const ReactDOM = await import('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
-            
-            window.React = React.default || React;
-            window.ReactDOM = ReactDOM.default || ReactDOM;
-            
-            return true;
-        } catch (fallbackError) {
-            console.error('Failed to load React from fallback CDN:', fallbackError);
-            showErrorBoundary('Failed to load required dependencies. Please check your internet connection and refresh the page.');
-            return false;
-        }
-    }
-}
-
 // Initialize the application
 async function initializeApp() {
+    console.log('Survey App: Initializing application...');
+    
+    // Check if React is available
+    if (!window.React || !window.ReactDOM) {
+        console.error('React or ReactDOM not available');
+        showErrorBoundary('Failed to load required dependencies. Please refresh the page.');
+        return;
+    }
+    
     try {
-        // Dynamically import components after React is loaded
+        // Dynamically import components
         const { ApiProvider } = await import('./utils/api-provider.js');
         const { SurveyApp } = await import('./components/survey-app.js');
-        const { ErrorBoundary } = await import('./components/error-boundary.js');
+        const { createErrorBoundary } = await import('./components/error-boundary.js');
+        
+        console.log('Survey App: Components imported successfully');
         
         // Create API provider
         const apiProvider = new ApiProvider();
+        
+        // Create ErrorBoundary component
+        const ErrorBoundary = createErrorBoundary();
         
         // Create and render the survey app
         const root = document.getElementById('root');
@@ -74,12 +58,17 @@ async function initializeApp() {
             throw new Error('Root element not found');
         }
         
+        // Use React 18 createRoot API instead of deprecated render
+        const reactRoot = window.ReactDOM.createRoot(root);
+        
         // Render with error boundary
-        const app = React.createElement(ErrorBoundary, null,
-            React.createElement(SurveyApp, { apiProvider })
+        const app = window.React.createElement(ErrorBoundary, null,
+            window.React.createElement(SurveyApp, { apiProvider })
         );
         
-        ReactDOM.render(app, root);
+        reactRoot.render(app);
+        
+        console.log('Survey App: Application rendered successfully');
         
     } catch (error) {
         console.error('Failed to initialize app:', error);
@@ -89,11 +78,8 @@ async function initializeApp() {
 
 // Start the application
 async function startApp() {
-    const reactLoaded = await loadReact();
-    
-    if (reactLoaded) {
-        await initializeApp();
-    }
+    console.log('Survey App: Starting application...');
+    await initializeApp();
 }
 
 // Start when DOM is ready

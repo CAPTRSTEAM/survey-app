@@ -1,0 +1,111 @@
+{
+  "id": "sample-upload-survey",
+  "title": "Sample Upload Survey",
+  "description": "This is a sample survey for testing the file upload functionality",
+  "welcome": {
+    "title": "Welcome to the Sample Survey",
+    "message": "This survey demonstrates the file upload functionality. You can upload custom survey JSON files to test different survey configurations."
+  },
+  "thankYou": {
+    "title": "Thank You!",
+    "message": "Thank you for completing the sample survey. Your responses have been recorded."
+  },
+  "sections": [
+    {
+      "id": "personal-info",
+      "title": "Personal Information",
+      "description": "Let's start with some basic information about you.",
+      "questions": [
+        {
+          "id": "name",
+          "question": "What is your full name?",
+          "type": "text",
+          "required": true,
+          "description": "Please enter your first and last name"
+        },
+        {
+          "id": "age",
+          "question": "What is your age?",
+          "type": "radio",
+          "required": true,
+          "options": ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
+        },
+        {
+          "id": "occupation",
+          "question": "What is your current occupation?",
+          "type": "text",
+          "required": false,
+          "description": "Optional: Please describe your current job or profession"
+        }
+      ]
+    },
+    {
+      "id": "preferences",
+      "title": "Preferences & Opinions",
+      "description": "Now let's learn about your preferences and opinions.",
+      "questions": [
+        {
+          "id": "favorite-color",
+          "question": "What is your favorite color?",
+          "type": "radio",
+          "required": true,
+          "options": ["Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Other"]
+        },
+        {
+          "id": "satisfaction",
+          "question": "How satisfied are you with our service?",
+          "type": "rating",
+          "required": true,
+          "description": "Rate your satisfaction from 1 (very dissatisfied) to 5 (very satisfied)"
+        },
+        {
+          "id": "recommend",
+          "question": "Would you recommend our service to others?",
+          "type": "yesno",
+          "required": true
+        },
+        {
+          "id": "improvements",
+          "question": "What improvements would you like to see?",
+          "type": "text",
+          "required": false,
+          "description": "Please share any suggestions for improvement"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "title": "Additional Feedback",
+      "description": "We value your feedback. Please share any additional thoughts.",
+      "questions": [
+        {
+          "id": "experience",
+          "question": "How would you rate your overall experience?",
+          "type": "likert",
+          "required": true,
+          "options": ["Very Poor", "Poor", "Average", "Good", "Excellent"]
+        },
+        {
+          "id": "features",
+          "question": "Which features do you find most useful? (Select all that apply)",
+          "type": "checkbox",
+          "required": false,
+          "options": ["Easy to use", "Fast loading", "Mobile friendly", "Good design", "Helpful support", "Regular updates"]
+        },
+        {
+          "id": "comments",
+          "question": "Any additional comments or suggestions?",
+          "type": "text",
+          "required": false,
+          "description": "Feel free to share any additional thoughts or suggestions"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "branding": {
+      "companyName": "Sample Company",
+      "poweredBy": "Powered by CAPTRS Survey"
+    }
+  }
+}

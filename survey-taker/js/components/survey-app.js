@@ -12,10 +12,77 @@ export const SurveyApp = ({ apiProvider }) => {
     const [appMode, setAppMode] = React.useState('loading');
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [error, setError] = React.useState(null);
+    const [showFileUpload, setShowFileUpload] = React.useState(false);
+    const fileInputRef = React.useRef(null);
 
     // Custom hooks
     const dynamicStyles = useDynamicPositioning(currentSectionIndex);
     const { validateSurvey, validateAnswer } = useSurveyValidation();
+
+    // Handle survey file upload
+    const handleSurveyLoad = (surveyData) => {
+        try {
+            // Validate survey structure
+            const validationResult = validateSurvey(surveyData);
+            if (validationResult.isValid) {
+                const processedSurvey = processSurveyStructure(surveyData);
+                setSurvey(processedSurvey);
+                setError(null);
+                setShowFileUpload(false);
+            } else {
+                setError(`Invalid survey configuration: ${validationResult.error}`);
+            }
+        } catch (error) {
+            console.error('Error processing uploaded survey:', error);
+            setError('Failed to process survey file');
+        }
+    };
+
+    // Handle file selection
+    const handleFileSelect = async (file) => {
+        if (!file) return;
+
+        // Validate file type
+        if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+            setError('Please select a valid JSON file');
+            return;
+        }
+
+        try {
+            const text = await file.text();
+            const surveyData = JSON.parse(text);
+
+            // Basic validation
+            if (!surveyData || typeof surveyData !== 'object') {
+                throw new Error('Invalid JSON structure');
+            }
+
+            if (!surveyData.title) {
+                throw new Error('Survey must have a title');
+            }
+
+            // Process the survey
+            handleSurveyLoad(surveyData);
+        } catch (error) {
+            console.error('Error loading survey file:', error);
+            setError(`Failed to load survey: ${error.message}`);
+        }
+    };
+
+    // Handle file input change
+    const handleFileInputChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            handleFileSelect(file);
+        }
+    };
+
+    // Trigger file input
+    const triggerFileInput = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
 
     // Initialize app with API provider
     React.useEffect(() => {
@@ -47,11 +114,9 @@ export const SurveyApp = ({ apiProvider }) => {
                     message: 'Survey app is ready to receive configuration'
                 }, '*');
             } else {
-                // Standalone mode - load sample survey
+                // Standalone mode - show file upload or sample survey
                 setAppMode('standalone');
-                const sampleSurvey = apiProvider.getSampleSurvey();
-                const processedSurvey = processSurveyStructure(sampleSurvey);
-                setSurvey(processedSurvey);
+                // Don't auto-load sample survey, let user choose
             }
         } catch (error) {
             console.error('Error initializing survey app:', error);
@@ -212,13 +277,107 @@ export const SurveyApp = ({ apiProvider }) => {
     }, [survey, currentSectionIndex, isCompleted]);
 
     // Show loading
-    if (!survey && !error) {
+    if (appMode === 'loading') {
         return React.createElement('div', { className: 'loading' }, 'Loading survey...');
     }
 
     // Show error
     if (error) {
         return React.createElement('div', { className: 'error-message' }, error);
+    }
+
+    // Show standalone mode with file upload options
+    if (appMode === 'standalone' && !survey) {
+        return React.createElement('div', { className: 'survey-app' },
+            React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
+            
+            // Hidden file input
+            React.createElement('input', {
+                ref: fileInputRef,
+                type: 'file',
+                accept: '.json,application/json',
+                onChange: handleFileInputChange,
+                style: { display: 'none' }
+            }),
+            
+            // Header for standalone mode
+            React.createElement('header', { className: 'survey-header' },
+                React.createElement('div', { className: 'header-content' },
+                    React.createElement('div', { className: 'header-brand' },
+                        React.createElement('div', { className: 'brand-logo', 'aria-hidden': 'true' }, 'C'),
+                        React.createElement('h1', { className: 'brand-title' }, 'CAPTRS Survey')
+                    ),
+                    React.createElement('div', { className: 'header-actions' },
+                        React.createElement('div', { 
+                            className: 'user-avatar',
+                            title: 'User profile',
+                            'aria-label': 'User profile'
+                        }, '👤')
+                    )
+                )
+            ),
+            
+            // Standalone content
+            React.createElement('main', { 
+                className: 'questions-container',
+                style: { paddingTop: 'calc(var(--header-height) + var(--space-8))' }
+            },
+                React.createElement('div', { className: 'standalone-mode' },
+                    React.createElement('div', { className: 'standalone-header' },
+                        React.createElement('h1', { className: 'standalone-title' }, 'Survey App'),
+                        React.createElement('p', { className: 'standalone-subtitle' }, 'Choose how you want to load your survey')
+                    ),
+                    React.createElement('div', { className: 'standalone-actions' },
+                        React.createElement('div', {
+                            className: 'standalone-action',
+                            onClick: triggerFileInput,
+                            role: 'button',
+                            tabIndex: 0,
+                            onKeyDown: (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    triggerFileInput();
+                                }
+                            }
+                        },
+                            React.createElement('div', { className: 'standalone-action-icon' }, '📁'),
+                            React.createElement('div', { className: 'standalone-action-content' },
+                                React.createElement('div', { className: 'standalone-action-title' }, 'Upload Survey File'),
+                                React.createElement('div', { className: 'standalone-action-description' }, 'Load a custom survey from a JSON file')
+                            )
+                        ),
+                        React.createElement('div', {
+                            className: 'standalone-action',
+                            onClick: () => {
+                                const sampleSurvey = apiProvider.getSampleSurvey();
+                                const processedSurvey = processSurveyStructure(sampleSurvey);
+                                setSurvey(processedSurvey);
+                            },
+                            role: 'button',
+                            tabIndex: 0,
+                            onKeyDown: (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    const sampleSurvey = apiProvider.getSampleSurvey();
+                                    const processedSurvey = processSurveyStructure(sampleSurvey);
+                                    setSurvey(processedSurvey);
+                                }
+                            }
+                        },
+                            React.createElement('div', { className: 'standalone-action-icon' }, '📋'),
+                            React.createElement('div', { className: 'standalone-action-content' },
+                                React.createElement('div', { className: 'standalone-action-title' }, 'Use Sample Survey'),
+                                React.createElement('div', { className: 'standalone-action-description' }, 'Load the built-in sample survey for testing')
+                            )
+                        )
+                    ),
+                    error && React.createElement('div', { className: 'file-upload-error' },
+                        React.createElement('span', { className: 'error-icon', 'aria-hidden': 'true' }, '⚠️'),
+                        React.createElement('span', null, error)
+                    )
+                )
+            )
+        );
     }
 
     // Show welcome screen
