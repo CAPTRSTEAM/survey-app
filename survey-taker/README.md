@@ -66,6 +66,21 @@ npm run dev
 
 This will start the survey taker on http://localhost:3001
 
+### Development Tools
+```bash
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+npm run lint:fix
+
+# Testing
+npm run test
+npm run test:ui
+npm run test:coverage
+```
+
 ### Build for Platform
 ```bash
 npm run build
@@ -89,11 +104,14 @@ The `survey-taker-spa.zip` file is ready for platform deployment. This zip file 
 - **Standalone Mode**: Loads sample survey for testing
 - **Platform Mode**: Uses spa-api-provider for platform integration
 - **Welcome/Thank You Screens**: Professional survey flow
-- **Multiple Question Types**: Radio, text, Likert scales, and more
+- **Multiple Question Types**: Radio, text, Likert scales, Yes/No, ranking, and more
 - **Responsive Design**: Works on desktop, tablet, and mobile
 - **API Integration**: Proper platform API communication with error handling
 - **Robust Fallback**: Always provides a working survey experience
 - **Platform-Safe**: No external dependencies or absolute paths
+- **Auto-Save Functionality**: Automatically saves user progress to localStorage
+- **Performance Monitoring**: Built-in performance tracking and optimization
+- **TypeScript Integration**: Full type safety and better development experience
 
 ## Survey Data Format
 

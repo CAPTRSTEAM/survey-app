@@ -16,6 +16,8 @@ A modern React-based survey builder application with a multi-step wizard interfa
 - **Checkboxes**: Multiple selections from predefined options
 - **Rating Scale**: Numeric ratings (1-5, 1-10, etc.)
 - **Likert Scale**: Agreement-based responses (Strongly Disagree to Strongly Agree)
+- **Yes/No**: Simple binary choice questions
+- **Ranking**: Ordering preferences in a specific sequence
 
 ### **Survey Structure**
 - **Welcome Section**: Customizable title and message

@@ -21,7 +21,7 @@ The **Survey Builder** is a modern React application that allows users to create
 - **Multi-Step Wizard**: Guided survey creation with 5 intuitive steps
 - **Survey Library**: View, edit, duplicate, and delete existing surveys
 - **Section Support**: Create multiple question sections with titles and descriptions
-- **Question Types**: Text input, multiple choice, checkboxes, rating scales, and Likert scales
+- **Question Types**: Text input, multiple choice, checkboxes, rating scales, Likert scales, Yes/No, and Ranking
 - **localStorage Persistence**: Surveys are automatically saved locally
 - **Export Functionality**: Generate JSON files compatible with the survey taker
 
@@ -53,10 +53,13 @@ The **Survey Taker** is a standalone HTML/JavaScript application designed for su
 
 - **Platform Integration**: Uses spa-api-provider for seamless platform deployment
 - **Standalone Mode**: Can run independently with sample surveys
-- **Multiple Question Types**: Supports radio buttons, text inputs, Likert scales, and more
+- **Multiple Question Types**: Supports radio buttons, text inputs, Likert scales, Yes/No, ranking, and more
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Robust Error Handling**: Graceful fallback when platform integration fails
 - **Professional UI**: Welcome and thank you screens with branding support
+- **Auto-Save Functionality**: Automatically saves user progress to localStorage
+- **Performance Monitoring**: Built-in performance tracking and optimization
+- **TypeScript Integration**: Full type safety and better development experience
 
 ### Platform Integration
 
@@ -69,10 +72,12 @@ The survey taker is designed to work within platform environments:
 
 ### Technology Stack
 
+- TypeScript for type safety and better development experience
 - Vanilla HTML/JavaScript (no framework dependencies)
 - CSS for styling and responsive design
 - spa-api-provider pattern for platform integration
 - Self-contained assets for platform deployment
+- Performance monitoring and auto-save functionality
 
 ### Getting Started
 
@@ -207,4 +212,6 @@ This project is part of the CAPTRS survey ecosystem.
 
 - [Survey Builder Documentation](./survey-builder/README.md)
 - [Survey Taker Documentation](./survey-taker/README.md)
+- [Development Guide](./DEVELOPMENT.md) - Development practices and recent improvements
+- [Question Types](./QUESTION_TYPES.md) - Supported question type specifications
 - [Platform Integration Guide](./survey-taker/README.md#platform-integration)
