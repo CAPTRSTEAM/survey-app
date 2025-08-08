@@ -63,8 +63,8 @@
         },
         {
           "id": "q6",
-          "type": "ranking",
-          "question": "Rank these company benefits in order of importance to you:",
+          "type": "checkbox",
+          "question": "Which of these company benefits are most important to you? (Select all that apply)",
           "options": ["Health Insurance", "Flexible Hours", "Remote Work", "Professional Development", "Team Events"],
           "required": true
         },
@@ -80,6 +80,13 @@
           "type": "text",
           "question": "What improvements would you suggest for the workplace?",
           "required": false
+        },
+        {
+          "id": "q9",
+          "type": "ranking",
+          "question": "Please rank the following work priorities in order of importance (1 = most important, 5 = least important):",
+          "options": ["Salary and Benefits", "Work-Life Balance", "Career Growth", "Company Culture", "Job Security"],
+          "required": true
         }
       ]
     }

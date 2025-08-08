@@ -24,6 +24,11 @@ export const useDynamicPositioning = (currentSectionIndex) => {
                         questionProgressTop: `${questionProgressTop}px`,
                         questionsPaddingTop: `${questionsPaddingTop}px`
                     });
+                } else {
+                    setDynamicStyles({
+                        questionProgressTop: '144px', // 64 + 80
+                        questionsPaddingTop: '204px'  // 144 + 60
+                    });
                 }
             } catch (error) {
                 console.error('Error updating positions:', error);

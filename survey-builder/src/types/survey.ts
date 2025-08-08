@@ -1,6 +1,6 @@
 export interface Question {
   id: string
-  type: 'text' | 'radio' | 'checkbox' | 'rating' | 'likert'
+  type: 'text' | 'radio' | 'checkbox' | 'rating' | 'likert' | 'yesno' | 'ranking'
   question: string
   required: boolean
   options?: string[]

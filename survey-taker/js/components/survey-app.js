@@ -93,8 +93,6 @@ export const SurveyApp = ({ apiProvider }) => {
                 
                 // Subscribe to API provider updates
                 apiProvider.subscribe((surveyConfig) => {
-                    console.log('Survey config received from API provider:', surveyConfig);
-                    
                     if (surveyConfig) {
                         // Validate survey structure
                         const validationResult = validateSurvey(surveyConfig);
@@ -211,7 +209,26 @@ export const SurveyApp = ({ apiProvider }) => {
         const totalQuestions = currentSection.questions.length;
         const answeredQuestions = currentSection.questions.filter(q => {
             const answer = answers[q.id];
-            return validateAnswer(answer, q.type, q.required);
+            // Check if there's actually an answer, not just if it's valid
+            if (answer === undefined || answer === null) return false;
+            
+            // For different question types, check if there's meaningful content
+            switch (q.type) {
+                case 'text':
+                    return typeof answer === 'string' && answer.trim().length > 0;
+                case 'checkbox':
+                    return Array.isArray(answer) && answer.length > 0;
+                case 'radio':
+                case 'likert':
+                case 'yesno':
+                    return typeof answer === 'string' && answer.length > 0;
+                case 'rating':
+                    return typeof answer === 'number' && answer > 0;
+                case 'ranking':
+                    return typeof answer === 'object' && answer !== null && Object.keys(answer).length > 0;
+                default:
+                    return !!answer;
+            }
         }).length;
 
         return {
@@ -219,7 +236,7 @@ export const SurveyApp = ({ apiProvider }) => {
             total: totalQuestions,
             percentage: totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0
         };
-    }, [survey, currentSectionIndex, answers, validateAnswer]);
+    }, [survey, currentSectionIndex, answers]);
 
     // Section progress for header
     const createSectionProgress = React.useCallback(() => {
@@ -309,7 +326,7 @@ export const SurveyApp = ({ apiProvider }) => {
                             alt: 'CAPTRS Logo',
                             className: 'brand-logo'
                         }),
-                        React.createElement('h1', { className: 'brand-title' }, 'Survey App')
+                        React.createElement('h1', { className: 'brand-title' }, 'Standalone Survey Taker App')
                     )
                 )
             ),
@@ -321,52 +338,14 @@ export const SurveyApp = ({ apiProvider }) => {
             },
                 React.createElement('div', { className: 'standalone-mode' },
                     React.createElement('div', { className: 'standalone-header' },
-                        React.createElement('h1', { className: 'standalone-title' }, 'Survey App'),
-                        React.createElement('p', { className: 'standalone-subtitle' }, 'Choose how you want to load your survey')
+                        React.createElement('h1', { className: 'standalone-title' }, 'Standalone Survey Taker App')
                     ),
                     React.createElement('div', { className: 'standalone-actions' },
-                        React.createElement('div', {
-                            className: 'standalone-action',
+                        React.createElement('button', {
                             onClick: triggerFileInput,
-                            role: 'button',
-                            tabIndex: 0,
-                            onKeyDown: (e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    triggerFileInput();
-                                }
-                            }
-                        },
-                            React.createElement('div', { className: 'standalone-action-icon' }, '📁'),
-                            React.createElement('div', { className: 'standalone-action-content' },
-                                React.createElement('div', { className: 'standalone-action-title' }, 'Upload Survey File'),
-                                React.createElement('div', { className: 'standalone-action-description' }, 'Load a custom survey from a JSON file')
-                            )
-                        ),
-                        React.createElement('div', {
-                            className: 'standalone-action',
-                            onClick: () => {
-                                const sampleSurvey = apiProvider.getSampleSurvey();
-                                const processedSurvey = processSurveyStructure(sampleSurvey);
-                                setSurvey(processedSurvey);
-                            },
-                            role: 'button',
-                            tabIndex: 0,
-                            onKeyDown: (e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    const sampleSurvey = apiProvider.getSampleSurvey();
-                                    const processedSurvey = processSurveyStructure(sampleSurvey);
-                                    setSurvey(processedSurvey);
-                                }
-                            }
-                        },
-                            React.createElement('div', { className: 'standalone-action-icon' }, '📋'),
-                            React.createElement('div', { className: 'standalone-action-content' },
-                                React.createElement('div', { className: 'standalone-action-title' }, 'Use Sample Survey'),
-                                React.createElement('div', { className: 'standalone-action-description' }, 'Load the built-in sample survey for testing')
-                            )
-                        )
+                            className: 'button button--primary',
+                            'aria-label': 'Upload survey file'
+                        }, 'Upload Survey File')
                     ),
                     error && React.createElement('div', { className: 'file-upload-error' },
                         React.createElement('span', { className: 'error-icon', 'aria-hidden': 'true' }, '⚠️'),
@@ -504,8 +483,10 @@ export const SurveyApp = ({ apiProvider }) => {
                             React.createElement('div', {
                                 className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,
                                 title: section.title,
-                                'aria-label': `${section.title} - ${section.status}`
-                            }, section.label),
+                                'aria-label': `${section.title} - ${section.status}`,
+                                'data-type': section.sectionIndex !== undefined ? 'question' : undefined,
+                                'data-number': section.sectionIndex !== undefined ? section.sectionIndex + 1 : undefined
+                            }, section.sectionIndex !== undefined ? `Q${section.sectionIndex + 1}` : section.label),
                             index < sectionProgress.length - 1 && 
                                 React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
                         )
@@ -528,14 +509,13 @@ export const SurveyApp = ({ apiProvider }) => {
         ),
 
         // Question Progress Bar (fixed positioned)
-        currentSection.questions.length > 0 && React.createElement('div', { 
+        React.createElement('div', { 
             className: 'question-progress-container',
-            style: { top: dynamicStyles.questionProgressTop }
+            style: { 
+                top: dynamicStyles.questionProgressTop
+            }
         },
             React.createElement('div', { className: 'question-progress-header' },
-                React.createElement('div', { className: 'question-progress-text' },
-                    'Section Progress'
-                ),
                 React.createElement('div', { className: 'question-progress-count' },
                     `Question ${questionProgress.current} of ${questionProgress.total}`
                 )
@@ -546,11 +526,13 @@ export const SurveyApp = ({ apiProvider }) => {
                 'aria-valuenow': questionProgress.percentage,
                 'aria-valuemin': 0,
                 'aria-valuemax': 100,
-                'aria-label': `Section progress: ${questionProgress.percentage}%`
+                'aria-label': `Question progress: ${questionProgress.percentage}%`
             },
                 React.createElement('div', { 
                     className: 'question-progress-fill',
-                    style: { width: `${questionProgress.percentage}%` }
+                    style: { 
+                        width: `${Math.max(questionProgress.percentage, 0)}%`
+                    }
                 })
             )
         ),
@@ -609,7 +591,7 @@ export const SurveyApp = ({ apiProvider }) => {
                 )
             ),
             React.createElement('div', { className: 'footer-center' },
-                React.createElement('div', { className: 'footer-icon', 'aria-hidden': 'true' }, '📄')
+                React.createElement('div', { className: 'footer-icon', 'aria-hidden': 'true' }, '✅')
             ),
             React.createElement('div', { className: 'footer-section' },
                 React.createElement('button', {

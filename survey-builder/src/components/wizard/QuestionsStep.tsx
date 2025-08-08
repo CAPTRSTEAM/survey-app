@@ -283,6 +283,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     <MenuItem value="checkbox">Checkboxes</MenuItem>
                     <MenuItem value="rating">Rating Scale</MenuItem>
                     <MenuItem value="likert">Likert Scale</MenuItem>
+                    <MenuItem value="yesno">Yes/No</MenuItem>
+                    <MenuItem value="ranking">Ranking</MenuItem>
                   </TextField>
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -296,7 +298,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     label="Required"
                   />
                 </Grid>
-                {(newQuestion.type === 'radio' || newQuestion.type === 'checkbox' || newQuestion.type === 'rating' || newQuestion.type === 'likert' || newQuestion.type === 'ranking') && (
+                {(newQuestion.type === 'radio' || newQuestion.type === 'checkbox' || newQuestion.type === 'rating' || newQuestion.type === 'likert' || newQuestion.type === 'yesno' || newQuestion.type === 'ranking') && (
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" gutterBottom>Options</Typography>
                     {newQuestion.options?.map((option, optionIndex) => (

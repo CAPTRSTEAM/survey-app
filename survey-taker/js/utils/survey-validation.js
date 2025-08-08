@@ -104,13 +104,13 @@ export const useSurveyValidation = () => {
         }
 
         // Validate question type
-        const validTypes = ['text', 'radio', 'checkbox', 'likert', 'yesno', 'rating'];
+        const validTypes = ['text', 'radio', 'checkbox', 'likert', 'yesno', 'rating', 'ranking'];
         if (!validTypes.includes(question.type)) {
             return { isValid: false, error: `Invalid question type: ${question.type}. Must be one of: ${validTypes.join(', ')}` };
         }
 
         // Validate options for question types that require them
-        if (['radio', 'checkbox', 'likert'].includes(question.type)) {
+        if (['radio', 'checkbox', 'likert', 'ranking'].includes(question.type)) {
             if (!question.options || !Array.isArray(question.options)) {
                 return { isValid: false, error: `Question type "${question.type}" requires an "options" array` };
             }
@@ -162,6 +162,9 @@ export const useSurveyValidation = () => {
             
             case 'rating':
                 return typeof answer === 'number' && answer > 0 && answer <= 5;
+            
+            case 'ranking':
+                return typeof answer === 'object' && answer !== null && Object.keys(answer).length > 0;
             
             default:
                 return !!answer;

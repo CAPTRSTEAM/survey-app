@@ -78,7 +78,7 @@ export const getDefaultOptions = (type: string): string[] => {
     rating: ['1', '2', '3', '4', '5'],
     likert: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
     yesno: ['Yes', 'No'],
-    ranking: ['Option 1', 'Option 2', 'Option 3', 'Option 4']
+    ranking: ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5']
   }
   return defaults[type] || []
 }

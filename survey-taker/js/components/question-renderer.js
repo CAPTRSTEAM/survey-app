@@ -19,6 +19,8 @@ export const QuestionRenderer = ({ question, answer, onChange, disabled = false 
             return React.createElement(RatingQuestion, questionProps);
         case 'checkbox':
             return React.createElement(CheckboxQuestion, questionProps);
+        case 'ranking':
+            return React.createElement(RankingQuestion, questionProps);
         default:
             return React.createElement('div', { className: 'error-message' },
                 `Unsupported question type: ${questionType}`
@@ -205,7 +207,7 @@ const CheckboxQuestion = ({ question, answer, onChange, disabled }) => {
 
     return React.createElement('div', { className: 'form-control' },
         React.createElement('div', { 
-            className: 'option-group option-group--stack',
+            className: 'option-group option-group--checkbox',
             role: 'group',
             'aria-labelledby': `${question.id}-label`
         },
@@ -213,7 +215,7 @@ const CheckboxQuestion = ({ question, answer, onChange, disabled }) => {
                 const isChecked = currentAnswers.includes(option);
                 return React.createElement('label', {
                     key: option,
-                    className: `option-item ${isChecked ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
+                    className: `checkbox-item ${isChecked ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     tabIndex: disabled ? -1 : 0
                 },
                     React.createElement('input', {
@@ -223,11 +225,97 @@ const CheckboxQuestion = ({ question, answer, onChange, disabled }) => {
                         onChange: (e) => handleChange(option, e.target.checked),
                         required: question.required && currentAnswers.length === 0,
                         disabled,
-                        className: 'option-input'
+                        className: 'checkbox-input'
                     }),
-                    React.createElement('span', { className: 'option-label' }, option)
+                    React.createElement('span', { className: 'checkbox-label' }, option)
                 );
             })
+        )
+    );
+};
+
+// Ranking Question Component
+const RankingQuestion = ({ question, answer, onChange, disabled }) => {
+    const currentRanking = answer || {};
+    
+    const handleItemClick = (option) => {
+        if (disabled) return;
+        
+        const currentRank = getRankForOption(option);
+        let nextRank = 1;
+        
+        // Find the next available rank
+        while (getOptionForRank(nextRank)) {
+            nextRank++;
+        }
+        
+        const newRanking = { ...currentRanking };
+        
+        // If item is already ranked, remove its rank
+        if (currentRank > 0) {
+            delete newRanking[option];
+        } else {
+            // Assign the next available rank
+            newRanking[option] = nextRank;
+        }
+        
+        onChange(question.id, newRanking);
+    };
+
+    const getRankForOption = (option) => {
+        return currentRanking[option] || 0;
+    };
+
+    const getOptionForRank = (rank) => {
+        return Object.keys(currentRanking).find(option => currentRanking[option] === rank);
+    };
+
+    const getNextAvailableRank = () => {
+        let rank = 1;
+        while (getOptionForRank(rank)) {
+            rank++;
+        }
+        return rank;
+    };
+
+    return React.createElement('div', { className: 'form-control' },
+        React.createElement('div', { 
+            className: 'ranking-container',
+            role: 'group',
+            'aria-labelledby': `${question.id}-label`
+        },
+            React.createElement('div', { className: 'ranking-instructions' },
+                'Click on items to rank them in order of importance (1 = most important):'
+            ),
+            React.createElement('div', { className: 'ranking-options' },
+                question.options?.map((option) => {
+                    const currentRank = getRankForOption(option);
+                    const nextRank = getNextAvailableRank();
+                    const displayRank = currentRank > 0 ? currentRank : '?';
+                    
+                    return React.createElement('div', {
+                        key: option,
+                        className: `ranking-item ${currentRank > 0 ? 'ranked' : ''} ${disabled ? 'disabled' : ''}`,
+                        onClick: () => handleItemClick(option),
+                        role: 'button',
+                        tabIndex: disabled ? -1 : 0,
+                        'aria-label': currentRank > 0 ? `${option} ranked ${currentRank}` : `Click to rank ${option}`
+                    },
+                        React.createElement('div', { 
+                            className: 'ranking-number',
+                            'aria-label': currentRank > 0 ? `Rank ${currentRank}` : 'Unranked'
+                        }, displayRank),
+                        React.createElement('div', { className: 'ranking-option' },
+                            React.createElement('span', { className: 'ranking-text' }, option)
+                        )
+                    );
+                })
+            ),
+            React.createElement('div', { className: 'ranking-summary' },
+                React.createElement('span', { className: 'ranking-summary-text' },
+                    `Ranked ${Object.keys(currentRanking).length} of ${question.options?.length || 0} items`
+                )
+            )
         )
     );
 };

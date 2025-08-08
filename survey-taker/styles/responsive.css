@@ -72,6 +72,30 @@
         grid-template-columns: 1fr;
     }
 
+    .option-group--stack {
+        grid-template-columns: 1fr;
+    }
+
+    .option-group--checkbox {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--space-1);
+    }
+
+    .checkbox-item {
+        padding: var(--space-1) var(--space-2);
+        min-height: 32px;
+        max-height: 36px;
+    }
+
+    .checkbox-input {
+        width: 14px;
+        height: 14px;
+    }
+
+    .checkbox-label {
+        font-size: var(--font-size-xs);
+    }
+
     .likert-options {
         flex-direction: column;
         gap: var(--space-2);
@@ -129,6 +153,30 @@
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
 
+    .option-group--stack {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .option-group--checkbox {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--space-2);
+    }
+
+    .checkbox-item {
+        padding: var(--space-2) var(--space-3);
+        min-height: 36px;
+        max-height: 40px;
+    }
+
+    .checkbox-input {
+        width: 16px;
+        height: 16px;
+    }
+
+    .checkbox-label {
+        font-size: var(--font-size-sm);
+    }
+
     .likert-options {
         gap: var(--space-1);
     }
@@ -149,6 +197,30 @@
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 
+    .option-group--stack {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .option-group--checkbox {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--space-3);
+    }
+
+    .checkbox-item {
+        padding: var(--space-2) var(--space-4);
+        min-height: 40px;
+        max-height: 44px;
+    }
+
+    .checkbox-input {
+        width: 18px;
+        height: 18px;
+    }
+
+    .checkbox-label {
+        font-size: var(--font-size-base);
+    }
+
     .likert-options {
         gap: var(--space-3);
     }
@@ -163,6 +235,30 @@
 @media (min-width: 1025px) {
     .option-group--grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .option-group--stack {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .option-group--checkbox {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-4);
+    }
+
+    .checkbox-item {
+        padding: var(--space-3) var(--space-4);
+        min-height: 44px;
+        max-height: 48px;
+    }
+
+    .checkbox-input {
+        width: 20px;
+        height: 20px;
+    }
+
+    .checkbox-label {
+        font-size: var(--font-size-base);
     }
 
     .likert-options {
@@ -180,6 +276,26 @@
     :root {
         --container-max-width: 1400px;
         --container-padding: 2rem;
+    }
+
+    .option-group--checkbox {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--space-4);
+    }
+
+    .checkbox-item {
+        padding: var(--space-3) var(--space-5);
+        min-height: 48px;
+        max-height: 52px;
+    }
+
+    .checkbox-input {
+        width: 22px;
+        height: 22px;
+    }
+
+    .checkbox-label {
+        font-size: var(--font-size-lg);
     }
 }
 
