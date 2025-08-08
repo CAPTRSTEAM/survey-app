@@ -1,3 +1,5 @@
+
+
 // Survey Types
 export type QuestionType = 'text' | 'radio' | 'checkbox' | 'likert' | 'yesno' | 'rating' | 'ranking';
 
@@ -44,6 +46,7 @@ export interface Survey {
   thankYou?: SurveyThankYou;
   settings?: SurveySettings;
   sections: SurveySection[];
+  questions?: SurveyQuestion[]; // Legacy support for flat question arrays
 }
 
 // Answer Types

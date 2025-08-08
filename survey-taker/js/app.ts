@@ -42,7 +42,7 @@ async function initializeApp() {
   try {
     // Dynamically import components
     const { ApiProvider } = await import('./utils/api-provider.js');
-    const { SurveyApp } = await import('./components/survey-app.js');
+    const { SurveyApp } = await import('./components/survey-app.ts');
     const { createErrorBoundary } = await import('./components/error-boundary.js');
     
     console.log('Survey App: Components imported successfully');
@@ -64,10 +64,12 @@ async function initializeApp() {
     const reactRoot = (window.ReactDOM as any).createRoot(root);
     
     // Render with error boundary
+    console.log('🔍 Creating SurveyApp component with apiProvider:', apiProvider);
     const app = window.React.createElement(ErrorBoundary, null,
       window.React.createElement(SurveyApp, { apiProvider })
     );
     
+    console.log('🔍 About to render app:', app);
     reactRoot.render(app);
     
     console.log('Survey App: Application rendered successfully');

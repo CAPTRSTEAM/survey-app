@@ -5,6 +5,9 @@ import { useDynamicPositioning } from '../utils/dynamic-positioning.js';
 import { useSurveyValidation } from '../utils/survey-validation.js';
 
 export const SurveyApp = ({ apiProvider }) => {
+    console.log('🔍 SurveyApp component STARTING...');
+    console.log('🔍 SurveyApp component rendered with apiProvider:', apiProvider);
+    
     const [survey, setSurvey] = React.useState(null);
     const [currentSectionIndex, setCurrentSectionIndex] = React.useState(-1); // Start at -1 for welcome screen
     const [answers, setAnswers] = React.useState({});
@@ -15,17 +18,21 @@ export const SurveyApp = ({ apiProvider }) => {
     const [showFileUpload, setShowFileUpload] = React.useState(false);
     const fileInputRef = React.useRef(null);
 
+    console.log('🔍 SurveyApp state:', { survey, currentSectionIndex, answers, isCompleted, appMode, error });
+
     // Custom hooks
     const dynamicStyles = useDynamicPositioning(currentSectionIndex);
     const { validateSurvey, validateAnswer } = useSurveyValidation();
 
     // Handle survey file upload
     const handleSurveyLoad = (surveyData) => {
+        console.log('🔍 handleSurveyLoad called with:', surveyData);
         try {
             // Validate survey structure
             const validationResult = validateSurvey(surveyData);
             if (validationResult.isValid) {
                 const processedSurvey = processSurveyStructure(surveyData);
+                console.log('🔍 Setting survey to:', processedSurvey);
                 setSurvey(processedSurvey);
                 setError(null);
                 setShowFileUpload(false);
@@ -40,6 +47,7 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Handle file selection
     const handleFileSelect = async (file) => {
+        console.log('🔍 handleFileSelect called with file:', file);
         if (!file) return;
 
         // Validate file type
@@ -51,6 +59,7 @@ export const SurveyApp = ({ apiProvider }) => {
         try {
             const text = await file.text();
             const surveyData = JSON.parse(text);
+            console.log('🔍 Parsed survey data:', surveyData);
 
             // Basic validation
             if (!surveyData || typeof surveyData !== 'object') {
@@ -71,6 +80,7 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Handle file input change
     const handleFileInputChange = (e) => {
+        console.log('🔍 handleFileInputChange called with:', e.target.files[0]);
         const file = e.target.files[0];
         if (file) {
             handleFileSelect(file);
@@ -79,6 +89,7 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Trigger file input
     const triggerFileInput = () => {
+        console.log('🔍 triggerFileInput called');
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
@@ -86,13 +97,16 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Initialize app with API provider
     React.useEffect(() => {
+        console.log('🔍 useEffect for API provider called');
         try {
             // Check if running in iframe (platform mode)
             if (window.parent !== window) {
+                console.log('🔍 Setting appMode to platform');
                 setAppMode('platform');
                 
                 // Subscribe to API provider updates
                 apiProvider.subscribe((surveyConfig) => {
+                    console.log('🔍 API provider subscription callback with:', surveyConfig);
                     if (surveyConfig) {
                         // Validate survey structure
                         const validationResult = validateSurvey(surveyConfig);
@@ -113,6 +127,7 @@ export const SurveyApp = ({ apiProvider }) => {
                 }, '*');
             } else {
                 // Standalone mode - show file upload or sample survey
+                console.log('🔍 Setting appMode to standalone');
                 setAppMode('standalone');
                 // Don't auto-load sample survey, let user choose
             }
@@ -124,15 +139,18 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Process survey structure to handle sections
     const processSurveyStructure = (surveyData) => {
+        console.log('🔍 processSurveyStructure called with:', surveyData);
         if (!surveyData) return null;
         
         // Keep the original structure with sections for the new layout
         if (surveyData.sections && Array.isArray(surveyData.sections)) {
+            console.log('🔍 Survey already has sections, returning as-is');
             return surveyData;
         }
         
         // If survey has a flat questions array, convert to sections format
         if (surveyData.questions && Array.isArray(surveyData.questions)) {
+            console.log('🔍 Converting flat questions to sections format');
             return {
                 ...surveyData,
                 sections: [{
@@ -148,10 +166,12 @@ export const SurveyApp = ({ apiProvider }) => {
     };
 
     const handleAnswerChange = (questionId, value) => {
+        console.log('🔍 handleAnswerChange called:', { questionId, value });
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
     const handleComplete = async () => {
+        console.log('🔍 handleComplete called');
         setIsSubmitting(true);
         
         try {
@@ -190,16 +210,22 @@ export const SurveyApp = ({ apiProvider }) => {
     }, [survey, currentSectionIndex, answers, validateAnswer]);
 
     const handleNext = React.useCallback(() => {
+        console.log('🔍 handleNext called, currentSectionIndex:', currentSectionIndex);
         if (currentSectionIndex < (survey?.sections?.length || 0) - 1) {
-            setCurrentSectionIndex(prev => prev + 1);
+            const newIndex = currentSectionIndex + 1;
+            console.log('🔍 Setting currentSectionIndex to:', newIndex);
+            setCurrentSectionIndex(newIndex);
         } else {
             handleComplete();
         }
     }, [currentSectionIndex, survey, handleComplete]);
 
     const handlePrevious = React.useCallback(() => {
-        setCurrentSectionIndex(prev => Math.max(0, prev - 1));
-    }, []);
+        console.log('🔍 handlePrevious called, currentSectionIndex:', currentSectionIndex);
+        const newIndex = Math.max(0, currentSectionIndex - 1);
+        console.log('🔍 Setting currentSectionIndex to:', newIndex);
+        setCurrentSectionIndex(newIndex);
+    }, [currentSectionIndex]);
 
     // Question progress calculation for current section
     const questionProgress = React.useMemo(() => {
@@ -240,7 +266,15 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Section progress for header
     const createSectionProgress = React.useCallback(() => {
-        if (!survey?.sections) return [];
+        console.log('🔍 createSectionProgress called');
+        console.log('🔍 createSectionProgress - survey:', survey);
+        console.log('🔍 createSectionProgress - currentSectionIndex:', currentSectionIndex);
+        console.log('🔍 createSectionProgress - isCompleted:', isCompleted);
+        
+        if (!survey?.sections) {
+            console.log('🔍 createSectionProgress - no survey sections, returning empty array');
+            return [];
+        }
 
         const sections = [];
         
@@ -274,37 +308,58 @@ export const SurveyApp = ({ apiProvider }) => {
             });
         }
 
-        return sections.map((section, index) => {
+        const result = sections.map((section, index) => {
             let status = 'pending';
             
-            if (section.isWelcome && currentSectionIndex === -1) {
-                status = 'active';
+            console.log('🔍 Processing section:', section);
+            console.log('🔍 Section isWelcome:', section.isWelcome);
+            console.log('🔍 Section isThankYou:', section.isThankYou);
+            console.log('🔍 Section sectionIndex:', section.sectionIndex);
+            
+            if (section.isWelcome) {
+                if (currentSectionIndex === -1) {
+                    status = 'active';
+                    console.log('🔍 Welcome section set to active (currentSectionIndex === -1)');
+                } else {
+                    status = 'completed';
+                    console.log('🔍 Welcome section set to completed (currentSectionIndex > -1)');
+                }
             } else if (section.isThankYou && isCompleted) {
-                status = 'active';
+                status = 'completed';
+                console.log('🔍 Thank you section set to completed (isCompleted === true)');
             } else if (section.sectionIndex !== undefined) {
                 if (section.sectionIndex < currentSectionIndex) {
                     status = 'completed';
+                    console.log('🔍 Question section set to completed (sectionIndex < currentSectionIndex)');
                 } else if (section.sectionIndex === currentSectionIndex) {
                     status = 'active';
+                    console.log('🔍 Question section set to active (sectionIndex === currentSectionIndex)');
                 }
             }
 
+            console.log('🔍 Final status for section:', section.label, '=', status);
             return { ...section, status, index };
         });
+
+        console.log('🔍 createSectionProgress returning:', result);
+        return result;
     }, [survey, currentSectionIndex, isCompleted]);
 
     // Show loading
     if (appMode === 'loading') {
+        console.log('🔍 Rendering loading screen');
         return React.createElement('div', { className: 'loading' }, 'Loading survey...');
     }
 
     // Show error
     if (error) {
+        console.log('🔍 Rendering error screen:', error);
         return React.createElement('div', { className: 'error-message' }, error);
     }
 
     // Show standalone mode with file upload options
     if (appMode === 'standalone' && !survey) {
+        console.log('🔍 Rendering standalone mode with file upload');
         return React.createElement('div', { className: 'survey-app' },
             React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
             
@@ -358,6 +413,10 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Show welcome screen
     if (survey.welcome && currentSectionIndex === -1) {
+        console.log('🔍 Rendering welcome screen');
+        const sectionProgress = createSectionProgress();
+        console.log('🔍 Welcome screen sectionProgress:', sectionProgress);
+        
         return React.createElement('div', { className: 'survey-app' },
             React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
             
@@ -373,7 +432,19 @@ export const SurveyApp = ({ apiProvider }) => {
                         React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                     ),
                     React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
-                        React.createElement('div', { className: 'progress-step active' }, 'W')
+                        sectionProgress.map((section, index) =>
+                            React.createElement(React.Fragment, { key: section.id },
+                                React.createElement('div', {
+                                    className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,
+                                    title: section.title,
+                                    'aria-label': `${section.title} - ${section.status}`,
+                                    'data-type': section.sectionIndex !== undefined ? 'question' : undefined,
+                                    'data-number': section.sectionIndex !== undefined ? section.sectionIndex + 1 : undefined
+                                }, section.sectionIndex !== undefined ? `Q${section.sectionIndex + 1}` : section.label),
+                                index < sectionProgress.length - 1 && 
+                                    React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
+                            )
+                        )
                     )
                 )
             ),
@@ -387,7 +458,11 @@ export const SurveyApp = ({ apiProvider }) => {
                     React.createElement('h1', { className: 'survey-title' }, survey.welcome.title),
                     React.createElement('p', { className: 'welcome-message' }, survey.welcome.message),
                     React.createElement('button', {
-                        onClick: () => setCurrentSectionIndex(0),
+                        onClick: () => {
+                            console.log('🔍 Start Survey button clicked!');
+                            console.log('🔍 Setting currentSectionIndex from -1 to 0');
+                            setCurrentSectionIndex(0);
+                        },
                         className: 'button button--primary button--lg',
                         style: { marginTop: 'var(--space-8)' }
                     }, 'Start Survey'),
@@ -404,6 +479,10 @@ export const SurveyApp = ({ apiProvider }) => {
 
     // Show thank you screen
     if (survey.thankYou && isCompleted) {
+        console.log('🔍 Rendering thank you screen');
+        const sectionProgress = createSectionProgress();
+        console.log('🔍 Thank you screen sectionProgress:', sectionProgress);
+        
         return React.createElement('div', { className: 'survey-app' },
             React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
             
@@ -419,13 +498,19 @@ export const SurveyApp = ({ apiProvider }) => {
                         React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                     ),
                     React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
-                        React.createElement('div', { className: 'progress-step completed' }, 'W'),
-                        React.createElement('div', { className: 'progress-connector' }),
-                        React.createElement('div', { className: 'progress-step completed' }, '1'),
-                        React.createElement('div', { className: 'progress-connector' }),
-                        React.createElement('div', { className: 'progress-step completed' }, '2'),
-                        React.createElement('div', { className: 'progress-connector' }),
-                        React.createElement('div', { className: 'progress-step active' }, 'T')
+                        sectionProgress.map((section, index) =>
+                            React.createElement(React.Fragment, { key: section.id },
+                                React.createElement('div', {
+                                    className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,
+                                    title: section.title,
+                                    'aria-label': `${section.title} - ${section.status}`,
+                                    'data-type': section.sectionIndex !== undefined ? 'question' : undefined,
+                                    'data-number': section.sectionIndex !== undefined ? section.sectionIndex + 1 : undefined
+                                }, section.sectionIndex !== undefined ? `Q${section.sectionIndex + 1}` : section.label),
+                                index < sectionProgress.length - 1 && 
+                                    React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
+                            )
+                        )
                     )
                 )
             ),
@@ -452,6 +537,7 @@ export const SurveyApp = ({ apiProvider }) => {
     // Get current section
     const currentSection = survey.sections?.[currentSectionIndex];
     if (!currentSection) {
+        console.log('🔍 Current section not found, rendering error');
         return React.createElement('div', { className: 'error-message' },
             'Section not found. Please check the survey configuration.'
         );
@@ -459,8 +545,10 @@ export const SurveyApp = ({ apiProvider }) => {
 
     const isLastSection = currentSectionIndex === (survey.sections?.length || 0) - 1;
     const sectionProgress = createSectionProgress();
+    console.log('🔍 Main survey interface sectionProgress:', sectionProgress);
 
     // Main survey interface
+    console.log('🔍 Rendering main survey interface');
     return React.createElement('div', { className: 'survey-app' },
         React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
         

@@ -1,66 +1,113 @@
-import React from 'react';
-import type { SurveyProgressProps, QuestionProgress } from '../types/index.js';
+import { React } from '../utils/react-wrapper.js';
+import type { Survey, SectionProgress } from '../types/index.js';
 
-export const SurveyProgress: React.FC<SurveyProgressProps> = ({ currentSection, answers, dynamicStyles }) => {
-  // Calculate question progress
-  const questionProgress: QuestionProgress = React.useMemo(() => {
-    const totalQuestions = currentSection.questions.length;
-    const answeredQuestions = currentSection.questions.filter(q => {
-      const answer = answers[q.id];
-      // Check if there's actually an answer, not just if it's valid
-      if (answer === undefined || answer === null) return false;
-      
-      // For different question types, check if there's meaningful content
-      switch (q.type) {
-        case 'text':
-          return typeof answer === 'string' && answer.trim().length > 0;
-        case 'checkbox':
-          return Array.isArray(answer) && answer.length > 0;
-        case 'radio':
-        case 'likert':
-        case 'yesno':
-          return typeof answer === 'string' && answer.length > 0;
-        case 'rating':
-          return typeof answer === 'number' && answer > 0;
-        case 'ranking':
-          return typeof answer === 'object' && answer !== null && Object.keys(answer).length > 0;
-        default:
-          return !!answer;
-      }
-    }).length;
+interface SurveyProgressProps {
+  survey: Survey;
+  currentSectionIndex: number;
+  isCompleted: boolean;
+}
 
-    return {
-      current: answeredQuestions,
-      total: totalQuestions,
-      percentage: totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0
-    };
-  }, [currentSection, answers]);
+// Helper function to create section progress data
+const createSectionProgressData = (survey: Survey): Omit<SectionProgress, 'status'>[] => {
+  const sections: Omit<SectionProgress, 'status'>[] = [];
+  
+  // Welcome section
+  if (survey.welcome) {
+    sections.push({
+      id: 'welcome',
+      label: 'W',
+      title: 'Welcome',
+      isWelcome: true
+    });
+  }
 
-  return React.createElement('div', { 
-    className: 'question-progress-container',
-    style: { 
-      top: dynamicStyles.questionProgressTop
+  // Question sections
+  survey.sections.forEach((section, index) => {
+    sections.push({
+      id: section.id,
+      label: (index + 1).toString(),
+      title: section.title,
+      sectionIndex: index
+    });
+  });
+
+  // Thank you section
+  if (survey.thankYou) {
+    sections.push({
+      id: 'thank-you',
+      label: 'T',
+      title: 'Thank You',
+      isThankYou: true
+    });
+  }
+
+  return sections;
+};
+
+// Helper function to determine section status
+const determineSectionStatus = (
+  section: Omit<SectionProgress, 'status'>,
+  currentSectionIndex: number,
+  isCompleted: boolean
+): 'pending' | 'active' | 'completed' => {
+  // Welcome section logic
+  if (section.isWelcome) {
+    return currentSectionIndex === -1 ? 'active' : 'completed';
+  }
+
+  // Thank you section logic
+  if (section.isThankYou) {
+    return isCompleted ? 'completed' : 'pending';
+  }
+
+  // Question section logic
+  if (section.sectionIndex !== undefined) {
+    if (isCompleted) {
+      return 'completed';
     }
-  },
-    React.createElement('div', { className: 'question-progress-header' },
-      React.createElement('div', { className: 'question-progress-count' },
-        `Question ${questionProgress.current} of ${questionProgress.total}`
+    if (section.sectionIndex < currentSectionIndex) {
+      return 'completed';
+    }
+    if (section.sectionIndex === currentSectionIndex) {
+      return 'active';
+    }
+  }
+
+  return 'pending';
+};
+
+export const SurveyProgress: React.FC<SurveyProgressProps> = ({ 
+  survey, 
+  currentSectionIndex, 
+  isCompleted 
+}) => {
+  const sectionProgress = React.useMemo((): SectionProgress[] => {
+    if (!survey?.sections) {
+      return [];
+    }
+
+    const sectionData = createSectionProgressData(survey);
+    
+    return sectionData.map((section, index) => ({
+      ...section,
+      status: determineSectionStatus(section, currentSectionIndex, isCompleted),
+      index
+    }));
+  }, [survey, currentSectionIndex, isCompleted]);
+
+  return React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
+    sectionProgress.map((section, index) =>
+      React.createElement(React.Fragment, { key: section.id },
+        React.createElement('div', {
+          className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,
+          title: section.title,
+          'aria-label': `${section.title} - ${section.status}`,
+          'data-type': section.sectionIndex !== undefined ? 'question' : undefined,
+          'data-number': section.sectionIndex !== undefined ? section.sectionIndex + 1 : undefined
+        }, section.sectionIndex !== undefined ? `Q${section.sectionIndex + 1}` : section.label),
+        index < sectionProgress.length - 1 && 
+          React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
       )
-    ),
-    React.createElement('div', { 
-      className: 'question-progress-bar',
-      role: 'progressbar',
-      'aria-valuenow': questionProgress.percentage,
-      'aria-valuemin': 0,
-      'aria-valuemax': 100,
-      'aria-label': `Question progress: ${questionProgress.percentage}%`
-    },
-      React.createElement('div', { 
-        className: 'question-progress-fill',
-        style: { 
-          width: `${Math.max(questionProgress.percentage, 0)}%`
-        }
-      })
     )
   );
 };

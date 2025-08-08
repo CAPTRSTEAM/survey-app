@@ -1,4 +1,4 @@
-import React from 'react';
+import { React } from '../utils/react-wrapper.js';
 import type { SurveyAnswers } from '../types/index.js';
 
 const STORAGE_KEY = 'survey-answers';

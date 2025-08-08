@@ -2,6 +2,8 @@ import React from 'react';
 import type { SurveyHeaderProps } from '../types/index.js';
 
 export const SurveyHeader: React.FC<SurveyHeaderProps> = ({ survey, sectionProgress }) => {
+  console.log('🔍 SurveyHeader rendering with sectionProgress:', sectionProgress);
+  
   return React.createElement('header', { 
     className: 'survey-header'
   },
@@ -15,10 +17,12 @@ export const SurveyHeader: React.FC<SurveyHeaderProps> = ({ survey, sectionProgr
         React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
       ),
       React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
-        sectionProgress.map((section, index) =>
-          React.createElement(React.Fragment, { key: section.id },
+        sectionProgress.map((section, index) => {
+          const className = `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`;
+          console.log(`🔍 SurveyHeader progress step ${section.label}: status=${section.status}, className="${className}"`);
+          return React.createElement(React.Fragment, { key: section.id },
             React.createElement('div', {
-              className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,
+              className,
               title: section.title,
               'aria-label': `${section.title} - ${section.status}`,
               'data-type': section.sectionIndex !== undefined ? 'question' : undefined,
@@ -26,8 +30,8 @@ export const SurveyHeader: React.FC<SurveyHeaderProps> = ({ survey, sectionProgr
             }, section.sectionIndex !== undefined ? `Q${section.sectionIndex + 1}` : section.label),
             index < sectionProgress.length - 1 && 
               React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
-          )
-        )
+          );
+        })
       )
     )
   );

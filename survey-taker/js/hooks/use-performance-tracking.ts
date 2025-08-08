@@ -1,4 +1,4 @@
-import React from 'react';
+import { React } from '../utils/react-wrapper.js';
 
 export const usePerformanceTracking = (componentName: string) => {
   React.useEffect(() => {

@@ -1,28 +1,41 @@
 // API Provider for Platform Integration
 export class ApiProvider {
     constructor() {
+        console.log('🔍 ApiProvider constructor called');
         this.gameConfig = null;
         this.gameData = null;
         this.isReady = false;
         this.listeners = [];
         this.setupMessageListener();
+        console.log('🔍 ApiProvider setup complete');
+        
+        // Don't auto-load fallback survey - let the app handle survey loading
+        console.log('🔍 No auto-loading of fallback survey');
     }
 
     setupMessageListener() {
+        console.log('🔍 Setting up message listener...');
         window.addEventListener('message', (event) => {
+            console.log('🔍 Message received:', event.data);
             if (event.data.type === 'CONFIG') {
+                console.log('🔍 CONFIG message received, handling...');
                 this.handleConfigMessage(event.data);
+            } else {
+                console.log('🔍 Non-CONFIG message received, ignoring');
             }
         });
     }
 
     handleConfigMessage(data) {
+        console.log('🔍 handleConfigMessage called with data:', data);
         try {
             // Extract platform configuration
             const { token, url, exerciseId, appInstanceId, survey, surveyConfig } = data;
+            console.log('🔍 Extracted config:', { token: !!token, url: !!url, survey: !!survey, surveyConfig: !!surveyConfig });
             
             // First, check if survey data is directly in the CONFIG message
             if (survey && this.isValidSurvey(survey)) {
+                console.log('🔍 Found valid survey in CONFIG message');
                 this.gameConfig = survey;
                 this.isReady = true;
                 this.notifyListeners();
@@ -30,24 +43,25 @@ export class ApiProvider {
             }
             
             if (surveyConfig && this.isValidSurvey(surveyConfig)) {
+                console.log('🔍 Found valid surveyConfig in CONFIG message');
                 this.gameConfig = surveyConfig;
                 this.isReady = true;
                 this.notifyListeners();
                 return;
             }
             
-            // Validate required parameters for API call
+                                // Validate required parameters for API call
             if (!url || !token) {
-                console.warn('Missing required parameters for API call, using fallback survey');
-                this.useFallbackSurvey();
+                console.warn('Missing required parameters for API call');
+                console.log('🔍 No valid configuration provided');
                 return;
             }
             
             // Use spa-api-provider pattern: getCurrentGameConfig
+            console.log('🔍 Attempting to fetch game config...');
             this.fetchGameConfig(url, token, exerciseId, appInstanceId);
         } catch (error) {
-            console.error('Error handling config message:', error);
-            this.useFallbackSurvey();
+            console.error('❌ Error handling config message:', error);
         }
     }
 
@@ -77,19 +91,20 @@ export class ApiProvider {
                 this.isReady = true;
                 this.notifyListeners();
             } else {
-                console.warn('No valid survey config found in API response, using fallback');
-                this.useFallbackSurvey();
+                console.warn('No valid survey config found in API response');
             }
         } catch (error) {
             console.error('Error fetching game config:', error);
-            this.useFallbackSurvey();
         }
     }
 
     useFallbackSurvey() {
-        console.log('Using fallback survey');
+        console.log('🔍 useFallbackSurvey called!');
+        console.log('🔍 Loading sample survey automatically...');
         this.gameConfig = this.getSampleSurvey();
+        console.log('🔍 Sample survey loaded:', this.gameConfig);
         this.isReady = true;
+        console.log('🔍 API provider is ready, notifying listeners...');
         this.notifyListeners();
     }
 
@@ -283,18 +298,27 @@ export class ApiProvider {
     }
 
     subscribe(callback) {
+        console.log('🔍 subscribe called, isReady:', this.isReady);
         this.listeners.push(callback);
         if (this.isReady) {
+            console.log('🔍 API provider is ready, calling callback immediately');
             callback(this.gameConfig);
+        } else {
+            console.log('🔍 API provider not ready yet, callback will be called later');
         }
     }
 
     notifyListeners() {
-        this.listeners.forEach(callback => {
+        console.log('🔍 notifyListeners called with gameConfig:', this.gameConfig);
+        console.log('🔍 Number of listeners:', this.listeners.length);
+        this.listeners.forEach((callback, index) => {
+            console.log(`🔍 Calling listener ${index}...`);
             try {
+                console.log(`🔍 About to call listener ${index} with:`, this.gameConfig);
                 callback(this.gameConfig);
+                console.log(`🔍 Listener ${index} called successfully`);
             } catch (error) {
-                console.error('Error in listener callback:', error);
+                console.error('❌ Error in listener callback:', error);
             }
         });
     }
