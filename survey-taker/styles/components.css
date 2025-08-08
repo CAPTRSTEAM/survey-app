@@ -28,20 +28,15 @@
 .header-brand {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-6);
+    min-height: 32px;
 }
 
 .brand-logo {
-    width: 32px;
-    height: 32px;
-    background-color: var(--color-white);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: var(--font-weight-bold);
-    color: var(--color-primary-dark);
-    font-size: var(--font-size-lg);
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: block;
 }
 
 .brand-title {

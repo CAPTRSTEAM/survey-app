@@ -304,15 +304,12 @@ export const SurveyApp = ({ apiProvider }) => {
             React.createElement('header', { className: 'survey-header' },
                 React.createElement('div', { className: 'header-content' },
                     React.createElement('div', { className: 'header-brand' },
-                        React.createElement('div', { className: 'brand-logo', 'aria-hidden': 'true' }, 'C'),
-                        React.createElement('h1', { className: 'brand-title' }, 'CAPTRS Survey')
-                    ),
-                    React.createElement('div', { className: 'header-actions' },
-                        React.createElement('div', { 
-                            className: 'user-avatar',
-                            title: 'User profile',
-                            'aria-label': 'User profile'
-                        }, '👤')
+                        React.createElement('img', { 
+                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
+                            alt: 'CAPTRS Logo',
+                            className: 'brand-logo'
+                        }),
+                        React.createElement('h1', { className: 'brand-title' }, 'Survey App')
                     )
                 )
             ),
@@ -389,18 +386,15 @@ export const SurveyApp = ({ apiProvider }) => {
             React.createElement('header', { className: 'survey-header' },
                 React.createElement('div', { className: 'header-content' },
                     React.createElement('div', { className: 'header-brand' },
-                        React.createElement('div', { className: 'brand-logo', 'aria-hidden': 'true' }, 'C'),
-                        React.createElement('h1', { className: 'brand-title' }, 'CAPTRS Survey')
+                        React.createElement('img', { 
+                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
+                            alt: 'CAPTRS Logo',
+                            className: 'brand-logo'
+                        }),
+                        React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                     ),
                     React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
                         React.createElement('div', { className: 'progress-step active' }, 'W')
-                    ),
-                    React.createElement('div', { className: 'header-actions' },
-                        React.createElement('div', { 
-                            className: 'user-avatar',
-                            title: 'User profile',
-                            'aria-label': 'User profile'
-                        }, '👤')
                     )
                 )
             ),
@@ -438,8 +432,12 @@ export const SurveyApp = ({ apiProvider }) => {
             React.createElement('header', { className: 'survey-header' },
                 React.createElement('div', { className: 'header-content' },
                     React.createElement('div', { className: 'header-brand' },
-                        React.createElement('div', { className: 'brand-logo', 'aria-hidden': 'true' }, 'C'),
-                        React.createElement('h1', { className: 'brand-title' }, 'CAPTRS Survey')
+                        React.createElement('img', { 
+                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
+                            alt: 'CAPTRS Logo',
+                            className: 'brand-logo'
+                        }),
+                        React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                     ),
                     React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
                         React.createElement('div', { className: 'progress-step completed' }, 'W'),
@@ -449,13 +447,6 @@ export const SurveyApp = ({ apiProvider }) => {
                         React.createElement('div', { className: 'progress-step completed' }, '2'),
                         React.createElement('div', { className: 'progress-connector' }),
                         React.createElement('div', { className: 'progress-step active' }, 'T')
-                    ),
-                    React.createElement('div', { className: 'header-actions' },
-                        React.createElement('div', { 
-                            className: 'user-avatar',
-                            title: 'User profile',
-                            'aria-label': 'User profile'
-                        }, '👤')
                     )
                 )
             ),
@@ -500,8 +491,12 @@ export const SurveyApp = ({ apiProvider }) => {
         },
             React.createElement('div', { className: 'header-content' },
                 React.createElement('div', { className: 'header-brand' },
-                    React.createElement('div', { className: 'brand-logo', 'aria-hidden': 'true' }, 'C'),
-                    React.createElement('h1', { className: 'brand-title' }, 'CAPTRS Survey')
+                    React.createElement('img', { 
+                        src: './CAPTRS_StackedLogo_White_Square-01-01.png',
+                        alt: 'CAPTRS Logo',
+                        className: 'brand-logo'
+                    }),
+                    React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                 ),
                 React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
                     sectionProgress.map((section, index) =>
@@ -515,13 +510,6 @@ export const SurveyApp = ({ apiProvider }) => {
                                 React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
                         )
                     )
-                ),
-                React.createElement('div', { className: 'header-actions' },
-                    React.createElement('div', { 
-                        className: 'user-avatar',
-                        title: 'User profile',
-                        'aria-label': 'User profile'
-                    }, '👤')
                 )
             )
         ),
