@@ -35,7 +35,7 @@ export function createErrorBoundary() {
                             onClick: () => window.location.reload(),
                             className: 'button button--primary'
                         }, 'Refresh Page'),
-                        process.env.NODE_ENV === 'development' && this.state.error && 
+                        typeof process !== 'undefined' && process.env.NODE_ENV === 'development' && this.state.error && 
                             React.createElement('details', { style: { marginTop: '1rem', textAlign: 'left' } },
                                 React.createElement('summary', null, 'Error Details'),
                                 React.createElement('pre', { style: { fontSize: '0.8rem', overflow: 'auto' } },
