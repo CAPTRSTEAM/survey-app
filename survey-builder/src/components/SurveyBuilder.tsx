@@ -13,13 +13,12 @@ import {
   LinearProgress
 } from '@mui/material'
 import {
-  Add as AddIcon,
-  LibraryBooks as LibraryIcon
+  Add as AddIcon
 } from '@mui/icons-material'
 
 import { Survey } from '../types/survey'
 import { useSurveyContext } from '../context/SurveyContext'
-import { exportSurvey } from '../utils/surveyUtils'
+import { exportSurveyWithSections } from '../utils/surveyUtils'
 import { SurveyLibraryView } from './SurveyLibraryView'
 import { SurveyWizard } from './SurveyWizard'
 
@@ -75,7 +74,7 @@ const SurveyBuilder: React.FC = () => {
 
   const handleExportSurvey = (survey: Survey) => {
     try {
-      exportSurvey(survey)
+      exportSurveyWithSections(survey)
       showSnackbar('Survey exported successfully')
     } catch (error) {
       showSnackbar('Failed to export survey', 'error')
@@ -95,12 +94,59 @@ const SurveyBuilder: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <LinearProgress />
-        <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
-          Loading Survey Library...
-        </Typography>
-      </Container>
+      <Box sx={{ minHeight: '100vh', backgroundColor: '#eef0f8' }}>
+        {/* 3/4 Width Header Bar */}
+        <Box sx={{ 
+          background: '#181a43',
+          color: 'white',
+          position: 'fixed',
+          top: 0,
+          left: '12.5%',
+          right: '12.5%',
+          zIndex: 1200,
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          px: 3,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          borderBottomLeftRadius: 12,
+          borderBottomRightRadius: 12
+        }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flex: 1 }}>
+          {/* CAPTRS Logo */}
+          <Box
+            component="img"
+            src="/CAPTRS_StackedLogo_White_Square-01-01.png"
+            alt="CAPTRS Logo"
+            sx={{
+              height: 48,
+              width: 'auto',
+              filter: 'brightness(0) invert(1)',
+              opacity: 0.95
+            }}
+          />
+          
+          {/* Application Title */}
+          <Typography variant="h6" sx={{ 
+            fontWeight: 'bold',
+            fontFamily: '"DM Sans", sans-serif',
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            ml: 2
+          }}>
+            CAPTRS Survey Builder
+          </Typography>
+        </Box>
+        </Box>
+
+        {/* Main Content with top padding for fixed header */}
+        <Container maxWidth="lg" sx={{ py: 4, pt: 12 }}>
+          <LinearProgress />
+          <Typography variant="h6" sx={{ mt: 2, textAlign: 'center' }}>
+            Loading Survey Library...
+          </Typography>
+        </Container>
+      </Box>
     )
   }
 
@@ -115,40 +161,145 @@ const SurveyBuilder: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#eef0f8' }}>
+      {/* 3/4 Width Header Bar */}
+      <Box sx={{ 
+        background: '#181a43',
+        color: 'white',
+        position: 'fixed',
+        top: 0,
+        left: '12.5%',
+        right: '12.5%',
+        zIndex: 1200,
+        height: 64,
+        display: 'flex',
+        alignItems: 'center',
+        px: 3,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        borderBottomLeftRadius: 12,
+        borderBottomRightRadius: 12
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flex: 1 }}>
+          {/* CAPTRS Logo */}
+          <Box
+            component="img"
+            src="/CAPTRS_StackedLogo_White_Square-01-01.png"
+            alt="CAPTRS Logo"
+            sx={{
+              height: 48,
+              width: 'auto',
+              filter: 'brightness(0) invert(1)',
+              opacity: 0.95
+            }}
+          />
+          
+          {/* Application Title */}
+          <Typography variant="h6" sx={{ 
+            fontWeight: 'bold',
+            fontFamily: '"DM Sans", sans-serif',
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            ml: 2
+          }}>
+            CAPTRS Survey Builder
+          </Typography>
+        </Box>
+        
+        {/* Right side controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <LibraryIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-          <Box>
-            <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
-              Survey Builder
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              Create, edit, and manage your surveys
-            </Typography>
+          {/* User Profile Icon */}
+          <Box sx={{ 
+            width: 32, 
+            height: 32, 
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: 'white'
+          }}>
+            👤
           </Box>
         </Box>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<AddIcon />}
-          onClick={handleCreateSurvey}
-          sx={{ px: 3, py: 1.5 }}
-        >
-          Create New Survey
-        </Button>
       </Box>
 
-      {/* Survey Library */}
-      <SurveyLibraryView
-        key={`library-${surveys.length}-${refreshKey}`}
-        surveys={surveys}
-        onEdit={handleEditSurvey}
-        onDuplicate={handleDuplicateSurvey}
-        onDelete={handleDeleteSurvey}
-        onExport={handleExportSurvey}
-      />
+      {/* Main Content with top padding for fixed header */}
+      <Container maxWidth="lg" sx={{ py: 4, pt: 16, display: 'flex', justifyContent: 'center' }}>
+        {/* Survey Library Box - Centered */}
+        <Box sx={{ 
+          backgroundColor: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          border: '1px solid #eef0f8',
+          p: 4,
+          position: 'relative',
+          width: '100%',
+          maxWidth: 1200
+        }}>
+          {/* Library Header with Create Button */}
+          <Box sx={{ 
+            mb: 4,
+            pb: 3,
+            borderBottom: '2px solid #eef0f8',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start'
+          }}>
+            <Box>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 'bold',
+                fontFamily: '"DM Sans", sans-serif',
+                color: '#181a43',
+                mb: 1
+              }}>
+                Survey Library
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                color: '#6b7280',
+                fontFamily: '"Open Sans", sans-serif',
+                fontWeight: 400
+              }}>
+                {surveys.length} survey{surveys.length !== 1 ? 's' : ''} available
+              </Typography>
+            </Box>
+            
+            {/* Create Survey Button - Inline with title */}
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<AddIcon />}
+              onClick={handleCreateSurvey}
+              sx={{ 
+                px: 3, 
+                py: 1.5,
+                background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+                color: 'white',
+                borderRadius: 2,
+                boxShadow: '0 2px 8px rgba(43, 61, 139, 0.2)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+                  boxShadow: '0 4px 12px rgba(43, 61, 139, 0.3)',
+                  transform: 'translateY(-1px)',
+                },
+                transition: 'all 0.2s ease-in-out',
+                ml: 3
+              }}
+            >
+              Create New Survey
+            </Button>
+          </Box>
+
+          {/* Survey Library Content */}
+          <SurveyLibraryView
+            key={`library-${surveys.length}-${refreshKey}`}
+            surveys={surveys}
+            onEdit={handleEditSurvey}
+            onDuplicate={handleDuplicateSurvey}
+            onDelete={handleDeleteSurvey}
+            onExport={handleExportSurvey}
+          />
+        </Box>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, survey: null })}>
@@ -180,6 +331,7 @@ const SurveyBuilder: React.FC = () => {
         </Alert>
       </Snackbar>
     </Container>
+  </Box>
   )
 }
 

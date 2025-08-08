@@ -10,7 +10,6 @@ import {
   Button
 } from '@mui/material'
 import {
-  Check as CheckIcon,
   Warning as WarningIcon
 } from '@mui/icons-material'
 
@@ -188,20 +187,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         </Grid>
       </Grid>
 
-      <Divider sx={{ my: 3 }} />
 
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<CheckIcon />}
-          onClick={onComplete}
-          disabled={!isComplete}
-          sx={{ px: 4, py: 1.5 }}
-        >
-          {isComplete ? 'Create Survey' : 'Complete Required Fields'}
-        </Button>
-      </Box>
     </Box>
   )
 } 

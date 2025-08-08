@@ -123,7 +123,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
   const handleQuestionTypeChange = (question: Question, newType: string) => {
     const updatedQuestion = { ...question, type: newType as any }
     
-    if (['radio', 'checkbox', 'rating', 'likert'].includes(newType)) {
+    if (['radio', 'checkbox', 'rating', 'likert', 'ranking'].includes(newType)) {
       updatedQuestion.options = getDefaultOptions(newType)
     } else {
       updatedQuestion.options = []
@@ -181,7 +181,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
       <Alert severity="info" sx={{ mb: 3 }}>
         <strong>Question Types:</strong> Text Input (free text), Multiple Choice (single selection), 
-        Checkboxes (multiple selection), Rating Scale (1-5), Likert Scale (agreement levels)
+        Checkboxes (multiple selection), Rating Scale (1-5), Likert Scale (agreement levels), 
+        Yes/No (binary choice), Ranking (drag to reorder)
       </Alert>
 
       {/* Add New Section */}
@@ -207,6 +208,10 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
               value={newSection.description}
               onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
               placeholder="Enter section description"
+              multiline
+              rows={3}
+              minRows={2}
+              maxRows={6}
             />
           </Grid>
           <Grid item xs={12}>
@@ -239,7 +244,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
             {/* Section Details (title, description inputs) */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid item xs={12} md={6}><TextField fullWidth label="Section Title" value={section.title} onChange={(e) => handleUpdateSection(sectionIndex, 'title', e.target.value)} /></Grid>
-              <Grid item xs={12} md={6}><TextField fullWidth label="Section Description" value={section.description} onChange={(e) => handleUpdateSection(sectionIndex, 'description', e.target.value)} /></Grid>
+              <Grid item xs={12} md={6}><TextField fullWidth label="Section Description" value={section.description} onChange={(e) => handleUpdateSection(sectionIndex, 'description', e.target.value)} multiline rows={3} minRows={2} maxRows={6} /></Grid>
             </Grid>
 
             {/* Add New Question (within section) */}
@@ -255,27 +260,30 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     placeholder="Enter your question here"
                   />
                 </Grid>
+                <Grid item xs={12} sx={{ mb: 2 }}>
+                  {/* Spacer for better visual separation */}
+                </Grid>
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Question Type</InputLabel>
-                    <Select
-                      value={newQuestion.type}
-                      onChange={(e) => {
-                        const newType = e.target.value as string
-                        setNewQuestion({
-                          ...newQuestion,
-                          type: newType as any,
-                          options: getDefaultOptions(newType)
-                        })
-                      }}
-                    >
-                      <MenuItem value="text">Text Input</MenuItem>
-                      <MenuItem value="radio">Multiple Choice</MenuItem>
-                      <MenuItem value="checkbox">Checkboxes</MenuItem>
-                      <MenuItem value="rating">Rating Scale</MenuItem>
-                      <MenuItem value="likert">Likert Scale</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    fullWidth
+                    label="Question Type"
+                    value={newQuestion.type}
+                    onChange={(e) => {
+                      const newType = e.target.value as string
+                      setNewQuestion({
+                        ...newQuestion,
+                        type: newType as any,
+                        options: getDefaultOptions(newType)
+                      })
+                    }}
+                    select
+                  >
+                    <MenuItem value="text">Text Input</MenuItem>
+                    <MenuItem value="radio">Multiple Choice</MenuItem>
+                    <MenuItem value="checkbox">Checkboxes</MenuItem>
+                    <MenuItem value="rating">Rating Scale</MenuItem>
+                    <MenuItem value="likert">Likert Scale</MenuItem>
+                  </TextField>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FormControlLabel
@@ -288,7 +296,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     label="Required"
                   />
                 </Grid>
-                {(newQuestion.type === 'radio' || newQuestion.type === 'checkbox' || newQuestion.type === 'rating' || newQuestion.type === 'likert') && (
+                {(newQuestion.type === 'radio' || newQuestion.type === 'checkbox' || newQuestion.type === 'rating' || newQuestion.type === 'likert' || newQuestion.type === 'ranking') && (
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" gutterBottom>Options</Typography>
                     {newQuestion.options?.map((option, optionIndex) => (
@@ -373,22 +381,23 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
               />
             </Grid>
             
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Question Type</InputLabel>
-                <Select
-                  value={editingQuestion.type}
-                  label="Question Type"
-                  onChange={(e) => handleQuestionTypeChange(editingQuestion, e.target.value)}
-                >
-                  <MenuItem value="text">Text Input</MenuItem>
-                  <MenuItem value="radio">Multiple Choice</MenuItem>
-                  <MenuItem value="checkbox">Checkboxes</MenuItem>
-                  <MenuItem value="rating">Rating Scale</MenuItem>
-                  <MenuItem value="likert">Likert Scale</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+                         <Grid item xs={12} md={6}>
+               <TextField
+                 fullWidth
+                 label="Question Type"
+                 value={editingQuestion.type}
+                 onChange={(e) => handleQuestionTypeChange(editingQuestion, e.target.value)}
+                 select
+               >
+                 <MenuItem value="text">Text Input</MenuItem>
+                 <MenuItem value="radio">Multiple Choice</MenuItem>
+                 <MenuItem value="checkbox">Checkboxes</MenuItem>
+                 <MenuItem value="rating">Rating Scale</MenuItem>
+                 <MenuItem value="likert">Likert Scale</MenuItem>
+                 <MenuItem value="yesno">Yes/No</MenuItem>
+                 <MenuItem value="ranking">Ranking</MenuItem>
+               </TextField>
+             </Grid>
             
             <Grid item xs={12} md={6}>
               <FormControlLabel
@@ -403,7 +412,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
             </Grid>
             
             {/* Options for choice-based questions */}
-            {['radio', 'checkbox', 'rating', 'likert'].includes(editingQuestion.type) && (
+            {['radio', 'checkbox', 'rating', 'likert', 'ranking'].includes(editingQuestion.type) && (
               <Grid item xs={12}>
                 <Typography variant="subtitle2" gutterBottom>
                   Options

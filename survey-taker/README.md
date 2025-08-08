@@ -89,7 +89,7 @@ The `survey-taker-spa.zip` file is ready for platform deployment. This zip file 
 - **Standalone Mode**: Loads sample survey for testing
 - **Platform Mode**: Uses spa-api-provider for platform integration
 - **Welcome/Thank You Screens**: Professional survey flow
-- **Multiple Question Types**: Radio, text, and more
+- **Multiple Question Types**: Radio, text, Likert scales, and more
 - **Responsive Design**: Works on desktop, tablet, and mobile
 - **API Integration**: Proper platform API communication with error handling
 - **Robust Fallback**: Always provides a working survey experience

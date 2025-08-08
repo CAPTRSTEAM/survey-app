@@ -173,82 +173,173 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-        <IconButton onClick={onCancel} sx={{ mr: 2 }}>
-          <BackIcon />
-        </IconButton>
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#eef0f8' }}>
+      {/* 3/4 Width Header Bar */}
+      <Box sx={{ 
+        background: '#181a43',
+        color: 'white',
+        position: 'fixed',
+        top: 0,
+        left: '12.5%',
+        right: '12.5%',
+        zIndex: 1200,
+        height: 64,
+        display: 'flex',
+        alignItems: 'center',
+        px: 3,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        borderBottomLeftRadius: 12,
+        borderBottomRightRadius: 12
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flex: 1 }}>
+          {/* Back Button */}
+          <IconButton onClick={onCancel} sx={{ mr: 2, color: 'white' }}>
+            <BackIcon />
+          </IconButton>
+          
+          {/* CAPTRS Logo */}
+          <Box
+            component="img"
+            src="/CAPTRS_StackedLogo_White_Square-01-01.png"
+            alt="CAPTRS Logo"
+            sx={{
+              height: 48,
+              width: 'auto',
+              filter: 'brightness(0) invert(1)',
+              opacity: 0.95
+            }}
+          />
+          
+          {/* Application Title */}
+          <Typography variant="h6" sx={{ 
+            fontWeight: 'bold',
+            fontFamily: '"DM Sans", sans-serif',
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            ml: 2
+          }}>
             {survey ? 'Edit Survey' : 'Create New Survey'}
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            {survey ? 'Modify your survey settings and questions' : 'Build your survey step by step'}
-          </Typography>
+        </Box>
+        
+        {/* Right side controls */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* User Profile Icon */}
+          <Box sx={{ 
+            width: 32, 
+            height: 32, 
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: 'white'
+          }}>
+            👤
+          </Box>
         </Box>
       </Box>
 
-      {/* Progress */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">
-            Step {wizard.currentStepIndex + 1} of {wizard.totalSteps}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {wizard.currentStep.title}
-          </Typography>
-        </Box>
-        <LinearProgress 
-          variant="determinate" 
-          value={((wizard.currentStepIndex + 1) / wizard.totalSteps) * 100}
-          sx={{ height: 8, borderRadius: 4 }}
-        />
-      </Paper>
+             {/* Main Content with top padding for fixed header and bottom padding for fixed navigation */}
+       <Container maxWidth="lg" sx={{ py: 4, pt: 16, pb: 20 }}>
 
-      {/* Stepper */}
-      <Paper sx={{ p: 3 }}>
-        <Stepper activeStep={wizard.currentStepIndex} orientation="vertical">
-          {WIZARD_STEPS.map((step) => (
-            <Step key={step.id}>
-              <StepLabel>{step.title}</StepLabel>
-              <StepContent>
-                <Box sx={{ mb: 2 }}>
-                  {getStepContent(step.id)}
-                </Box>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button
-                    variant="outlined"
-                    onClick={wizard.previousStep}
-                    disabled={wizard.isFirstStep}
-                    startIcon={<BackIcon />}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={wizard.nextStep}
-                    disabled={wizard.isLastStep}
-                    endIcon={<SaveIcon />}
-                  >
-                    Next
-                  </Button>
-                  {wizard.isLastStep && (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={handleComplete}
-                      startIcon={<SaveIcon />}
-                    >
-                      Save Survey
-                    </Button>
-                  )}
-                </Box>
-              </StepContent>
-            </Step>
-          ))}
-        </Stepper>
-      </Paper>
-    </Container>
+       {/* Progress */}
+       <Paper sx={{ p: 3, mb: 3 }}>
+         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+           <Typography variant="h6">
+             Step {wizard.currentStepIndex + 1} of {wizard.totalSteps}
+           </Typography>
+           <Typography variant="body2" color="text.secondary">
+             {wizard.currentStep.title}
+           </Typography>
+         </Box>
+         <LinearProgress 
+           variant="determinate" 
+           value={((wizard.currentStepIndex + 1) / wizard.totalSteps) * 100}
+           sx={{ height: 8, borderRadius: 4 }}
+         />
+       </Paper>
+
+       {/* Stepper */}
+       <Paper sx={{ p: 3 }}>
+         <Stepper activeStep={wizard.currentStepIndex} orientation="vertical">
+           {WIZARD_STEPS.map((step) => (
+             <Step key={step.id}>
+               <StepLabel>{step.title}</StepLabel>
+               <StepContent>
+                 <Box sx={{ mb: 2 }}>
+                   {getStepContent(step.id)}
+                 </Box>
+               </StepContent>
+             </Step>
+           ))}
+         </Stepper>
+       </Paper>
+     </Container>
+
+           {/* Fixed Bottom Navigation - 3/4 Width */}
+      <Box sx={{
+        position: 'fixed',
+        bottom: 0,
+        left: '12.5%',
+        right: '12.5%',
+        backgroundColor: 'white',
+        borderTop: '1px solid #eef0f8',
+        boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',
+        zIndex: 1100,
+        py: 3,
+        px: 4,
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Back Button - Left */}
+          <Button
+            variant="outlined"
+            onClick={wizard.previousStep}
+            disabled={wizard.isFirstStep}
+            startIcon={<BackIcon />}
+            sx={{ minWidth: 100 }}
+          >
+            Back
+          </Button>
+          
+          {/* Next/Save Button - Right */}
+          {!wizard.isLastStep ? (
+            <Button
+              variant="contained"
+              onClick={wizard.nextStep}
+              endIcon={<SaveIcon />}
+              sx={{ 
+                minWidth: 120,
+                background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+                }
+              }}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleComplete}
+              startIcon={<SaveIcon />}
+              sx={{ 
+                minWidth: 140,
+                background: 'linear-gradient(45deg, #2e7d32 0%, #4caf50 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #1b5e20 0%, #388e3c 100%)',
+                }
+              }}
+            >
+              Save Survey
+            </Button>
+          )}
+        </Box>
+      </Box>
+  </Box>
   )
 } 

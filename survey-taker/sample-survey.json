@@ -16,39 +16,72 @@
       "poweredBy": "Powered by CAPTRS"
     }
   },
-  "questions": [
+  "sections": [
     {
-      "id": "q1",
-      "type": "radio",
-      "question": "How satisfied are you with your current role?",
-      "options": ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
-      "required": true
+      "id": "work-satisfaction",
+      "title": "Work Satisfaction",
+      "description": "This section focuses on your overall satisfaction with your work and role.",
+      "questions": [
+        {
+          "id": "q1",
+          "type": "radio",
+          "question": "How satisfied are you with your current role?",
+          "options": ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
+          "required": true
+        },
+        {
+          "id": "q2",
+          "type": "rating",
+          "question": "Rate your overall work experience (1-5 stars):",
+          "required": true
+        },
+        {
+          "id": "q3",
+          "type": "yesno",
+          "question": "Do you feel valued as an employee?",
+          "required": true
+        },
+        {
+          "id": "q4",
+          "type": "text",
+          "question": "What aspects of your job do you find most rewarding?",
+          "required": false
+        }
+      ]
     },
     {
-      "id": "q2",
-      "type": "radio",
-      "question": "How would you rate your work-life balance?",
-      "options": ["Excellent", "Good", "Fair", "Poor", "Very Poor"],
-      "required": true
-    },
-    {
-      "id": "q3",
-      "type": "text",
-      "question": "What aspects of your job do you find most rewarding?",
-      "required": false
-    },
-    {
-      "id": "q4",
-      "type": "text",
-      "question": "What improvements would you suggest for the workplace?",
-      "required": false
-    },
-    {
-      "id": "q5",
-      "type": "radio",
-      "question": "Would you recommend this company to others?",
-      "options": ["Definitely Yes", "Probably Yes", "Not Sure", "Probably No", "Definitely No"],
-      "required": true
+      "id": "company-feedback",
+      "title": "Company Feedback",
+      "description": "This section collects feedback about the company culture and environment.",
+      "questions": [
+        {
+          "id": "q5",
+          "type": "likert",
+          "question": "This company provides a supportive work environment.",
+          "options": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
+          "required": true
+        },
+        {
+          "id": "q6",
+          "type": "ranking",
+          "question": "Rank these company benefits in order of importance to you:",
+          "options": ["Health Insurance", "Flexible Hours", "Remote Work", "Professional Development", "Team Events"],
+          "required": true
+        },
+        {
+          "id": "q7",
+          "type": "checkbox",
+          "question": "Which of the following would improve your work experience? (Select all that apply)",
+          "options": ["Better Communication Tools", "More Training Opportunities", "Improved Office Space", "Better Work-Life Balance", "More Recognition"],
+          "required": false
+        },
+        {
+          "id": "q8",
+          "type": "text",
+          "question": "What improvements would you suggest for the workplace?",
+          "required": false
+        }
+      ]
     }
   ]
 } 

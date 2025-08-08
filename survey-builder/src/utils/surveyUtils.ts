@@ -64,7 +64,9 @@ export const getQuestionTypeLabel = (type: string): string => {
     radio: 'Multiple Choice',
     checkbox: 'Checkboxes',
     rating: 'Rating Scale',
-    likert: 'Likert Scale'
+    likert: 'Likert Scale',
+    yesno: 'Yes/No',
+    ranking: 'Ranking'
   }
   return labels[type] || type
 }
@@ -74,7 +76,9 @@ export const getDefaultOptions = (type: string): string[] => {
     radio: ['Option 1', 'Option 2', 'Option 3'],
     checkbox: ['Option 1', 'Option 2', 'Option 3'],
     rating: ['1', '2', '3', '4', '5'],
-    likert: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
+    likert: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'],
+    yesno: ['Yes', 'No'],
+    ranking: ['Option 1', 'Option 2', 'Option 3', 'Option 4']
   }
   return defaults[type] || []
 }
@@ -115,6 +119,18 @@ export const flattenSurveyForExport = (survey: Survey): FlattenedSurvey => {
     settings: survey.settings,
     questions: flattenedQuestions
   }
+}
+
+// Export with section structure for survey taker
+export const exportSurveyWithSections = (survey: Survey): void => {
+  const dataStr = JSON.stringify(survey, null, 2)
+  const dataBlob = new Blob([dataStr], { type: 'application/json' })
+  const url = URL.createObjectURL(dataBlob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${survey.title || 'survey'}.json`
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 export const exportSurvey = (survey: Survey): void => {

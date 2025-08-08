@@ -6,33 +6,134 @@ import { SurveyProvider } from './context/SurveyContext'
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#2b3d8b', // CAPTRS primary.dark
+      light: '#4358a3', // CAPTRS primary.medium
+      dark: '#181a43', // CAPTRS primary.darkest
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#4358a3', // CAPTRS primary.medium
+      light: '#eef0f8', // CAPTRS neutral.lightGray
+      dark: '#2b3d8b', // CAPTRS primary.dark
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#eef0f8', // CAPTRS neutral.lightGray
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#000000', // CAPTRS neutral.black
+      secondary: '#6b7280',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontFamily: '"DM Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'bold',
+      lineHeight: 1.2,
+      letterSpacing: '-0.02em',
+    },
+    h2: {
+      fontFamily: '"DM Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'bold',
+      lineHeight: 1.2,
+      letterSpacing: '-0.02em',
+    },
     h3: {
-      fontWeight: 600,
+      fontFamily: '"DM Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'bold',
+      lineHeight: 1.2,
+      letterSpacing: '-0.02em',
     },
     h4: {
-      fontWeight: 600,
+      fontFamily: '"DM Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'medium',
+      lineHeight: 1.3,
+      letterSpacing: '-0.01em',
     },
     h5: {
-      fontWeight: 600,
+      fontFamily: '"DM Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'medium',
+      lineHeight: 1.3,
+      letterSpacing: '-0.01em',
     },
     h6: {
-      fontWeight: 600,
+      fontFamily: '"DM Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'medium',
+      lineHeight: 1.3,
+      letterSpacing: '-0.01em',
+    },
+    body1: {
+      fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'regular',
+      lineHeight: 1.6,
+      letterSpacing: '0',
+    },
+    body2: {
+      fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'regular',
+      lineHeight: 1.6,
+      letterSpacing: '0',
+    },
+    button: {
+      fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      fontWeight: 'semibold',
+      lineHeight: 1.5,
+      letterSpacing: '0',
+      textTransform: 'none',
     },
   },
+  spacing: 4, // Base spacing unit of 4px
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           textTransform: 'none',
           borderRadius: 8,
+          fontWeight: 'semibold',
+          padding: '12px 24px',
+          boxShadow: '0 2px 4px rgba(43, 61, 139, 0.2)',
+          '&:hover': {
+            boxShadow: '0 4px 8px rgba(43, 61, 139, 0.3)',
+          },
+                     '&.Mui-disabled': {
+             backgroundColor: '#d1d5db',
+             color: '#374151',
+             borderColor: '#9ca3af',
+             boxShadow: 'none',
+             '&:hover': {
+               backgroundColor: '#d1d5db',
+               boxShadow: 'none',
+             },
+           },
+        },
+        contained: {
+          background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+          '&:hover': {
+            background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+          },
+                     '&.Mui-disabled': {
+             background: '#d1d5db',
+             color: '#374151',
+             '&:hover': {
+               background: '#d1d5db',
+             },
+           },
+        },
+        outlined: {
+          borderColor: '#2b3d8b',
+          color: '#2b3d8b',
+          '&:hover': {
+            backgroundColor: 'rgba(43, 61, 139, 0.04)',
+          },
+                     '&.Mui-disabled': {
+             borderColor: '#9ca3af',
+             color: '#374151',
+             '&:hover': {
+               backgroundColor: 'transparent',
+             },
+           },
         },
       },
     },
@@ -41,6 +142,7 @@ const theme = createTheme({
         root: {
           borderRadius: 12,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          border: '1px solid #eef0f8',
         },
       },
     },
@@ -48,7 +150,56 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 8,
+          border: '1px solid #eef0f8',
         },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+          boxShadow: '0 2px 8px rgba(43, 61, 139, 0.2)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#2b3d8b',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#2b3d8b',
+            },
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          fontWeight: 'semibold',
+        },
+        colorPrimary: {
+          backgroundColor: '#2b3d8b',
+          color: '#ffffff',
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+                 root: {
+           '&.Mui-disabled': {
+             backgroundColor: '#d1d5db',
+             color: '#374151',
+             '&:hover': {
+               backgroundColor: '#d1d5db',
+             },
+           },
+         },
       },
     },
   },

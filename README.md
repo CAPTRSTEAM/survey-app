@@ -53,7 +53,7 @@ The **Survey Taker** is a standalone HTML/JavaScript application designed for su
 
 - **Platform Integration**: Uses spa-api-provider for seamless platform deployment
 - **Standalone Mode**: Can run independently with sample surveys
-- **Multiple Question Types**: Supports radio buttons, text inputs, and more
+- **Multiple Question Types**: Supports radio buttons, text inputs, Likert scales, and more
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Robust Error Handling**: Graceful fallback when platform integration fails
 - **Professional UI**: Welcome and thank you screens with branding support
@@ -163,6 +163,13 @@ Both applications use a consistent JSON format for survey data:
       "type": "radio",
       "question": "Question text?",
       "options": ["Option 1", "Option 2"],
+      "required": true
+    },
+    {
+      "id": "q2",
+      "type": "likert",
+      "question": "Statement to rate?",
+      "options": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
       "required": true
     }
   ]

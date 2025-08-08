@@ -51,10 +51,6 @@ export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        Survey Library ({surveys.length} surveys)
-      </Typography>
-      
       <Grid container spacing={3}>
         {surveys.map((survey) => (
           <Grid item xs={12} md={6} lg={4} key={survey.id}>
