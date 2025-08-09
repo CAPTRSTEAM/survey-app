@@ -185,7 +185,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     const handleAnswerChange = React.useCallback((questionId: string, value: any) => {
         console.log('🔍 handleAnswerChange called:', { questionId, value });
-        setAnswers(prev => ({ ...prev, [questionId]: value }));
+        setAnswers((prev: SurveyAnswers) => ({ ...prev, [questionId]: value }));
     }, []);
 
     const handleComplete = React.useCallback(async () => {
@@ -224,7 +224,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         const currentSection = survey?.sections?.[currentSectionIndex];
         if (!currentSection) return false;
 
-        return currentSection.questions.every(q => {
+        return currentSection.questions.every((q: any) => {
             const answer = answers[q.id];
             return validateAnswer(answer, q.type, q.required);
         });
@@ -236,6 +236,17 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             const newIndex = currentSectionIndex + 1;
             console.log('🔍 Setting currentSectionIndex to:', newIndex);
             setCurrentSectionIndex(newIndex);
+            
+            // Scroll to top of the new section and focus on section title
+            setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Focus on the section title for better accessibility
+                const sectionTitle = document.getElementById('section-title');
+                if (sectionTitle) {
+                    sectionTitle.focus();
+                }
+            }, 100);
         } else {
             handleComplete();
         }
@@ -246,6 +257,17 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         const newIndex = Math.max(0, currentSectionIndex - 1);
         console.log('🔍 Setting currentSectionIndex to:', newIndex);
         setCurrentSectionIndex(newIndex);
+        
+        // Scroll to top of the new section and focus on section title
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Focus on the section title for better accessibility
+            const sectionTitle = document.getElementById('section-title');
+            if (sectionTitle) {
+                sectionTitle.focus();
+            }
+        }, 100);
     }, [currentSectionIndex]);
 
     // Question progress is now handled by the QuestionProgress component
@@ -357,6 +379,17 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                             console.log('🔍 Start Survey button clicked!');
                             console.log('🔍 Setting currentSectionIndex from -1 to 0');
                             setCurrentSectionIndex(0);
+                            
+                            // Scroll to top when starting the survey and focus on section title
+                            setTimeout(() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                
+                                // Focus on the section title for better accessibility
+                                const sectionTitle = document.getElementById('section-title');
+                                if (sectionTitle) {
+                                    sectionTitle.focus();
+                                }
+                            }, 100);
                         },
                         className: 'button button--primary button--lg',
                         style: { marginTop: 'var(--space-8)' }
@@ -460,7 +493,8 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         },
             React.createElement('h2', { 
                 className: 'fixed-section-title',
-                id: 'section-title'
+                id: 'section-title',
+                tabIndex: 0
             }, `${currentSectionIndex + 1}. ${currentSection.title}`),
             currentSection.description && React.createElement('p', { 
                 className: 'fixed-section-description' 
@@ -480,7 +514,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             style: { paddingTop: dynamicStyles.questionsPaddingTop }
         },
             React.createElement('div', { className: 'questions-section' },
-                currentSection.questions.map((question, index) =>
+                currentSection.questions.map((question: any, index: number) =>
                     React.createElement('div', { 
                         key: question.id, 
                         className: 'question-card'
