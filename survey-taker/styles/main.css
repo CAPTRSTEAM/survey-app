@@ -341,3 +341,56 @@ body {
     from { transform: translateX(-100%); }
     to { transform: translateX(0); }
 }
+
+/* Modern High Contrast Mode Support */
+@media (forced-colors: active) {
+    /* Ensure proper contrast in high contrast modes */
+    .survey-app {
+        forced-color-adjust: none;
+    }
+    
+    /* High contrast button styles */
+    .button {
+        border: 2px solid CanvasText;
+        forced-color-adjust: none;
+    }
+    
+    .button--primary {
+        background-color: CanvasText;
+        color: Canvas;
+    }
+    
+    .button--secondary {
+        background-color: Canvas;
+        color: CanvasText;
+    }
+    
+    /* High contrast form elements */
+    input, textarea, select {
+        border: 2px solid CanvasText;
+        forced-color-adjust: none;
+    }
+    
+    /* High contrast progress indicators */
+    .progress-step.active {
+        background-color: CanvasText;
+        color: Canvas;
+    }
+    
+    .progress-step.completed {
+        background-color: CanvasText;
+        color: Canvas;
+    }
+    
+    /* High contrast loading states */
+    .loading-spinner {
+        color: CanvasText;
+    }
+    
+    /* High contrast error states */
+    .error-message {
+        border: 2px solid CanvasText;
+        background-color: Canvas;
+        color: CanvasText;
+    }
+}
