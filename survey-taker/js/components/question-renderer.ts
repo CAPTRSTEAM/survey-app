@@ -160,10 +160,12 @@ const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
             role: 'radiogroup',
             'aria-labelledby': `${question.id}-label`
         },
-            ratings.map((rating) =>
-                React.createElement('label', {
+            ratings.map((rating) => {
+                // A star should be highlighted if it's less than or equal to the selected rating
+                const isHighlighted = answer && rating <= answer;
+                return React.createElement('label', {
                     key: rating,
-                    className: `rating-option ${answer === rating ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
+                    className: `rating-option ${isHighlighted ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     role: 'radio',
                     'aria-checked': answer === rating,
                     tabIndex: disabled ? -1 : 0
@@ -178,9 +180,9 @@ const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
                         disabled,
                         className: 'rating-input'
                     }),
-                    React.createElement('span', { className: 'rating-label' }, rating)
-                )
-            )
+                    React.createElement('span', { className: 'rating-star' }, '★')
+                );
+            })
         )
     );
 };
@@ -198,7 +200,7 @@ const CheckboxQuestion: React.FC<QuestionRendererProps> = ({ question, answer, o
 
     return React.createElement('div', { className: 'form-control' },
         React.createElement('div', { 
-            className: 'option-group',
+            className: 'option-group option-group--grid',
             role: 'group',
             'aria-labelledby': `${question.id}-label`
         },
@@ -228,13 +230,21 @@ const CheckboxQuestion: React.FC<QuestionRendererProps> = ({ question, answer, o
 // Ranking Question Component
 const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
     const currentAnswer = typeof answer === 'object' && answer !== null ? answer as Record<string, number> : {};
+    const totalOptions = question.options?.length || 0;
     
     const handleItemClick = (option: string) => {
         if (disabled) return;
         
         const nextRank = getNextAvailableRank();
         const newAnswer = { ...currentAnswer, [option]: nextRank };
-        onChange(question.id, newAnswer);
+        
+        // Only mark as complete if all options are ranked
+        if (Object.keys(newAnswer).length === totalOptions) {
+            onChange(question.id, newAnswer);
+        } else {
+            // Store partial answer but don't mark as complete
+            onChange(question.id, newAnswer);
+        }
     };
 
     const handleItemRemove = (option: string) => {
@@ -242,6 +252,8 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
         
         const newAnswer = { ...currentAnswer };
         delete newAnswer[option];
+        
+        // When removing a ranking, the question is no longer complete
         onChange(question.id, newAnswer);
     };
 
@@ -249,69 +261,68 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
         return currentAnswer[option] || 0;
     };
 
-
-
     const getNextAvailableRank = (): number => {
+        const maxRank = totalOptions;
+        if (maxRank === 0) return 1;
+        
         const ranks = Object.values(currentAnswer);
-        return ranks.length > 0 ? Math.max(...ranks) + 1 : 1;
+        if (ranks.length === 0) return 1;
+        
+        // Find the next available rank within the valid range
+        for (let rank = 1; rank <= maxRank; rank++) {
+            if (!ranks.includes(rank)) {
+                return rank;
+            }
+        }
+        
+        // If all ranks are used, return 0 (shouldn't happen in normal usage)
+        return 0;
     };
+
+    // Check if all options are ranked
+    const isComplete = Object.keys(currentAnswer).length === totalOptions;
 
     return React.createElement('div', { className: 'form-control' },
         React.createElement('div', { className: 'ranking-container' },
-            // Available options
-            React.createElement('div', { className: 'ranking-options' },
-                React.createElement('h4', { className: 'ranking-title' }, 'Available Options'),
-                React.createElement('div', { className: 'ranking-list' },
-                    question.options?.map((option) => {
-                        const isRanked = getRankForOption(option) > 0;
-                        return React.createElement('div', {
-                            key: option,
-                            className: `ranking-item ${isRanked ? 'ranked' : ''} ${disabled ? 'disabled' : ''}`,
-                            onClick: () => handleItemClick(option),
-                            tabIndex: disabled ? -1 : 0
-                        },
-                            React.createElement('span', { className: 'ranking-option' }, option),
-                            isRanked && React.createElement('span', { className: 'ranking-rank' }, 
-                                `Rank ${getRankForOption(option)}`
-                            )
-                        );
-                    })
-                )
+            // Show completion status
+            totalOptions > 0 && React.createElement('div', { 
+                className: `ranking-status ${isComplete ? 'complete' : 'incomplete'}` 
+            },
+                isComplete 
+                    ? `All ${totalOptions} options ranked`
+                    : `${Object.keys(currentAnswer).length} of ${totalOptions} options ranked`
             ),
-            // Ranked options
-            React.createElement('div', { className: 'ranking-results' },
-                React.createElement('h4', { className: 'ranking-title' }, 'Your Ranking'),
-                React.createElement('div', { className: 'ranking-list' },
-                    Object.keys(currentAnswer).length > 0 
-                        ? Object.keys(currentAnswer)
-                            .sort((a, b) => currentAnswer[a] - currentAnswer[b])
-                            .map((option) =>
-                                React.createElement('div', {
-                                    key: option,
-                                    className: 'ranking-item ranked',
-                                    onClick: () => handleItemRemove(option),
-                                    tabIndex: disabled ? -1 : 0
-                                },
-                                    React.createElement('span', { className: 'ranking-rank' }, 
-                                        `${currentAnswer[option]}.`
-                                    ),
-                                    React.createElement('span', { className: 'ranking-option' }, option),
-                                    React.createElement('button', {
-                                        type: 'button',
-                                        className: 'ranking-remove',
-                                        onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-                                            e.stopPropagation();
-                                            handleItemRemove(option);
-                                        },
-                                        disabled,
-                                        'aria-label': `Remove ${option} from ranking`
-                                    }, '×')
-                                )
-                            )
-                        : React.createElement('div', { className: 'ranking-empty' }, 
-                            'Click on options above to rank them'
-                          )
-                )
+            React.createElement('div', { className: 'ranking-list' },
+                question.options?.map((option) => {
+                    const isRanked = getRankForOption(option) > 0;
+                    const rankNumber = getRankForOption(option);
+                    return React.createElement('div', {
+                        key: option,
+                        className: `ranking-item ${isRanked ? 'ranked' : ''} ${disabled ? 'disabled' : ''}`,
+                        onClick: () => isRanked ? handleItemRemove(option) : handleItemClick(option),
+                        tabIndex: disabled ? -1 : 0
+                    },
+                        // Ranking circle on the left
+                        React.createElement('div', { 
+                            className: `ranking-circle ${isRanked ? 'filled' : ''}` 
+                        },
+                            isRanked ? rankNumber : ''
+                        ),
+                        // Option text
+                        React.createElement('span', { className: 'ranking-option' }, option),
+                        // Remove button for ranked items
+                        isRanked && React.createElement('button', {
+                            type: 'button',
+                            className: 'ranking-remove',
+                            onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+                                e.stopPropagation();
+                                handleItemRemove(option);
+                            },
+                            disabled,
+                            'aria-label': `Remove ${option} from ranking`
+                        }, '×')
+                    );
+                })
             )
         )
     );

@@ -6,9 +6,7 @@ export const usePerformanceTracking = (componentName: string) => {
     
     return () => {
       const duration = performance.now() - startTime;
-      if (duration > 16) { // Log if render takes longer than 16ms (60fps)
-        console.warn(`${componentName} render took ${duration.toFixed(2)}ms`);
-      }
+      // Performance tracking disabled in production
     };
   });
 };
@@ -18,7 +16,7 @@ export const useRenderCount = (componentName: string) => {
   
   React.useEffect(() => {
     renderCount.current += 1;
-    console.log(`${componentName} rendered ${renderCount.current} times`);
+    // Render count tracking disabled in production
   });
   
   return renderCount.current;
@@ -28,11 +26,7 @@ export const useMemoryUsage = () => {
   React.useEffect(() => {
     if ('memory' in performance) {
       const memory = (performance as any).memory;
-      console.log('Memory usage:', {
-        used: `${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB`,
-        total: `${(memory.totalJSHeapSize / 1024 / 1024).toFixed(2)}MB`,
-        limit: `${(memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)}MB`
-      });
+      // Memory usage tracking disabled in production
     }
   });
 };

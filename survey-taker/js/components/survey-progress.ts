@@ -88,7 +88,7 @@ export const SurveyProgress: React.FC<SurveyProgressProps> = ({
 
     const sectionData = createSectionProgressData(survey);
     
-    return sectionData.map((section, index) => ({
+    return sectionData.map((section: any, index: number) => ({
       ...section,
       status: determineSectionStatus(section, currentSectionIndex, isCompleted),
       index
@@ -96,7 +96,7 @@ export const SurveyProgress: React.FC<SurveyProgressProps> = ({
   }, [survey, currentSectionIndex, isCompleted]);
 
   return React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
-    sectionProgress.map((section, index) =>
+    sectionProgress.map((section: any, index: number) =>
       React.createElement(React.Fragment, { key: section.id },
         React.createElement('div', {
           className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,

@@ -1,8 +1,6 @@
 // Main Survey App Entry Point
 // Note: React and ReactDOM are loaded via script tags in HTML
 
-console.log('Survey App: app.js loaded successfully');
-
 // Global error handler
 window.addEventListener('error', (event) => {
   console.error('Global error:', event.error);
@@ -16,8 +14,8 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // Global message listener setup - ensure it's ready before any components
 // Store early CONFIG messages to deliver to ApiProvider when ready
-let earlyConfigMessage = null;
-let apiProviderInstance = null;
+let earlyConfigMessage: any = null;
+let apiProviderInstance: any = null;
 
 window.addEventListener('message', (event) => {
   if (event.data.type === 'CONFIG') {
@@ -31,7 +29,7 @@ window.addEventListener('message', (event) => {
 });
 
 // Function to register ApiProvider and deliver any early messages
-function registerApiProvider(apiProvider) {
+function registerApiProvider(apiProvider: any) {
   apiProviderInstance = apiProvider;
   
   // Deliver any early CONFIG message if we have one
@@ -57,8 +55,6 @@ function showErrorBoundary(message: string) {
 
 // Initialize the application
 async function initializeApp() {
-  console.log('Survey App: Initializing application...');
-  
   // Check if React is available
   if (!window.React || !window.ReactDOM) {
     console.error('React or ReactDOM not available');
@@ -71,8 +67,6 @@ async function initializeApp() {
     const { ApiProvider } = await import('./utils/api-provider.js');
     const { SurveyApp } = await import('./components/survey-app.ts');
     const { createErrorBoundary } = await import('./components/error-boundary.js');
-    
-    console.log('Survey App: Components imported successfully');
     
     // Create API provider
     const apiProvider = new ApiProvider();
@@ -100,8 +94,6 @@ async function initializeApp() {
     
     reactRoot.render(app);
     
-    console.log('Survey App: Application rendered successfully');
-    
   } catch (error) {
     console.error('Failed to initialize app:', error);
     showErrorBoundary('Failed to load the survey application. Please refresh the page.');
@@ -110,7 +102,6 @@ async function initializeApp() {
 
 // Start the application
 async function startApp() {
-  console.log('Survey App: Starting application...');
   await initializeApp();
 }
 

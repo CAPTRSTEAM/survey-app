@@ -85,12 +85,8 @@ export class ApiProvider {
     }
 
     useFallbackSurvey() {
-        console.log('🔍 useFallbackSurvey called!');
-        console.log('🔍 Loading sample survey automatically...');
         this.gameConfig = this.getSampleSurvey();
-        console.log('🔍 Sample survey loaded:', this.gameConfig);
         this.isReady = true;
-        console.log('🔍 API provider is ready, notifying listeners...');
         this.notifyListeners();
     }
 
