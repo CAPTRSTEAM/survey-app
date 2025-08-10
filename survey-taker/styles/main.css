@@ -272,6 +272,33 @@ body {
     font-style: italic;
 }
 
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: var(--space-12);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.loading-spinner {
+    font-size: var(--font-size-6xl);
+    margin-bottom: var(--space-6);
+    animation: spin 2s linear infinite;
+}
+
+.loading-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary-medium);
+    margin-bottom: var(--space-4);
+}
+
+.loading-message {
+    font-size: var(--font-size-lg);
+    color: var(--color-gray-600);
+    line-height: var(--line-height-relaxed);
+}
+
 /* Error Messages */
 .error-message {
     padding: var(--space-6);

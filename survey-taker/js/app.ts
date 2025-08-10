@@ -14,6 +14,33 @@ window.addEventListener('unhandledrejection', (event) => {
   showErrorBoundary('An unexpected error occurred. Please refresh the page.');
 });
 
+// Global message listener setup - ensure it's ready before any components
+// Store early CONFIG messages to deliver to ApiProvider when ready
+let earlyConfigMessage = null;
+let apiProviderInstance = null;
+
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'CONFIG') {
+    earlyConfigMessage = event.data;
+    
+    // If ApiProvider is already ready, deliver the message immediately
+    if (apiProviderInstance) {
+      apiProviderInstance.handleConfigMessage(event.data);
+    }
+  }
+});
+
+// Function to register ApiProvider and deliver any early messages
+function registerApiProvider(apiProvider) {
+  apiProviderInstance = apiProvider;
+  
+  // Deliver any early CONFIG message if we have one
+  if (earlyConfigMessage) {
+    apiProviderInstance.handleConfigMessage(earlyConfigMessage);
+    earlyConfigMessage = null; // Clear after delivery
+  }
+}
+
 function showErrorBoundary(message: string) {
   const errorBoundary = document.getElementById('error-boundary');
   const errorContent = errorBoundary?.querySelector('.error-content');
@@ -50,6 +77,9 @@ async function initializeApp() {
     // Create API provider
     const apiProvider = new ApiProvider();
     
+    // Register the API provider with the global message listener
+    registerApiProvider(apiProvider);
+    
     // Create ErrorBoundary component
     const ErrorBoundary = createErrorBoundary();
     
@@ -64,12 +94,10 @@ async function initializeApp() {
     const reactRoot = (window.ReactDOM as any).createRoot(root);
     
     // Render with error boundary
-    console.log('🔍 Creating SurveyApp component with apiProvider:', apiProvider);
     const app = window.React.createElement(ErrorBoundary, null,
       window.React.createElement(SurveyApp, { apiProvider })
     );
     
-    console.log('🔍 About to render app:', app);
     reactRoot.render(app);
     
     console.log('Survey App: Application rendered successfully');

@@ -9,9 +9,6 @@ import { useAutoSave } from '../hooks/use-auto-save.js';
 import { usePerformanceTracking, useRenderCount, useMemoryUsage } from '../hooks/use-performance-tracking.js';
 
 export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
-    console.log('🔍 SurveyApp component STARTING...');
-    console.log('🔍 SurveyApp component rendered with apiProvider:', apiProvider);
-    
     // Performance tracking
     usePerformanceTracking('SurveyApp');
     useRenderCount('SurveyApp');
@@ -28,8 +25,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     const fileInputRef = React.useRef(null as HTMLInputElement | null);
 
-    console.log('🔍 SurveyApp state:', { survey, currentSectionIndex, answers, isCompleted, appMode, error });
-
     // Custom hooks
     const dynamicStyles = useDynamicPositioning(currentSectionIndex);
     const { validateSurvey, validateAnswer } = useSurveyValidation();
@@ -39,13 +34,11 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Handle survey file upload
     const handleSurveyLoad = React.useCallback((surveyData: Survey) => {
-        console.log('🔍 handleSurveyLoad called with:', surveyData);
         try {
             // Validate survey structure
             const validationResult = validateSurvey(surveyData);
             if (validationResult.isValid) {
                 const processedSurvey = processSurveyStructure(surveyData);
-                console.log('🔍 Setting survey to:', processedSurvey);
                 setSurvey(processedSurvey);
                 setError(null);
                 
@@ -65,19 +58,18 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Process survey structure to handle sections
     const processSurveyStructure = React.useCallback((surveyData: Survey): Survey => {
-        console.log('🔍 processSurveyStructure called with:', surveyData);
-        if (!surveyData) return surveyData;
+        if (!surveyData) {
+            return surveyData;
+        }
         
         // Keep the original structure with sections for the new layout
         if (surveyData.sections && Array.isArray(surveyData.sections)) {
-            console.log('🔍 Survey already has sections, returning as-is');
             return surveyData;
         }
         
         // If survey has a flat questions array, convert to sections format
         if (surveyData.questions && Array.isArray(surveyData.questions)) {
-            console.log('🔍 Converting flat questions to sections format');
-            return {
+            const result = {
                 ...surveyData,
                 sections: [{
                     id: 'main-section',
@@ -86,6 +78,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                     questions: surveyData.questions
                 }]
             };
+            return result;
         }
         
         return surveyData;
@@ -93,7 +86,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Handle file selection
     const handleFileSelect = React.useCallback(async (file: File) => {
-        console.log('🔍 handleFileSelect called with file:', file);
         if (!file) return;
 
         // Validate file type
@@ -105,7 +97,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         try {
             const text = await file.text();
             const surveyData = JSON.parse(text);
-            console.log('🔍 Parsed survey data:', surveyData);
 
             // Basic validation
             if (!surveyData || typeof surveyData !== 'object') {
@@ -126,7 +117,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Handle file input change
     const handleFileInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log('🔍 handleFileInputChange called with:', e.target.files?.[0]);
         const file = e.target.files?.[0];
         if (file) {
             handleFileSelect(file);
@@ -135,7 +125,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Trigger file input
     const triggerFileInput = React.useCallback(() => {
-        console.log('🔍 triggerFileInput called');
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
@@ -143,37 +132,55 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Initialize app with API provider
     React.useEffect(() => {
-        console.log('🔍 useEffect for API provider called');
         try {
             // Check if running in iframe (platform mode)
             if (window.parent !== window) {
-                console.log('🔍 Setting appMode to platform');
                 setAppMode('platform');
                 
                 // Subscribe to API provider updates
                 apiProvider.subscribe((surveyConfig) => {
-                    console.log('🔍 API provider subscription callback with:', surveyConfig);
+                    
                     if (surveyConfig) {
                         // Validate survey structure
                         const validationResult = validateSurvey(surveyConfig);
+                        
                         if (validationResult.isValid) {
                             const processedSurvey = processSurveyStructure(surveyConfig);
                             setSurvey(processedSurvey);
                             setError(null);
                         } else {
+                            console.error('Survey validation failed:', validationResult.error);
                             setError(`Invalid survey configuration: ${validationResult.error}`);
                         }
+                    } else {
+                        console.warn('API provider callback received null/undefined surveyConfig');
                     }
                 });
 
                 // Send ready message to platform
-                window.parent.postMessage({
-                    type: 'SURVEY_APP_READY',
-                    message: 'Survey app is ready to receive configuration'
-                }, '*');
+                try {
+                    window.parent.postMessage({
+                        type: 'SURVEY_APP_READY',
+                        message: 'Survey app is ready to receive configuration'
+                    }, '*');
+                } catch (error) {
+                    console.error('Error sending message to parent:', error);
+                }
+                
+                // Also try sending to top window if different from parent
+                if (window.top && window.top !== window) {
+                    try {
+                        window.top.postMessage({
+                            type: 'SURVEY_APP_READY',
+                            message: 'Survey app is ready to receive configuration'
+                        }, '*');
+                    } catch (error) {
+                        console.error('Error sending message to top window:', error);
+                    }
+                }
+                
             } else {
                 // Standalone mode - show file upload or sample survey
-                console.log('🔍 Setting appMode to standalone');
                 setAppMode('standalone');
                 // Don't auto-load sample survey, let user choose
             }
@@ -184,12 +191,10 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     }, [apiProvider, validateSurvey, processSurveyStructure]);
 
     const handleAnswerChange = React.useCallback((questionId: string, value: any) => {
-        console.log('🔍 handleAnswerChange called:', { questionId, value });
         setAnswers((prev: SurveyAnswers) => ({ ...prev, [questionId]: value }));
     }, []);
 
     const handleComplete = React.useCallback(async () => {
-        console.log('🔍 handleComplete called');
         setIsSubmitting(true);
         
         try {
@@ -209,7 +214,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                 }, '*');
             }
             
-            console.log('Survey completed:', { surveyId: survey?.id, answers });
             setIsCompleted(true);
         } catch (error) {
             console.error('Error completing survey:', error);
@@ -231,10 +235,8 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     }, [survey, currentSectionIndex, answers, validateAnswer]);
 
     const handleNext = React.useCallback(() => {
-        console.log('🔍 handleNext called, currentSectionIndex:', currentSectionIndex);
         if (currentSectionIndex < (survey?.sections?.length || 0) - 1) {
             const newIndex = currentSectionIndex + 1;
-            console.log('🔍 Setting currentSectionIndex to:', newIndex);
             setCurrentSectionIndex(newIndex);
             
             // Scroll to top of the new section and focus on section title
@@ -253,9 +255,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     }, [currentSectionIndex, survey, handleComplete]);
 
     const handlePrevious = React.useCallback(() => {
-        console.log('🔍 handlePrevious called, currentSectionIndex:', currentSectionIndex);
         const newIndex = Math.max(0, currentSectionIndex - 1);
-        console.log('🔍 Setting currentSectionIndex to:', newIndex);
         setCurrentSectionIndex(newIndex);
         
         // Scroll to top of the new section and focus on section title
@@ -276,19 +276,49 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Show loading
     if (appMode === 'loading') {
-        console.log('🔍 Rendering loading screen');
         return React.createElement('div', { className: 'loading' }, 'Loading survey...');
     }
 
     // Show error
     if (error) {
-        console.log('🔍 Rendering error screen:', error);
         return React.createElement('div', { className: 'error-message' }, error);
+    }
+
+    // Show loading state for platform mode when survey is not yet loaded
+    if (appMode === 'platform' && !survey) {
+        return React.createElement('div', { className: 'survey-app' },
+            React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
+            
+            // Header for loading state
+            React.createElement('header', { className: 'survey-header' },
+                React.createElement('div', { className: 'header-content' },
+                    React.createElement('div', { className: 'header-brand' },
+                        React.createElement('img', { 
+                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
+                            alt: 'CAPTRS Logo',
+                            className: 'brand-logo'
+                        }),
+                        React.createElement('h1', { className: 'brand-title' }, 'Loading Survey...')
+                    )
+                )
+            ),
+            
+            // Loading content
+            React.createElement('main', { 
+                className: 'questions-container',
+                style: { paddingTop: 'calc(var(--header-height) + var(--space-8))' }
+            },
+                React.createElement('div', { className: 'loading-state' },
+                    React.createElement('div', { className: 'loading-spinner' }, '⏳'),
+                    React.createElement('h2', { className: 'loading-title' }, 'Loading Survey Configuration'),
+                    React.createElement('p', { className: 'loading-message' }, 'Please wait while we load your survey...')
+                )
+            )
+        );
     }
 
     // Show standalone mode with file upload options
     if (appMode === 'standalone' && !survey) {
-        console.log('🔍 Rendering standalone mode with file upload');
         return React.createElement('div', { className: 'survey-app' },
             React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
             
@@ -333,16 +363,15 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                     ),
                     error && React.createElement('div', { className: 'file-upload-error' },
                         React.createElement('span', { className: 'error-icon', 'aria-hidden': 'true' }, '⚠️'),
-                        React.createElement('span', null, error)
+                        React.createElement('div', null, error)
                     )
                 )
             )
         );
     }
 
-    // Show welcome screen
-    if (survey?.welcome && currentSectionIndex === -1) {
-        console.log('🔍 Rendering welcome screen');
+    // Show welcome screen - this must come BEFORE section rendering logic
+    if (currentSectionIndex === -1 && survey) {
         
         return React.createElement('div', { className: 'survey-app' },
             React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
@@ -356,7 +385,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                             alt: 'CAPTRS Logo',
                             className: 'brand-logo'
                         }),
-                        React.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
+                        React.createElement('h1', { className: 'brand-title' }, survey.title || 'CAPTRS Survey')
                     ),
                     React.createElement(SurveyProgress, {
                         survey,
@@ -372,12 +401,21 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                 style: { paddingTop: 'calc(var(--header-height) + var(--space-8))' }
             },
                 React.createElement('div', { className: 'welcome-screen' },
-                    React.createElement('h1', { className: 'survey-title' }, survey.welcome.title),
-                    React.createElement('p', { className: 'welcome-message' }, survey.welcome.message),
+                    survey.welcome ? (
+                        // Show welcome content if available
+                        React.createElement(React.Fragment, null,
+                            React.createElement('h1', { className: 'survey-title' }, survey.welcome.title),
+                            React.createElement('p', { className: 'welcome-message' }, survey.welcome.message)
+                        )
+                    ) : (
+                        // Show default welcome if no welcome property
+                        React.createElement(React.Fragment, null,
+                            React.createElement('h1', { className: 'survey-title' }, 'Welcome to the Survey'),
+                            React.createElement('p', { className: 'welcome-message' }, 'Click the button below to begin.')
+                        )
+                    ),
                     React.createElement('button', {
                         onClick: () => {
-                            console.log('🔍 Start Survey button clicked!');
-                            console.log('🔍 Setting currentSectionIndex from -1 to 0');
                             setCurrentSectionIndex(0);
                             
                             // Scroll to top when starting the survey and focus on section title
@@ -407,7 +445,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Show thank you screen
     if (survey?.thankYou && isCompleted) {
-        console.log('🔍 Rendering thank you screen');
         
         return React.createElement('div', { className: 'survey-app' },
             React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
@@ -451,9 +488,17 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     }
 
     // Get current section
+    
+    // Check if survey is still loading (platform mode)
+    if (appMode === 'platform' && !survey) {
+        return React.createElement('div', { className: 'loading-state' },
+            React.createElement('div', { className: 'loading-spinner' }),
+            React.createElement('p', null, 'Loading survey configuration...')
+        );
+    }
+    
     const currentSection = survey?.sections?.[currentSectionIndex];
     if (!currentSection) {
-        console.log('🔍 Current section not found, rendering error');
         return React.createElement('div', { className: 'error-message' },
             'Section not found. Please check the survey configuration.'
         );
@@ -462,7 +507,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     const isLastSection = currentSectionIndex === (survey?.sections?.length || 0) - 1;
 
     // Main survey interface
-    console.log('🔍 Rendering main survey interface');
     return React.createElement('div', { className: 'survey-app' },
         React.createElement('div', { className: 'mode-indicator' }, `Mode: ${appMode}`),
         
