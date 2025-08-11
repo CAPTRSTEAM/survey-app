@@ -1,11 +1,14 @@
-import { React } from '../utils/react-wrapper.js';
+import React from 'react';
 import type { SurveyAnswers } from '../types/index.js';
+
+// Ensure React is available for browser environment
+const ReactInstance = window.React || (window as any).React;
 
 const STORAGE_KEY = 'survey-answers';
 
 export const useAutoSave = (surveyId: string | null, answers: SurveyAnswers) => {
   // Load saved answers on mount
-  const loadSavedAnswers = React.useCallback((): SurveyAnswers => {
+  const loadSavedAnswers = ReactInstance.useCallback((): SurveyAnswers => {
     if (!surveyId) return {};
     
     try {
@@ -18,7 +21,7 @@ export const useAutoSave = (surveyId: string | null, answers: SurveyAnswers) => 
   }, [surveyId]);
 
   // Save answers to localStorage
-  const saveAnswers = React.useCallback((newAnswers: SurveyAnswers) => {
+  const saveAnswers = ReactInstance.useCallback((newAnswers: SurveyAnswers) => {
     if (!surveyId) return;
     
     try {
@@ -29,14 +32,14 @@ export const useAutoSave = (surveyId: string | null, answers: SurveyAnswers) => 
   }, [surveyId]);
 
   // Auto-save when answers change
-  React.useEffect(() => {
+  ReactInstance.useEffect(() => {
     if (surveyId && Object.keys(answers).length > 0) {
       saveAnswers(answers);
     }
   }, [answers, saveAnswers]);
 
   // Clear saved answers when survey changes
-  React.useEffect(() => {
+  ReactInstance.useEffect(() => {
     if (surveyId) {
       // Clear old saved answers when switching surveys
       const keys = Object.keys(localStorage);

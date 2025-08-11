@@ -65,7 +65,11 @@ async function initializeApp() {
   try {
     // Dynamically import components
     const { ApiProvider } = await import('./utils/api-provider.js');
-    const { SurveyApp } = await import('./components/survey-app.ts');
+    
+    // Import SurveyApp and ensure React is available
+    const surveyAppModule = await import('./components/survey-app.js');
+    const SurveyApp = surveyAppModule.SurveyApp;
+    
     const { createErrorBoundary } = await import('./components/error-boundary.js');
     
     // Create API provider

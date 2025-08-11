@@ -1,8 +1,11 @@
 import React from 'react';
 import type { Survey, ValidationResult, AnswerValue, QuestionType, SurveySection, SurveyQuestion } from '../types/index.js';
 
+// Ensure React is available for browser environment
+const ReactInstance = window.React || (window as any).React;
+
 export const useSurveyValidation = () => {
-    const validateSurvey = React.useCallback((surveyData: Survey): ValidationResult => {
+    const validateSurvey = ReactInstance.useCallback((surveyData: Survey): ValidationResult => {
         try {
             if (!surveyData || typeof surveyData !== 'object') {
                 return { isValid: false, error: 'Survey data is not a valid object' };
@@ -53,7 +56,7 @@ export const useSurveyValidation = () => {
         }
     }, []);
 
-    const validateSection = React.useCallback((section: SurveySection, _index: number): ValidationResult => {
+    const validateSection = ReactInstance.useCallback((section: SurveySection, _index: number): ValidationResult => {
         if (!section || typeof section !== 'object') {
             return { isValid: false, error: 'Section is not a valid object' };
         }
@@ -86,7 +89,7 @@ export const useSurveyValidation = () => {
         return { isValid: true };
     }, []);
 
-    const validateQuestion = React.useCallback((question: SurveyQuestion, _index: number): ValidationResult => {
+    const validateQuestion = ReactInstance.useCallback((question: SurveyQuestion, _index: number): ValidationResult => {
         if (!question || typeof question !== 'object') {
             return { isValid: false, error: 'Question is not a valid object' };
         }
@@ -136,7 +139,7 @@ export const useSurveyValidation = () => {
         return { isValid: true };
     }, []);
 
-    const validateAnswer = React.useCallback((answer: AnswerValue | undefined, type: QuestionType, required?: boolean): boolean => {
+    const validateAnswer = ReactInstance.useCallback((answer: AnswerValue | undefined, type: QuestionType, required?: boolean, totalRankingOptions?: number): boolean => {
         // If not required, any answer (including undefined/null) is valid
         if (!required) {
             return true;
@@ -164,7 +167,61 @@ export const useSurveyValidation = () => {
                 return typeof answer === 'number' && answer > 0 && answer <= 5;
             
             case 'ranking':
-                return typeof answer === 'object' && answer !== null && Object.keys(answer).length > 0;
+                // For ranking questions, we need to check if all options are ranked
+                if (typeof answer !== 'object' || answer === null) {
+                    console.log('Ranking validation: answer is not an object or null', answer);
+                    return false;
+                }
+                
+                const rankingAnswer = answer as Record<string, number>;
+                const rankedOptions = Object.keys(rankingAnswer);
+                const rankedCount = rankedOptions.length;
+                
+                console.log('Ranking validation debug:', {
+                    rankedCount,
+                    totalRankingOptions,
+                    answer: rankingAnswer,
+                    required
+                });
+                
+                // For ranking questions, we ALWAYS require all options to be ranked
+                // This is the nature of ranking - you can't have a partial ranking
+                if (totalRankingOptions !== undefined && rankedCount !== totalRankingOptions) {
+                    console.log('Ranking validation: not all options ranked', rankedCount, '!=', totalRankingOptions);
+                    return false;
+                }
+                
+                // Check if we have any rankings
+                if (rankedCount === 0) {
+                    console.log('Ranking validation: no options ranked');
+                    return false;
+                }
+                
+                // Check if all ranked values are valid positive numbers
+                const rankValues = Object.values(rankingAnswer);
+                const hasValidRanks = rankValues.every(rank => typeof rank === 'number' && rank > 0);
+                
+                if (!hasValidRanks) {
+                    console.log('Ranking validation: invalid rank values', rankValues);
+                    return false;
+                }
+                
+                // Check if ranks are sequential (1, 2, 3, etc.) without gaps
+                const sortedRanks = [...new Set(rankValues)].sort((a, b) => a - b);
+                const maxRank = Math.max(...rankValues);
+                
+                // All ranks should be sequential starting from 1
+                // and we should have ranks from 1 to maxRank without gaps
+                const expectedRanks = Array.from({ length: maxRank }, (_, i) => i + 1);
+                
+                const isSequential = JSON.stringify(sortedRanks) === JSON.stringify(expectedRanks);
+                console.log('Ranking validation: sequential check', {
+                    sortedRanks,
+                    expectedRanks,
+                    isSequential
+                });
+                
+                return isSequential;
             
             default:
                 return !!answer;

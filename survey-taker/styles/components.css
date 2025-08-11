@@ -659,6 +659,13 @@
     color: var(--color-gray-500);
 }
 
+.dragon-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: brightness(0.7); /* Make it slightly darker to match the footer icon color */
+}
+
 /* Spacers */
 .fixed-header-spacer {
     height: calc(var(--header-height) + var(--safe-area-top));

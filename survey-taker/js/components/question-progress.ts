@@ -1,5 +1,8 @@
-import { React } from '../utils/react-wrapper.js';
+import React from 'react';
 import type { SurveySection, SurveyAnswers, QuestionProgress as QuestionProgressType, DynamicStyles } from '../types/index.js';
+
+// Ensure React is available for browser environment
+const ReactInstance = window.React || (window as any).React;
 
 interface QuestionProgressProps {
   currentSection: SurveySection;
@@ -7,19 +10,19 @@ interface QuestionProgressProps {
   dynamicStyles: DynamicStyles;
 }
 
-export const QuestionProgress: React.FC<QuestionProgressProps> = ({ 
-  currentSection, 
-  answers, 
-  dynamicStyles 
+export const QuestionProgress: React.FC<QuestionProgressProps> = ({
+  currentSection,
+  answers,
+  dynamicStyles
 }) => {
   // Calculate question progress
-  const questionProgress: QuestionProgressType = React.useMemo(() => {
+  const questionProgress: QuestionProgressType = ReactInstance.useMemo(() => {
     const totalQuestions = currentSection.questions.length;
     const answeredQuestions = currentSection.questions.filter(q => {
       const answer = answers[q.id];
       // Check if there's actually an answer, not just if it's valid
       if (answer === undefined || answer === null) return false;
-      
+
       // For different question types, check if there's meaningful content
       switch (q.type) {
         case 'text':
@@ -46,18 +49,18 @@ export const QuestionProgress: React.FC<QuestionProgressProps> = ({
     };
   }, [currentSection, answers]);
 
-  return React.createElement('div', { 
+  return ReactInstance.createElement('div', {
     className: 'question-progress-container',
-    style: { 
+    style: {
       top: dynamicStyles.questionProgressTop
     }
   },
-    React.createElement('div', { className: 'question-progress-header' },
-      React.createElement('div', { className: 'question-progress-count' },
+    ReactInstance.createElement('div', { className: 'question-progress-header' },
+      ReactInstance.createElement('div', { className: 'question-progress-count' },
         `Question ${questionProgress.current} of ${questionProgress.total}`
       )
     ),
-    React.createElement('div', { 
+    ReactInstance.createElement('div', {
       className: 'question-progress-bar',
       role: 'progressbar',
       'aria-valuenow': questionProgress.percentage,
@@ -65,9 +68,9 @@ export const QuestionProgress: React.FC<QuestionProgressProps> = ({
       'aria-valuemax': 100,
       'aria-label': `Question progress: ${questionProgress.percentage}%`
     },
-      React.createElement('div', { 
+      ReactInstance.createElement('div', {
         className: 'question-progress-fill',
-        style: { 
+        style: {
           width: `${Math.max(questionProgress.percentage, 0)}%`
         }
       })

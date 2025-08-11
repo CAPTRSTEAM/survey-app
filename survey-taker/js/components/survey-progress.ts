@@ -1,5 +1,8 @@
-import { React } from '../utils/react-wrapper.js';
-import type { Survey, SectionProgress } from '../types/index.js';
+import React from 'react';
+import type { Survey, SurveyAnswers, SectionProgress } from '../types/index.js';
+
+// Ensure React is available for browser environment
+const ReactInstance = window.React || (window as any).React;
 
 interface SurveyProgressProps {
   survey: Survey;
@@ -76,12 +79,12 @@ const determineSectionStatus = (
   return 'pending';
 };
 
-export const SurveyProgress: React.FC<SurveyProgressProps> = ({ 
+export const SurveyProgress: React.FC<SurveyProgressProps> = ({
   survey, 
   currentSectionIndex, 
   isCompleted 
 }) => {
-  const sectionProgress = React.useMemo((): SectionProgress[] => {
+  const sectionProgress = ReactInstance.useMemo((): SectionProgress[] => {
     if (!survey?.sections) {
       return [];
     }
@@ -95,10 +98,10 @@ export const SurveyProgress: React.FC<SurveyProgressProps> = ({
     }));
   }, [survey, currentSectionIndex, isCompleted]);
 
-  return React.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
+  return ReactInstance.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },
     sectionProgress.map((section: any, index: number) =>
-      React.createElement(React.Fragment, { key: section.id },
-        React.createElement('div', {
+      ReactInstance.createElement(ReactInstance.Fragment, { key: section.id },
+        ReactInstance.createElement('div', {
           className: `progress-step ${section.status === 'active' ? 'active' : ''} ${section.status === 'completed' ? 'completed' : ''}`,
           title: section.title,
           'aria-label': `${section.title} - ${section.status}`,
@@ -106,7 +109,7 @@ export const SurveyProgress: React.FC<SurveyProgressProps> = ({
           'data-number': section.sectionIndex !== undefined ? section.sectionIndex + 1 : undefined
         }, section.sectionIndex !== undefined ? `Q${section.sectionIndex + 1}` : section.label),
         index < sectionProgress.length - 1 && 
-          React.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
+          ReactInstance.createElement('div', { className: 'progress-connector', 'aria-hidden': 'true' })
       )
     )
   );

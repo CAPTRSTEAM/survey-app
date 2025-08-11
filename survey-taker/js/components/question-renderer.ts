@@ -1,5 +1,8 @@
 import React from 'react';
-import type { QuestionRendererProps } from '../types/index.js';
+import type { QuestionRendererProps, QuestionType, AnswerValue } from '../types/index.js';
+
+// Ensure React is available for browser environment
+const ReactInstance = window.React || (window as any).React;
 
 export const QuestionRenderer: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled = false }) => {
     const questionType = question.type || 'text';
@@ -8,21 +11,21 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({ question, an
 
     switch (questionType) {
         case 'text':
-            return React.createElement(TextQuestion, questionProps);
+            return ReactInstance.createElement(TextQuestion, questionProps);
         case 'radio':
-            return React.createElement(RadioQuestion, questionProps);
+            return ReactInstance.createElement(RadioQuestion, questionProps);
         case 'likert':
-            return React.createElement(LikertQuestion, questionProps);
+            return ReactInstance.createElement(LikertQuestion, questionProps);
         case 'yesno':
-            return React.createElement(YesNoQuestion, questionProps);
+            return ReactInstance.createElement(YesNoQuestion, questionProps);
         case 'rating':
-            return React.createElement(RatingQuestion, questionProps);
+            return ReactInstance.createElement(RatingQuestion, questionProps);
         case 'checkbox':
-            return React.createElement(CheckboxQuestion, questionProps);
+            return ReactInstance.createElement(CheckboxQuestion, questionProps);
         case 'ranking':
-            return React.createElement(RankingQuestion, questionProps);
+            return ReactInstance.createElement(RankingQuestion, questionProps);
         default:
-            return React.createElement('div', { className: 'error-message' },
+            return ReactInstance.createElement('div', { className: 'error-message' },
                 `Unsupported question type: ${questionType}`
             );
     }
@@ -30,8 +33,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({ question, an
 
 // Text Question Component
 const TextQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('textarea', {
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('textarea', {
             className: 'text-input',
             value: (answer as string) || '',
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(question.id, e.target.value),
@@ -41,7 +44,7 @@ const TextQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCha
             'aria-describedby': question.description ? `${question.id}-desc` : undefined,
             'aria-labelledby': `${question.id}-label`
         }),
-        question.description && React.createElement('div', {
+        question.description && ReactInstance.createElement('div', {
             id: `${question.id}-desc`,
             className: 'question-description'
         }, question.description)
@@ -50,21 +53,21 @@ const TextQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCha
 
 // Radio Question Component
 const RadioQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('div', { 
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('div', { 
             className: 'option-group option-group--grid',
             role: 'radiogroup',
             'aria-labelledby': `${question.id}-label`
         },
             question.options?.map((option) =>
-                React.createElement('label', {
+                ReactInstance.createElement('label', {
                     key: option,
                     className: `option-item ${answer === option ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     role: 'radio',
                     'aria-checked': answer === option,
                     tabIndex: disabled ? -1 : 0
                 },
-                    React.createElement('input', {
+                    ReactInstance.createElement('input', {
                         type: 'radio',
                         name: question.id,
                         value: option,
@@ -74,7 +77,7 @@ const RadioQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCh
                         disabled,
                         className: 'option-input'
                     }),
-                    React.createElement('span', { className: 'option-label' }, option)
+                    ReactInstance.createElement('span', { className: 'option-label' }, option)
                 )
             )
         )
@@ -83,22 +86,22 @@ const RadioQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCh
 
 // Likert Question Component
 const LikertQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('div', { className: 'likert-scale' },
-            React.createElement('div', { 
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('div', { className: 'likert-scale' },
+            ReactInstance.createElement('div', { 
                 className: 'likert-options',
                 role: 'radiogroup',
                 'aria-labelledby': `${question.id}-label`
             },
                 question.options?.map((option) =>
-                    React.createElement('label', {
+                    ReactInstance.createElement('label', {
                         key: option,
                         className: `likert-option ${answer === option ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                         role: 'radio',
                         'aria-checked': answer === option,
                         tabIndex: disabled ? -1 : 0
                     },
-                        React.createElement('input', {
+                        ReactInstance.createElement('input', {
                             type: 'radio',
                             name: question.id,
                             value: option,
@@ -108,7 +111,7 @@ const LikertQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
                             disabled,
                             className: 'likert-input'
                         }),
-                        React.createElement('span', { className: 'likert-label' }, option)
+                        ReactInstance.createElement('span', { className: 'likert-label' }, option)
                     )
                 )
             )
@@ -118,21 +121,21 @@ const LikertQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
 
 // Yes/No Question Component
 const YesNoQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('div', { 
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('div', { 
             className: 'option-group option-group--grid',
             role: 'radiogroup',
             'aria-labelledby': `${question.id}-label`
         },
             ['Yes', 'No'].map((option) =>
-                React.createElement('label', {
+                ReactInstance.createElement('label', {
                     key: option,
                     className: `option-item ${answer === option ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     role: 'radio',
                     'aria-checked': answer === option,
                     tabIndex: disabled ? -1 : 0
                 },
-                    React.createElement('input', {
+                    ReactInstance.createElement('input', {
                         type: 'radio',
                         name: question.id,
                         value: option,
@@ -142,7 +145,7 @@ const YesNoQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCh
                         disabled,
                         className: 'option-input'
                     }),
-                    React.createElement('span', { className: 'option-label' }, option)
+                    ReactInstance.createElement('span', { className: 'option-label' }, option)
                 )
             )
         )
@@ -154,8 +157,8 @@ const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
     const ratings = [1, 2, 3, 4, 5];
     const currentAnswer = typeof answer === 'number' ? answer : undefined;
     
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('div', { 
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('div', { 
             className: 'rating-scale',
             role: 'radiogroup',
             'aria-labelledby': `${question.id}-label`
@@ -163,14 +166,14 @@ const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
             ratings.map((rating) => {
                 // A star should be highlighted if it's less than or equal to the selected rating
                 const isHighlighted = currentAnswer && rating <= currentAnswer;
-                return React.createElement('label', {
+                return ReactInstance.createElement('label', {
                     key: rating,
                     className: `rating-option ${isHighlighted ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     role: 'radio',
                     'aria-checked': currentAnswer === rating,
                     tabIndex: disabled ? -1 : 0
                 },
-                    React.createElement('input', {
+                    ReactInstance.createElement('input', {
                         type: 'radio',
                         name: question.id,
                         value: rating.toString(),
@@ -180,7 +183,7 @@ const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
                         disabled,
                         className: 'rating-input'
                     }),
-                    React.createElement('span', { className: 'rating-star' }, '★')
+                    ReactInstance.createElement('span', { className: 'rating-star' }, '★')
                 );
             })
         )
@@ -198,19 +201,19 @@ const CheckboxQuestion: React.FC<QuestionRendererProps> = ({ question, answer, o
         onChange(question.id, newAnswer);
     };
 
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('div', { 
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('div', { 
             className: 'option-group option-group--grid',
             role: 'group',
             'aria-labelledby': `${question.id}-label`
         },
             question.options?.map((option) =>
-                React.createElement('label', {
+                ReactInstance.createElement('label', {
                     key: option,
                     className: `option-item ${currentAnswer.includes(option) ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     tabIndex: disabled ? -1 : 0
                 },
-                    React.createElement('input', {
+                    ReactInstance.createElement('input', {
                         type: 'checkbox',
                         name: question.id,
                         value: option,
@@ -220,7 +223,7 @@ const CheckboxQuestion: React.FC<QuestionRendererProps> = ({ question, answer, o
                         disabled,
                         className: 'option-input'
                     }),
-                    React.createElement('span', { className: 'option-label' }, option)
+                    ReactInstance.createElement('span', { className: 'option-label' }, option)
                 )
             )
         )
@@ -232,11 +235,8 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     const currentAnswer = typeof answer === 'object' && answer !== null ? answer as Record<string, number> : {};
     const totalOptions = question.options?.length || 0;
     
-    // Use window.React instead of importing React directly
-    const React = (window as any).React;
-    
-    // Use React state to trigger re-renders when rankings change
-    const [localRankings, setLocalRankings] = React.useState<Record<string, number>>(currentAnswer);
+    // Use a simple variable instead of React state to avoid useState issues
+    let localRankings = currentAnswer;
     
     const handleItemClick = (option: string) => {
         if (disabled) return;
@@ -244,14 +244,11 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
         const nextRank = getNextAvailableRank();
         const newAnswer = { ...localRankings, [option]: nextRank };
         
-        // Update local state immediately to show the ranking number
-        setLocalRankings(newAnswer);
+        // Update local variable
+        localRankings = newAnswer;
         
-        // Only call onChange (mark as complete) if all options are ranked
-        if (Object.keys(newAnswer).length === totalOptions) {
-            onChange(question.id, newAnswer);
-        }
-        // For partial answers, don't call onChange - just update local state for display
+        // Always call onChange to update the parent state for validation
+        onChange(question.id, newAnswer);
     };
 
     const handleItemRemove = (option: string) => {
@@ -260,10 +257,10 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
         const newAnswer = { ...localRankings };
         delete newAnswer[option];
         
-        // Update local state immediately
-        setLocalRankings(newAnswer);
+        // Update local variable
+        localRankings = newAnswer;
         
-        // When removing a ranking, always call onChange to indicate the question is no longer complete
+        // Always call onChange to update the parent state for validation
         onChange(question.id, newAnswer);
     };
 
@@ -292,36 +289,36 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     // Check if all options are ranked
     const isComplete = Object.keys(localRankings).length === totalOptions;
 
-    return React.createElement('div', { className: 'form-control' },
-        React.createElement('div', { className: 'ranking-container' },
+    return ReactInstance.createElement('div', { className: 'form-control' },
+        ReactInstance.createElement('div', { className: 'ranking-container' },
             // Show completion status
-            totalOptions > 0 && React.createElement('div', { 
+            totalOptions > 0 && ReactInstance.createElement('div', { 
                 className: `ranking-status ${isComplete ? 'complete' : 'incomplete'}` 
             },
                 isComplete 
                     ? `All ${totalOptions} options ranked`
                     : `${Object.keys(localRankings).length} of ${totalOptions} options ranked`
             ),
-            React.createElement('div', { className: 'ranking-list' },
+            ReactInstance.createElement('div', { className: 'ranking-list' },
                 question.options?.map((option) => {
                     const isRanked = getRankForOption(option) > 0;
                     const rankNumber = getRankForOption(option);
-                    return React.createElement('div', {
+                    return ReactInstance.createElement('div', {
                         key: option,
                         className: `ranking-item ${isRanked ? 'ranked' : ''} ${disabled ? 'disabled' : ''}`,
                         onClick: () => isRanked ? handleItemRemove(option) : handleItemClick(option),
                         tabIndex: disabled ? -1 : 0
                     },
                         // Ranking circle on the left
-                        React.createElement('div', { 
+                        ReactInstance.createElement('div', { 
                             className: `ranking-circle ${isRanked ? 'filled' : ''}` 
                         },
                             isRanked ? rankNumber : ''
                         ),
                         // Option text
-                        React.createElement('span', { className: 'ranking-option' }, option),
+                        ReactInstance.createElement('span', { className: 'ranking-option' }, option),
                         // Remove button for ranked items
-                        isRanked && React.createElement('button', {
+                        isRanked && ReactInstance.createElement('button', {
                             type: 'button',
                             className: 'ranking-remove',
                             onClick: (e: React.MouseEvent<HTMLButtonElement>) => {

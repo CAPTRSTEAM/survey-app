@@ -1,13 +1,16 @@
 import React from 'react';
 import type { DynamicStyles } from '../types/index.js';
 
+// Ensure React is available for browser environment
+const ReactInstance = window.React || (window as any).React;
+
 export const useDynamicPositioning = (currentSectionIndex: number): DynamicStyles => {
-    const [dynamicStyles, setDynamicStyles] = React.useState<DynamicStyles>({
+    const [dynamicStyles, setDynamicStyles] = ReactInstance.useState<DynamicStyles>({
         questionProgressTop: '144px',
         questionsPaddingTop: '204px'
     });
 
-    React.useEffect(() => {
+    ReactInstance.useEffect(() => {
         let resizeObserver: ResizeObserver | undefined;
         let mutationObserver: MutationObserver | undefined;
 
