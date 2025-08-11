@@ -21,17 +21,11 @@ export class ApiProvider {
 
     handleConfigMessage(data) {
         try {
-            console.log('handleConfigMessage received data:', data);
-            
             // Extract platform configuration
             const { token, url, exerciseId, appInstanceId, survey, surveyConfig } = data;
             
-            console.log('Extracted platform config:', { token: !!token, url: !!url, exerciseId: !!exerciseId, appInstanceId: !!appInstanceId });
-            
             // Store platform configuration for later use in createAppData
             this.platformConfig = { token, url, exerciseId, appInstanceId };
-            
-            console.log('Stored platformConfig:', this.platformConfig);
             
             // First, check if survey data is directly in the CONFIG message
             if (survey && this.isValidSurvey(survey)) {
@@ -286,20 +280,9 @@ export class ApiProvider {
      */
     async createAppData(surveyData) {
         try {
-            console.log('createAppData called with surveyData:', surveyData);
-            console.log('Current platformConfig:', this.platformConfig);
-            
             // Check if we have the required platform configuration
             if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
-                const errorMsg = 'Platform configuration not available. Cannot save survey data.';
-                console.error(errorMsg, {
-                    hasPlatformConfig: !!this.platformConfig,
-                    hasToken: this.platformConfig?.token ? 'Yes' : 'No',
-                    hasUrl: this.platformConfig?.url ? 'Yes' : 'No',
-                    hasExerciseId: this.platformConfig?.exerciseId ? 'Yes' : 'No',
-                    hasAppInstanceId: this.platformConfig?.appInstanceId ? 'Yes' : 'No'
-                });
-                throw new Error(errorMsg);
+                throw new Error('Platform configuration not available. Cannot save survey data.');
             }
 
             const { token, url, exerciseId, appInstanceId } = this.platformConfig;
@@ -321,8 +304,6 @@ export class ApiProvider {
                 })
             };
 
-            console.log('Using /api/gameData endpoint with payload:', payload);
-
             // Make the API call to save the survey data using the existing /api/gameData endpoint
             const response = await fetch(`${url}/api/gameData`, {
                 method: 'POST',
@@ -339,7 +320,6 @@ export class ApiProvider {
             }
 
             const result = await response.json();
-            console.log('Survey data saved successfully via /api/gameData:', result);
             return result;
 
         } catch (error) {
@@ -371,8 +351,6 @@ export class ApiProvider {
             const appInstanceId = options.appInstanceId || configAppInstanceId;
             const surveyId = options.surveyId;
 
-            console.log('Using /api/gameData endpoint to retrieve data');
-
             // Make the API call to retrieve the survey data using the existing /api/gameData endpoint
             const response = await fetch(`${url}/api/gameData`, {
                 method: 'GET',
@@ -387,7 +365,6 @@ export class ApiProvider {
             }
 
             const result = await response.json();
-            console.log('Survey data retrieved successfully via /api/gameData:', result);
             
             // Filter by surveyId if provided (since the endpoint returns all game data)
             if (surveyId && result.gameData) {

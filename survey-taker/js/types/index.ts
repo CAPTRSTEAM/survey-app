@@ -148,8 +148,6 @@ export interface ApiProvider {
     appInstanceId?: string;
     surveyId?: string;
   }) => Promise<any>;
-  // Add platformConfig for debugging purposes
-  platformConfig?: PlatformConfig;
 }
 
 export interface PlatformConfig {
