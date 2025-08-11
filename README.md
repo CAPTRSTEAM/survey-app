@@ -98,12 +98,12 @@ For detailed documentation, see [survey-taker/README.md](./survey-taker/README.m
 1. **Create Survey**: Use the Survey Builder to create a new survey
    - Follow the 5-step wizard to configure survey details
    - Add sections and questions as needed
-   - Export the survey as a JSON file
+   - Export the survey as a JSON file to you PC
 
 2. **Deploy Survey**: Use the Survey Taker to administer the survey
-   - Upload the survey JSON to the platform
-   - Configure platform settings
-   - Share the survey link with participants
+   - Create a new survery app configuration
+   - Upload the survey JSON to the new configuration
+   - Add the survey taker app to the desired exercise with the new configuration
 
 3. **Collect Responses**: The Survey Taker handles response collection
    - Participants complete surveys through the web interface
@@ -191,7 +191,7 @@ The Survey Builder is designed for local use and development. Builds can be depl
 
 The Survey Taker includes a deployment package (`survey-taker-production-v2.zip`) ready for platform deployment:
 
-1. Upload `survey-taker-production-v2.zip` to the platform CMS
+1. Upload `survey-taker-spa.zip` to the platform CMS
 2. Configure survey data in the platform
 3. The app automatically fetches survey configuration
 4. If API fails, it gracefully falls back to sample survey
