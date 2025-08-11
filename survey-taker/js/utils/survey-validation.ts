@@ -169,7 +169,6 @@ export const useSurveyValidation = () => {
             case 'ranking':
                 // For ranking questions, we need to check if all options are ranked
                 if (typeof answer !== 'object' || answer === null) {
-                    console.log('Ranking validation: answer is not an object or null', answer);
                     return false;
                 }
                 
@@ -177,23 +176,14 @@ export const useSurveyValidation = () => {
                 const rankedOptions = Object.keys(rankingAnswer);
                 const rankedCount = rankedOptions.length;
                 
-                console.log('Ranking validation debug:', {
-                    rankedCount,
-                    totalRankingOptions,
-                    answer: rankingAnswer,
-                    required
-                });
-                
                 // For ranking questions, we ALWAYS require all options to be ranked
                 // This is the nature of ranking - you can't have a partial ranking
                 if (totalRankingOptions !== undefined && rankedCount !== totalRankingOptions) {
-                    console.log('Ranking validation: not all options ranked', rankedCount, '!=', totalRankingOptions);
                     return false;
                 }
                 
                 // Check if we have any rankings
                 if (rankedCount === 0) {
-                    console.log('Ranking validation: no options ranked');
                     return false;
                 }
                 
@@ -202,7 +192,6 @@ export const useSurveyValidation = () => {
                 const hasValidRanks = rankValues.every(rank => typeof rank === 'number' && rank > 0);
                 
                 if (!hasValidRanks) {
-                    console.log('Ranking validation: invalid rank values', rankValues);
                     return false;
                 }
                 
@@ -215,11 +204,6 @@ export const useSurveyValidation = () => {
                 const expectedRanks = Array.from({ length: maxRank }, (_, i) => i + 1);
                 
                 const isSequential = JSON.stringify(sortedRanks) === JSON.stringify(expectedRanks);
-                console.log('Ranking validation: sequential check', {
-                    sortedRanks,
-                    expectedRanks,
-                    isSequential
-                });
                 
                 return isSequential;
             

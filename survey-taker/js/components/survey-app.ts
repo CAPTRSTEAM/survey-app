@@ -32,10 +32,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     const dynamicStyles = useDynamicPositioning(currentSectionIndex);
     const { validateSurvey, validateAnswer } = useSurveyValidation();
     
-    // Debug: Log the validation function
-    console.log('validateAnswer function:', validateAnswer);
-    console.log('validateAnswer.toString():', validateAnswer.toString());
-    
+
     // Auto-save functionality
     const { loadSavedAnswers, clearSavedAnswers } = useAutoSave(survey?.id || null, answers);
 
@@ -220,7 +217,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                 try {
                     // Try to save survey data to database using createAppData
                     await apiProvider.createAppData(surveyData);
-                    console.log('Survey data saved to database successfully');
+            
                 } catch (dbError) {
                     console.warn('Failed to save to database, falling back to postMessage:', dbError);
                     // Fallback to postMessage if database save fails
@@ -250,25 +247,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             // For ranking questions, pass the total number of options to validate properly
             if (q.type === 'ranking') {
                 const totalOptions = q.options?.length;
-                console.log('canNavigateNext - ranking question:', {
-                    questionId: q.id,
-                    answer,
-                    answerKeys: answer ? Object.keys(answer) : 'undefined',
-                    answerValues: answer ? Object.values(answer) : 'undefined',
-                    totalOptions,
-                    required: q.required
-                });
-                
-                // Debug: Log the function call
-                console.log('About to call validateAnswer with:', {
-                    answer,
-                    type: q.type,
-                    required: q.required,
-                    totalOptions
-                });
-                
                 const isValid = validateAnswer(answer, q.type, q.required, totalOptions);
-                console.log('canNavigateNext - ranking validation result:', isValid);
                 return isValid;
             }
             return validateAnswer(answer, q.type, q.required);
