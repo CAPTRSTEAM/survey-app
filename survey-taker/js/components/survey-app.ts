@@ -436,8 +436,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                         style: { marginTop: 'var(--space-8)' }
                     }, 'Start Survey'),
                     survey.settings?.branding && ReactInstance.createElement('div', { className: 'branding' },
-                        survey.settings.branding.companyName && 
-                            ReactInstance.createElement('div', { className: 'company-name' }, survey.settings.branding.companyName),
                         survey.settings.branding.poweredBy && 
                             ReactInstance.createElement('div', { className: 'powered-by' }, survey.settings.branding.poweredBy)
                     )
@@ -475,8 +473,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                     ReactInstance.createElement('h1', { className: 'survey-title' }, survey.thankYou.title),
                     ReactInstance.createElement('p', { className: 'thank-you-message' }, survey.thankYou.message),
                     survey.settings?.branding && ReactInstance.createElement('div', { className: 'branding' },
-                        survey.settings.branding.companyName && 
-                            ReactInstance.createElement('div', { className: 'company-name' }, survey.settings.branding.companyName),
                         survey.settings.branding.poweredBy && 
                             ReactInstance.createElement('div', { className: 'powered-by' }, survey.settings.branding.poweredBy)
                     )
