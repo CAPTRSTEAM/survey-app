@@ -232,40 +232,50 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     const currentAnswer = typeof answer === 'object' && answer !== null ? answer as Record<string, number> : {};
     const totalOptions = question.options?.length || 0;
     
+    // Use window.React instead of importing React directly
+    const React = (window as any).React;
+    
+    // Use React state to trigger re-renders when rankings change
+    const [localRankings, setLocalRankings] = React.useState<Record<string, number>>(currentAnswer);
+    
     const handleItemClick = (option: string) => {
         if (disabled) return;
         
         const nextRank = getNextAvailableRank();
-        const newAnswer = { ...currentAnswer, [option]: nextRank };
+        const newAnswer = { ...localRankings, [option]: nextRank };
         
-        // Only mark as complete if all options are ranked
+        // Update local state immediately to show the ranking number
+        setLocalRankings(newAnswer);
+        
+        // Only call onChange (mark as complete) if all options are ranked
         if (Object.keys(newAnswer).length === totalOptions) {
             onChange(question.id, newAnswer);
-        } else {
-            // Store partial answer but don't mark as complete
-            onChange(question.id, newAnswer);
         }
+        // For partial answers, don't call onChange - just update local state for display
     };
 
     const handleItemRemove = (option: string) => {
         if (disabled) return;
         
-        const newAnswer = { ...currentAnswer };
+        const newAnswer = { ...localRankings };
         delete newAnswer[option];
         
-        // When removing a ranking, the question is no longer complete
+        // Update local state immediately
+        setLocalRankings(newAnswer);
+        
+        // When removing a ranking, always call onChange to indicate the question is no longer complete
         onChange(question.id, newAnswer);
     };
 
     const getRankForOption = (option: string): number => {
-        return currentAnswer[option] || 0;
+        return localRankings[option] || 0;
     };
 
     const getNextAvailableRank = (): number => {
         const maxRank = totalOptions;
         if (maxRank === 0) return 1;
         
-        const ranks = Object.values(currentAnswer);
+        const ranks = Object.values(localRankings);
         if (ranks.length === 0) return 1;
         
         // Find the next available rank within the valid range
@@ -280,7 +290,7 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     };
 
     // Check if all options are ranked
-    const isComplete = Object.keys(currentAnswer).length === totalOptions;
+    const isComplete = Object.keys(localRankings).length === totalOptions;
 
     return React.createElement('div', { className: 'form-control' },
         React.createElement('div', { className: 'ranking-container' },
@@ -290,7 +300,7 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
             },
                 isComplete 
                     ? `All ${totalOptions} options ranked`
-                    : `${Object.keys(currentAnswer).length} of ${totalOptions} options ranked`
+                    : `${Object.keys(localRankings).length} of ${totalOptions} options ranked`
             ),
             React.createElement('div', { className: 'ranking-list' },
                 question.options?.map((option) => {
@@ -319,7 +329,7 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
                                 handleItemRemove(option);
                             },
                             disabled,
-                            'aria-label': `Remove ${option} from ranking`
+                            'aria-label': `Remove ranking for ${option}`
                         }, '×')
                     );
                 })
