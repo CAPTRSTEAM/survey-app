@@ -236,36 +236,115 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     // Use a simple variable instead of React state to avoid useState issues
     let localRankings = currentAnswer;
     
+    // Drag and drop state variables
+    let draggedOption: string | null = null;
+    let draggedOverOption: string | null = null;
+    
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, option: string) => {
+        if (disabled) return;
+        draggedOption = option;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', option);
+        
+        // Add visual feedback
+        const target = e.currentTarget as HTMLElement;
+        target.style.opacity = '0.5';
+        target.style.transform = 'rotate(2deg)';
+    };
+    
+    const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+        if (disabled) return;
+        draggedOption = null;
+        draggedOverOption = null;
+        
+        // Remove visual feedback
+        const target = e.currentTarget as HTMLElement;
+        target.style.opacity = '';
+        target.style.transform = '';
+        
+        // Remove drag-over styling from all items
+        const allItems = document.querySelectorAll('.ranking-item');
+        allItems.forEach(item => {
+            item.classList.remove('drag-over');
+        });
+    };
+    
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>, option: string) => {
+        if (disabled || !draggedOption || draggedOption === option) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        draggedOverOption = option;
+        
+        // Add visual feedback
+        const target = e.currentTarget as HTMLElement;
+        target.classList.add('drag-over');
+    };
+    
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        if (disabled) return;
+        const target = e.currentTarget as HTMLElement;
+        target.classList.remove('drag-over');
+    };
+    
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropTarget: string) => {
+        if (disabled || !draggedOption || draggedOption === dropTarget) return;
+        e.preventDefault();
+        
+        // Remove drag-over styling
+        const target = e.currentTarget as HTMLElement;
+        target.classList.remove('drag-over');
+        
+        // Get current rankings
+        const currentRankings = { ...localRankings };
+        const draggedRank = currentRankings[draggedOption];
+        const targetRank = currentRankings[dropTarget];
+        
+        if (draggedRank && targetRank) {
+            // Swap rankings
+            currentRankings[draggedOption] = targetRank;
+            currentRankings[dropTarget] = draggedRank;
+        } else if (draggedRank && !targetRank) {
+            // Move dragged item to unranked position
+            delete currentRankings[draggedOption];
+            currentRankings[dropTarget] = draggedRank;
+        } else if (!draggedRank && targetRank) {
+            // Move unranked item to ranked position
+            currentRankings[draggedOption] = targetRank;
+            delete currentRankings[dropTarget];
+        } else {
+            // Both unranked - assign next available rank to dragged item
+            const nextRank = getNextAvailableRank();
+            currentRankings[draggedOption] = nextRank;
+        }
+        
+        // Update local variable and parent state
+        localRankings = currentRankings;
+        onChange(question.id, currentRankings);
+    };
+    
     const handleItemClick = (option: string) => {
         if (disabled) return;
         
-        const nextRank = getNextAvailableRank();
-        const newAnswer = { ...localRankings, [option]: nextRank };
+        if (localRankings[option]) {
+            // Remove ranking if already ranked
+            const newAnswer = { ...localRankings };
+            delete newAnswer[option];
+            localRankings = newAnswer;
+        } else {
+            // Add ranking if not ranked
+            const nextRank = getNextAvailableRank();
+            const newAnswer = { ...localRankings, [option]: nextRank };
+            localRankings = newAnswer;
+        }
         
-        // Update local variable
-        localRankings = newAnswer;
-        
-        // Always call onChange to update the parent state for validation
-        onChange(question.id, newAnswer);
+        onChange(question.id, localRankings);
     };
-
-    const handleItemRemove = (option: string) => {
-        if (disabled) return;
-        
-        const newAnswer = { ...localRankings };
-        delete newAnswer[option];
-        
-        // Update local variable
-        localRankings = newAnswer;
-        
-        // Always call onChange to update the parent state for validation
-        onChange(question.id, newAnswer);
-    };
-
+    
     const getRankForOption = (option: string): number => {
         return localRankings[option] || 0;
     };
-
+    
     const getNextAvailableRank = (): number => {
         const maxRank = totalOptions;
         if (maxRank === 0) return 1;
@@ -283,12 +362,26 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
         // If all ranks are used, return 0 (shouldn't happen in normal usage)
         return 0;
     };
-
+    
     // Check if all options are ranked
     const isComplete = Object.keys(localRankings).length === totalOptions;
-
+    
+    // Sort options by rank for display
+    const sortedOptions = question.options?.slice().sort((a, b) => {
+        const rankA = getRankForOption(a);
+        const rankB = getRankForOption(b);
+        if (rankA === 0 && rankB === 0) return 0;
+        if (rankA === 0) return 1;
+        if (rankB === 0) return -1;
+        return rankA - rankB;
+    }) || [];
+    
     return ReactInstance.createElement('div', { className: 'form-control' },
         ReactInstance.createElement('div', { className: 'ranking-container' },
+            // Instructions
+            ReactInstance.createElement('div', { className: 'ranking-instructions' },
+                'Drag and drop options to rank them, or click to toggle ranking. Higher ranked items appear at the top.'
+            ),
             // Show completion status
             totalOptions > 0 && ReactInstance.createElement('div', { 
                 className: `ranking-status ${isComplete ? 'complete' : 'incomplete'}` 
@@ -298,16 +391,27 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
                     : `${Object.keys(localRankings).length} of ${totalOptions} options ranked`
             ),
             ReactInstance.createElement('div', { className: 'ranking-list' },
-                question.options?.map((option) => {
+                sortedOptions.map((option) => {
                     const isRanked = getRankForOption(option) > 0;
                     const rankNumber = getRankForOption(option);
                     return ReactInstance.createElement('div', {
                         key: option,
                         className: `ranking-item ${isRanked ? 'ranked' : ''} ${disabled ? 'disabled' : ''}`,
-                        onClick: () => isRanked ? handleItemRemove(option) : handleItemClick(option),
+                        draggable: !disabled,
+                        onClick: () => handleItemClick(option),
+                        onDragStart: (e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, option),
+                        onDragEnd: (e: React.DragEvent<HTMLDivElement>) => handleDragEnd(e),
+                        onDragOver: (e: React.DragEvent<HTMLDivElement>) => handleDragOver(e, option),
+                        onDragLeave: (e: React.DragEvent<HTMLDivElement>) => handleDragLeave(e),
+                        onDrop: (e: React.DragEvent<HTMLDivElement>) => handleDrop(e, option),
                         tabIndex: disabled ? -1 : 0
                     },
-                        // Ranking circle on the left
+                        // Drag handle icon
+                        ReactInstance.createElement('div', { 
+                            className: 'ranking-drag-handle',
+                            'aria-hidden': 'true'
+                        }, '⋮⋮'),
+                        // Ranking circle
                         ReactInstance.createElement('div', { 
                             className: `ranking-circle ${isRanked ? 'filled' : ''}` 
                         },
@@ -315,17 +419,63 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
                         ),
                         // Option text
                         ReactInstance.createElement('span', { className: 'ranking-option' }, option),
-                        // Remove button for ranked items
-                        isRanked && ReactInstance.createElement('button', {
-                            type: 'button',
-                            className: 'ranking-remove',
-                            onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-                                e.stopPropagation();
-                                handleItemRemove(option);
-                            },
-                            disabled,
-                            'aria-label': `Remove ranking for ${option}`
-                        }, '×')
+                        // Action buttons container
+                        ReactInstance.createElement('div', { className: 'ranking-actions' },
+                            // Up arrow button
+                            isRanked && rankNumber > 1 && ReactInstance.createElement('button', {
+                                type: 'button',
+                                className: 'ranking-arrow ranking-arrow-up',
+                                onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+                                    e.stopPropagation();
+                                    const newAnswer = { ...localRankings };
+                                    // Find the option with the rank above this one
+                                    const optionAbove = Object.keys(newAnswer).find(key => newAnswer[key] === rankNumber - 1);
+                                    if (optionAbove) {
+                                        // Swap ranks
+                                        newAnswer[option] = rankNumber - 1;
+                                        newAnswer[optionAbove] = rankNumber;
+                                        localRankings = newAnswer;
+                                        onChange(question.id, newAnswer);
+                                    }
+                                },
+                                disabled,
+                                'aria-label': `Move ${option} up in ranking`
+                            }, '↑'),
+                            // Down arrow button
+                            isRanked && rankNumber < Object.keys(localRankings).length && ReactInstance.createElement('button', {
+                                type: 'button',
+                                className: 'ranking-arrow ranking-arrow-down',
+                                onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+                                    e.stopPropagation();
+                                    const newAnswer = { ...localRankings };
+                                    // Find the option with the rank below this one
+                                    const optionBelow = Object.keys(newAnswer).find(key => newAnswer[key] === rankNumber + 1);
+                                    if (optionBelow) {
+                                        // Swap ranks
+                                        newAnswer[option] = rankNumber + 1;
+                                        newAnswer[optionBelow] = rankNumber;
+                                        localRankings = newAnswer;
+                                        onChange(question.id, newAnswer);
+                                    }
+                                },
+                                disabled,
+                                'aria-label': `Move ${option} down in ranking`
+                            }, '↓'),
+                            // Remove button for ranked items
+                            isRanked && ReactInstance.createElement('button', {
+                                type: 'button',
+                                className: 'ranking-remove',
+                                onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
+                                    e.stopPropagation();
+                                    const newAnswer = { ...localRankings };
+                                    delete newAnswer[option];
+                                    localRankings = newAnswer;
+                                    onChange(question.id, newAnswer);
+                                },
+                                disabled,
+                                'aria-label': `Remove ranking for ${option}`
+                            }, '×')
+                        )
                     );
                 })
             )

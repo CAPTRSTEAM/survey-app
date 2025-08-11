@@ -872,6 +872,7 @@ div.likert-scale > div.likert-options > label.likert-option {
     margin-bottom: var(--space-4);
     color: var(--color-gray-600);
     font-size: var(--font-size-sm);
+    font-style: italic;
 }
 
 .ranking-options {
@@ -886,15 +887,22 @@ div.likert-scale > div.likert-options > label.likert-option {
     border: 2px solid var(--color-gray-300);
     border-radius: var(--radius-md);
     background-color: var(--color-white);
-    cursor: pointer;
+    cursor: grab;
     transition: all 0.2s ease;
     margin-bottom: var(--space-2);
     min-height: var(--touch-target-min);
+    position: relative;
+}
+
+.ranking-item:active {
+    cursor: grabbing;
 }
 
 .ranking-item:hover {
     border-color: var(--color-primary-medium);
     background-color: var(--color-gray-100);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .ranking-item.ranked {
@@ -905,6 +913,27 @@ div.likert-scale > div.likert-options > label.likert-option {
 .ranking-item.disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.ranking-item.drag-over {
+    border-color: var(--color-primary-medium);
+    background-color: var(--color-primary-light);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-md);
+}
+
+.ranking-drag-handle {
+    color: var(--color-gray-400);
+    font-size: var(--font-size-lg);
+    cursor: grab;
+    user-select: none;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+}
+
+.ranking-drag-handle:active {
+    cursor: grabbing;
 }
 
 .ranking-circle {
@@ -1012,6 +1041,57 @@ div.likert-scale > div.likert-options > label.likert-option {
 .ranking-remove:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.ranking-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex-shrink: 0;
+}
+
+.ranking-arrow {
+    background: none;
+    border: none;
+    color: var(--color-gray-500);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ranking-arrow:hover {
+    color: var(--color-primary-medium);
+    background-color: var(--color-gray-100);
+}
+
+.ranking-arrow:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ranking-arrow-up {
+    color: var(--color-success);
+}
+
+.ranking-arrow-up:hover {
+    color: var(--color-success-dark);
+    background-color: var(--color-success-light);
+}
+
+.ranking-arrow-down {
+    color: var(--color-warning);
+}
+
+.ranking-arrow-down:hover {
+    color: var(--color-warning-dark);
+    background-color: var(--color-warning-light);
 }
 
 .ranking-empty {
