@@ -216,11 +216,31 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
                 try {
                     // Try to save survey data to database using createAppData
+                    console.log('Attempting to save survey data via createAppData...');
+                    console.log('Platform config available:', apiProvider.platformConfig ? 'Yes' : 'No');
+                    if (apiProvider.platformConfig) {
+                        console.log('Platform config details:', {
+                            hasToken: !!apiProvider.platformConfig.token,
+                            hasUrl: !!apiProvider.platformConfig.url,
+                            hasExerciseId: !!apiProvider.platformConfig.exerciseId,
+                            hasAppInstanceId: !!apiProvider.platformConfig.appInstanceId
+                        });
+                    }
+                    
                     await apiProvider.createAppData(surveyData);
-            
+                    console.log('Survey data saved to database successfully via /api/gameData endpoint');
                 } catch (dbError) {
-                    console.warn('Failed to save to database, falling back to postMessage:', dbError);
+                    console.error('createAppData failed with error:', dbError);
+                    
+                    // Check if it's a 404 (endpoint not implemented) vs other errors
+                    if (dbError instanceof Error && dbError.message.includes('404')) {
+                        console.log('Database endpoint /api/gameData not accessible, using postMessage fallback');
+                    } else {
+                        console.warn('Database save failed, using postMessage fallback:', dbError);
+                    }
+                    
                     // Fallback to postMessage if database save fails
+                    console.log('Falling back to postMessage method...');
                     window.parent.postMessage({
                         type: 'SURVEY_COMPLETE',
                         data: surveyData

@@ -21,11 +21,17 @@ export class ApiProvider {
 
     handleConfigMessage(data) {
         try {
+            console.log('handleConfigMessage received data:', data);
+            
             // Extract platform configuration
             const { token, url, exerciseId, appInstanceId, survey, surveyConfig } = data;
             
+            console.log('Extracted platform config:', { token: !!token, url: !!url, exerciseId: !!exerciseId, appInstanceId: !!appInstanceId });
+            
             // Store platform configuration for later use in createAppData
             this.platformConfig = { token, url, exerciseId, appInstanceId };
+            
+            console.log('Stored platformConfig:', this.platformConfig);
             
             // First, check if survey data is directly in the CONFIG message
             if (survey && this.isValidSurvey(survey)) {
@@ -270,6 +276,7 @@ export class ApiProvider {
 
     /**
      * Save survey data to the database using the platform API
+     * Updated to use the existing /api/gameData endpoint (spa-api-provider pattern)
      * @param {Object} surveyData - The survey data to save
      * @param {string} surveyData.surveyId - The survey ID
      * @param {Object} surveyData.answers - The survey answers
@@ -279,27 +286,45 @@ export class ApiProvider {
      */
     async createAppData(surveyData) {
         try {
+            console.log('createAppData called with surveyData:', surveyData);
+            console.log('Current platformConfig:', this.platformConfig);
+            
             // Check if we have the required platform configuration
             if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
-                throw new Error('Platform configuration not available. Cannot save survey data.');
+                const errorMsg = 'Platform configuration not available. Cannot save survey data.';
+                console.error(errorMsg, {
+                    hasPlatformConfig: !!this.platformConfig,
+                    hasToken: this.platformConfig?.token ? 'Yes' : 'No',
+                    hasUrl: this.platformConfig?.url ? 'Yes' : 'No',
+                    hasExerciseId: this.platformConfig?.exerciseId ? 'Yes' : 'No',
+                    hasAppInstanceId: this.platformConfig?.appInstanceId ? 'Yes' : 'No'
+                });
+                throw new Error(errorMsg);
             }
 
             const { token, url, exerciseId, appInstanceId } = this.platformConfig;
 
-            // Prepare the data payload following the data-collect app pattern
+            // Prepare the data payload following the spa-api-provider GameDataDTO pattern
+            // This matches the structure expected by /api/gameData endpoint
             const payload = {
                 exerciseId: exerciseId,
-                appInstanceId: appInstanceId,
-                surveyId: surveyData.surveyId,
-                answers: surveyData.answers,
-                timestamp: surveyData.timestamp,
-                sessionId: surveyData.sessionId,
-                completedAt: new Date().toISOString(),
-                status: 'completed'
+                gameConfigId: appInstanceId, // Using appInstanceId as gameConfigId
+                organizationId: exerciseId, // Using exerciseId as organizationId (adjust if needed)
+                data: JSON.stringify({
+                    surveyId: surveyData.surveyId,
+                    answers: surveyData.answers,
+                    timestamp: surveyData.timestamp,
+                    sessionId: surveyData.sessionId,
+                    completedAt: new Date().toISOString(),
+                    status: 'completed',
+                    type: 'survey-completion'
+                })
             };
 
-            // Make the API call to save the survey data
-            const response = await fetch(`${url}/api/appData`, {
+            console.log('Using /api/gameData endpoint with payload:', payload);
+
+            // Make the API call to save the survey data using the existing /api/gameData endpoint
+            const response = await fetch(`${url}/api/gameData`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -314,7 +339,7 @@ export class ApiProvider {
             }
 
             const result = await response.json();
-            console.log('Survey data saved successfully:', result);
+            console.log('Survey data saved successfully via /api/gameData:', result);
             return result;
 
         } catch (error) {
@@ -325,6 +350,7 @@ export class ApiProvider {
 
     /**
      * Retrieve survey data from the database using the platform API
+     * Updated to use the existing /api/gameData endpoint (spa-api-provider pattern)
      * @param {Object} options - Options for retrieving data
      * @param {string} options.exerciseId - Exercise identifier (optional, uses stored config if not provided)
      * @param {string} options.appInstanceId - App instance identifier (optional, uses stored config if not provided)
@@ -345,17 +371,10 @@ export class ApiProvider {
             const appInstanceId = options.appInstanceId || configAppInstanceId;
             const surveyId = options.surveyId;
 
-            // Build query parameters
-            const queryParams = new URLSearchParams();
-            if (exerciseId) queryParams.append('exerciseId', exerciseId);
-            if (appInstanceId) queryParams.append('appInstanceId', appInstanceId);
-            if (surveyId) queryParams.append('surveyId', surveyId);
+            console.log('Using /api/gameData endpoint to retrieve data');
 
-            const queryString = queryParams.toString();
-            const apiUrl = `${url}/api/appData${queryString ? `?${queryString}` : ''}`;
-
-            // Make the API call to retrieve the survey data
-            const response = await fetch(apiUrl, {
+            // Make the API call to retrieve the survey data using the existing /api/gameData endpoint
+            const response = await fetch(`${url}/api/gameData`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -368,8 +387,22 @@ export class ApiProvider {
             }
 
             const result = await response.json();
-            console.log('Survey data retrieved successfully:', result);
-            return result;
+            console.log('Survey data retrieved successfully via /api/gameData:', result);
+            
+            // Filter by surveyId if provided (since the endpoint returns all game data)
+            if (surveyId && result.gameData) {
+                const filteredData = result.gameData.filter(item => {
+                    try {
+                        const itemData = JSON.parse(item.data);
+                        return itemData.surveyId === surveyId;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+                return filteredData;
+            }
+            
+            return result.gameData || result;
 
         } catch (error) {
             console.error('Error retrieving survey data:', error);

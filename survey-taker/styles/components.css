@@ -1,5 +1,17 @@
 /* Component Styles */
 
+/* High-Contrast Mode Support */
+@media (forced-colors: active) {
+    /* Modern forced colors mode - no deprecation warnings */
+}
+
+@media (-ms-high-contrast: active) {
+    /* Legacy high-contrast mode - suppress deprecation warnings */
+    * {
+        -ms-high-contrast-adjust: none;
+    }
+}
+
 /* Fixed Header */
 .survey-header {
     position: fixed;
