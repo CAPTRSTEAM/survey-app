@@ -32,15 +32,15 @@ The tests cover:
 #### Setup
 1. Deploy the survey app to the platform
 2. Ensure platform provides valid `token` and `url` in CONFIG message
-3. Verify platform supports `/api/appData` endpoint
+3. Verify platform supports `/api/gameData` endpoint
 
 #### Test Cases
 
 **A. Successful Survey Completion**
 1. Complete a survey with various question types
-2. Verify console shows: "Survey data saved to database successfully"
+2. Verify console shows: "Survey data saved to database successfully via /api/gameData endpoint"
 3. Check platform database for saved survey data
-4. Verify data structure matches expected format
+4. Verify data structure matches expected GameDataDTO format
 
 **B. Partial Survey Completion**
 1. Start a survey but don't complete all questions
@@ -51,7 +51,7 @@ The tests cover:
 **C. Database Failure Fallback**
 1. Temporarily disable platform database
 2. Complete a survey
-3. Verify console shows: "Failed to save to database, falling back to postMessage"
+3. Verify console shows: "Database endpoint not yet implemented, using postMessage fallback"
 4. Verify fallback postMessage is sent
 5. Check platform receives survey completion data
 
@@ -93,22 +93,13 @@ The tests cover:
 ### 3. **Data Validation Testing**
 
 #### Survey Data Structure
-Verify saved data includes:
+Verify saved data follows GameDataDTO format:
 ```json
 {
   "exerciseId": "string",
-  "appInstanceId": "string", 
-  "surveyId": "string",
-  "answers": {
-    "q1": "text answer",
-    "q2": ["checkbox1", "checkbox2"],
-    "q3": {"option1": 1, "option2": 2},
-    "q4": 5
-  },
-  "timestamp": "ISO string",
-  "sessionId": "string",
-  "completedAt": "ISO string",
-  "status": "completed"
+  "gameConfigId": "string",
+  "organizationId": "string",
+  "data": "{\"surveyId\":\"string\",\"answers\":{\"q1\":\"text answer\",\"q2\":[\"checkbox1\",\"checkbox2\"],\"q3\":{\"option1\":1,\"option2\":2},\"q4\":5},\"timestamp\":\"ISO string\",\"sessionId\":\"string\",\"completedAt\":\"ISO string\",\"status\":\"completed\",\"type\":\"survey-completion\"}"
 }
 ```
 
@@ -137,18 +128,17 @@ Verify saved data includes:
 - [ ] 403 Forbidden
 - [ ] 500 Internal Server Error
 
-## 🛠️ **Debugging Tools**
+## 🛠️ **Testing Tools**
 
 ### Console Logging
-The app provides detailed logging:
-- Platform configuration received
-- Survey data being saved
+The app provides clean logging:
 - API call success/failure
-- Fallback behavior
+- Fallback behavior when needed
+- Error details for troubleshooting
 
 ### Browser DevTools
-- **Network Tab**: Monitor API calls to `/api/appData`
-- **Console Tab**: View detailed logging and errors
+- **Network Tab**: Monitor API calls to `/api/gameData`
+- **Console Tab**: View logging and errors
 - **Application Tab**: Check localStorage for saved answers
 
 ### Platform Monitoring
@@ -195,7 +185,7 @@ npm run dev
 Create a simple mock platform for testing:
 ```javascript
 // Mock platform endpoint
-app.post('/api/appData', (req, res) => {
+app.post('/api/gameData', (req, res) => {
   console.log('Survey data received:', req.body);
   res.json({ success: true, id: 'mock-id' });
 });

@@ -151,7 +151,7 @@ npm run test:coverage     # Generate coverage report
 - No server-side dependencies
 
 ### **Survey Taker**
-- Creates `survey-taker-spa.zip` for platform deployment
+- Creates `survey-taker-production-v2.zip` for platform deployment
 - Self-contained with all assets
 - Platform-safe with relative paths
 - No external dependencies

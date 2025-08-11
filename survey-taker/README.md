@@ -8,7 +8,7 @@ This directory contains the survey taker application - a standalone HTML/JavaScr
 - `sample-survey.json` - Sample survey data for testing
 - `vite.config.ts` - Vite configuration for development
 - `package.json` - Dependencies and scripts
-- `survey-taker-spa.zip` - **Platform deployment package**
+- `survey-taker-production-v2.zip` - **Platform deployment package**
 - `DATABASE_INTEGRATION.md` - **Database integration documentation**
 
 ## Platform Integration
@@ -32,11 +32,11 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 5. **Extracts**: Intelligently finds survey data in various response formats
 6. **Falls Back**: Uses sample survey if API fails or returns 400/403/404
 7. **Sends**: `{ type: 'SURVEY_COMPLETE', data: {...} }` on completion
-8. **Saves to DB**: **NEW!** Automatically saves survey responses to database via `/api/appData`
+8. **Saves to DB**: **NEW!** Automatically saves survey responses to database via `/api/gameData`
 
 ### **🗄️ Database Integration:**
 - **Automatic Saving**: Survey responses are automatically saved to the platform database
-- **API Endpoint**: Uses `POST /api/appData` with proper authentication
+- **API Endpoint**: Uses `POST /api/gameData` with proper authentication
 - **Data Structure**: Saves exerciseId, appInstanceId, surveyId, answers, timestamps, and session data
 - **Fallback Support**: Gracefully falls back to postMessage if database save fails
 - **Error Handling**: Comprehensive error handling with detailed logging
@@ -46,7 +46,7 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **Missing Parameters**: Falls back to sample survey if `token` or `url` are missing
 - **API Failures**: Handles 400, 403, 404, and network errors gracefully
 - **Parameter Flexibility**: Works with or without `exerciseId`/`appInstanceId`
-- **CORS Issues**: Provides detailed logging for debugging platform integration
+- **CORS Issues**: Provides logging for platform integration troubleshooting
 - **No Survey Data**: Uses fallback survey if platform doesn't provide survey configuration
 - **Asset Loading**: Uses relative paths to avoid 403 errors on JavaScript files
 - **Database Failures**: **NEW!** Gracefully handles database save failures with fallback
@@ -57,7 +57,7 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **Validation**: Ensures extracted data has valid survey structure
 - **Comprehensive Logging**: Shows exactly what data is found and where
 - **Flexible Formats**: Handles various platform response structures
-- **Parameter Debugging**: Shows which parameters are available in CONFIG message
+- **Parameter Validation**: Validates required parameters in CONFIG message
 - **Sections Support**: Automatically flattens sections structure into questions array
 
 ### **🔧 Technical Fixes:**
@@ -102,12 +102,12 @@ npm run build
 This creates a `dist` folder that can be zipped and uploaded to the platform.
 
 ### Platform Deployment
-The `survey-taker-spa.zip` file is ready for platform deployment. This zip file contains:
+The `survey-taker-production-v2.zip` file is ready for platform deployment. This zip file contains:
 - `index.html` - The main survey taker application with spa-api-provider
 - `assets/` - Compiled JavaScript and CSS files (using relative paths)
 
 **To deploy to the platform:**
-1. Upload `survey-taker-spa.zip` to the platform CMS
+1. Upload `survey-taker-production-v2.zip` to the platform CMS
 2. Configure the survey data in the platform
 3. The app will automatically fetch survey configuration via spa-api-provider
 4. If API fails, it will gracefully fall back to sample survey

@@ -4,7 +4,7 @@ The survey taker platform now includes a `createAppData` function that allows su
 
 ## Overview
 
-The `createAppData` function is part of the `ApiProvider` class and provides a way to save survey completion data to the platform's database using the standard API endpoints.
+The `createAppData` function is part of the `ApiProvider` class and provides a way to save survey completion data to the platform's database using the standard `/api/gameData` endpoint. This follows the same pattern used by other platform applications like `spa-api-provider`.
 
 ## How It Works
 
@@ -21,21 +21,31 @@ When the survey app receives a `CONFIG` message from the platform, it stores the
 When a survey is completed in platform mode, the app:
 1. Attempts to save the survey data using `createAppData`
 2. Falls back to the legacy `postMessage` method if database save fails
-3. Provides detailed logging for debugging
+3. Provides clean error handling without excessive logging
 
 ### 3. Data Structure
 
-The survey data saved includes:
+The survey data is saved using the `GameDataDTO` format expected by the `/api/gameData` endpoint:
+
 ```typescript
 {
   exerciseId: string,
-  appInstanceId: string,
+  gameConfigId: string,        // Uses appInstanceId
+  organizationId: string,      // Uses exerciseId
+  data: string                 // JSON stringified survey data
+}
+```
+
+Where the `data` field contains:
+```typescript
+{
   surveyId: string,
   answers: SurveyAnswers,
   timestamp: string,
   sessionId: string,
   completedAt: string,
-  status: 'completed'
+  status: 'completed',
+  type: 'survey-completion'
 }
 ```
 
@@ -69,7 +79,7 @@ try {
 
 The function makes a POST request to:
 ```
-POST {platformUrl}/api/appData
+POST {platformUrl}/api/gameData
 ```
 
 ### Headers
@@ -77,15 +87,15 @@ POST {platformUrl}/api/appData
 - `Authorization: Bearer {token}`
 
 ### Request Body
-The survey data payload as described above.
+The survey data payload in `GameDataDTO` format as described above.
 
 ## Error Handling
 
 The function includes comprehensive error handling:
 - Validates platform configuration availability
-- Provides detailed error messages for HTTP failures
-- Logs all operations for debugging
+- Provides clear error messages for HTTP failures
 - Gracefully falls back to postMessage if database save fails
+- No excessive logging in production builds
 
 ## Fallback Behavior
 
@@ -101,7 +111,7 @@ The functionality is covered by unit tests in `tests/survey-app.test.ts`:
 ## Requirements
 
 - Platform must provide valid `token` and `url` in CONFIG message
-- Platform must support the `/api/appData` endpoint
+- Platform must support the `/api/gameData` endpoint
 - Survey must be running in platform mode (`appMode === 'platform'`)
 
 ## Benefits
@@ -109,5 +119,16 @@ The functionality is covered by unit tests in `tests/survey-app.test.ts`:
 1. **Persistent Storage**: Survey responses are saved to the database for later analysis
 2. **Reliability**: Fallback mechanism ensures data is never lost
 3. **Integration**: Seamlessly integrates with existing platform infrastructure
-4. **Debugging**: Comprehensive logging for troubleshooting
-5. **Standards**: Follows the same pattern used in other platform apps (data-collect)
+4. **Standards Compliant**: Uses the same `/api/gameData` endpoint as other platform apps
+5. **Clean Implementation**: Production-ready code without debugging overhead
+
+## Platform Compatibility
+
+This implementation is compatible with:
+- **spa-api-provider**: Uses the same API patterns
+- **data-collect**: Follows similar data structures
+- **Other platform apps**: Standard `/api/gameData` endpoint usage
+
+## Data Retrieval
+
+Survey data can be retrieved using the `getAppData` function, which also uses the `/api/gameData` endpoint with GET requests to retrieve previously saved survey responses.

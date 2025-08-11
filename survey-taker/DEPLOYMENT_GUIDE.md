@@ -49,11 +49,11 @@ cd survey-taker
 
 After deployment, verify these files exist on your server:
 - ✅ `index.html`
-- ✅ `assets/survey-app.CO4mGQmK.js`
-- ✅ `assets/index.Cd9odeHc.js`
+- ✅ `assets/survey-app.B0uF0GgV.js`
+- ✅ `assets/index.r5ms2_j1.js`
 - ✅ `assets/error-boundary.GxYbDaxA.js`
-- ✅ `assets/api-provider.TDD0SKB3.js`
-- ✅ `assets/index.dIB3e0Im.css`
+- ✅ `assets/api-provider.BT93VPKF.js`
+- ✅ `assets/index.QrT27xo1.css`
 
 ## 🔍 Post-Deployment Testing
 
@@ -70,8 +70,8 @@ Open Developer Tools → Network tab and verify:
 ### 3. Expected File Hashes
 After successful deployment, you should see:
 ```
-survey-app.CO4mGQmK.js    ← NEW hash
-index.Cd9odeHc.js         ← NEW hash  
+survey-app.B0uF0GgV.js    ← NEW hash
+index.r5ms2_j1.js         ← NEW hash  
 error-boundary.GxYbDaxA.js ← NEW hash
 ```
 
