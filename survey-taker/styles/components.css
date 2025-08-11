@@ -305,11 +305,15 @@
     color: var(--color-gray-900);
     margin: 0 0 var(--space-2) 0;
     line-height: var(--line-height-tight);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
 }
 
 .question-required {
     color: var(--color-error);
-    margin-left: var(--space-1);
+    margin-right: var(--space-1);
+    order: -1; /* Move asterisk to the beginning */
 }
 
 .question-description {
