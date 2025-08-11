@@ -170,27 +170,27 @@ export class ApiProvider {
     getSampleSurvey() {
         return {
             "id": "sample-survey-001",
-            "title": "CAPTRS Employee Satisfaction Survey",
+            "title": "Employee Satisfaction Survey",
             "description": "Please take a moment to provide feedback about your work experience.",
             "welcome": {
-                "title": "Welcome to Our Survey",
-                "message": "Your feedback is valuable to us. This survey will take approximately 5-10 minutes to complete. All responses are confidential."
+                "title": "Welcome to the Survey",
+                "message": "Thank you for participating in our employee satisfaction survey. This will help us understand your experience and make improvements."
             },
             "thankYou": {
                 "title": "Thank You!",
-                "message": "Your responses have been recorded successfully. Thank you for taking the time to provide your valuable feedback."
+                "message": "Your responses have been recorded. Thank you for taking the time to provide feedback."
             },
             "settings": {
                 "branding": {
                     "companyName": "CAPTRS",
-                    "poweredBy": "Powered by CAPTRS Survey Platform"
+                    "poweredBy": "Powered by CAPTRS"
                 }
             },
             "sections": [
                 {
                     "id": "work-satisfaction",
                     "title": "Work Satisfaction",
-                    "description": "Tell us about your satisfaction with your current role and work environment.",
+                    "description": "This section focuses on your overall satisfaction with your work and role.",
                     "questions": [
                         {
                             "id": "q1",
@@ -201,63 +201,61 @@ export class ApiProvider {
                         },
                         {
                             "id": "q2",
-                            "type": "yesno",
-                            "question": "Do you feel your work is meaningful and impactful?",
+                            "type": "rating",
+                            "question": "Rate your overall work experience (1-5 stars):",
                             "required": true
                         },
                         {
                             "id": "q3",
-                            "type": "rating",
-                            "question": "Rate your overall job satisfaction (1-5 stars):",
+                            "type": "yesno",
+                            "question": "Do you feel valued as an employee?",
                             "required": true
                         },
                         {
                             "id": "q4",
                             "type": "text",
                             "question": "What aspects of your job do you find most rewarding?",
-                            "description": "Please be specific in your response.",
                             "required": false
                         }
                     ]
                 },
                 {
-                    "id": "company-culture",
-                    "title": "Company Culture & Environment",
-                    "description": "Share your thoughts about our company culture and work environment.",
+                    "id": "company-feedback",
+                    "title": "Company Feedback",
+                    "description": "This section collects feedback about the company culture and environment.",
                     "questions": [
                         {
                             "id": "q5",
-                            "type": "checkbox",
-                            "question": "Which benefits do you value most? (Select all that apply)",
-                            "options": [
-                                "Health Insurance",
-                                "Flexible Work Hours",
-                                "Remote Work Options",
-                                "Professional Development",
-                                "Team Building Events",
-                                "Performance Bonuses"
-                            ],
+                            "type": "likert",
+                            "question": "This company provides a supportive work environment.",
+                            "options": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
                             "required": true
                         },
                         {
                             "id": "q6",
-                            "type": "likert",
-                            "question": "I feel supported by my immediate supervisor.",
-                            "options": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
+                            "type": "checkbox",
+                            "question": "Which of these company benefits are most important to you? (Select all that apply)",
+                            "options": ["Health Insurance", "Flexible Hours", "Remote Work", "Professional Development", "Team Events"],
                             "required": true
                         },
                         {
                             "id": "q7",
-                            "type": "likert",
-                            "question": "This company provides a supportive and inclusive work environment.",
-                            "options": ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
-                            "required": true
+                            "type": "checkbox",
+                            "question": "Which of the following would improve your work experience? (Select all that apply)",
+                            "options": ["Better Communication Tools", "More Training Opportunities", "Improved Office Space", "Better Work-Life Balance", "More Recognition"],
+                            "required": false
                         },
                         {
                             "id": "q8",
-                            "type": "radio",
-                            "question": "Would you recommend this company as a great place to work?",
-                            "options": ["Definitely Yes", "Probably Yes", "Not Sure", "Probably No", "Definitely No"],
+                            "type": "text",
+                            "question": "What improvements would you suggest for the workplace?",
+                            "required": false
+                        },
+                        {
+                            "id": "q9",
+                            "type": "ranking",
+                            "question": "Please rank the following work priorities in order of importance (1 = most important, 5 = least important):",
+                            "options": ["Salary and Benefits", "Work-Life Balance", "Career Growth", "Company Culture", "Job Security"],
                             "required": true
                         }
                     ]
