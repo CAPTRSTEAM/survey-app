@@ -9,12 +9,7 @@ export const SurveyHeader: React.FC<SurveyHeaderProps> = ({ survey, sectionProgr
     className: 'survey-header'
   },
     ReactInstance.createElement('div', { className: 'header-content' },
-              ReactInstance.createElement('div', { className: 'header-brand' },
-            ReactInstance.createElement('img', {
-                src: './CAPTRS_StackedLogo_White_Square-01-01.png',
-                alt: 'CAPTRS Logo',
-                className: 'brand-logo'
-            }),
+      ReactInstance.createElement('div', { className: 'header-brand' },
         ReactInstance.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
       ),
       ReactInstance.createElement('div', { className: 'header-progress', 'aria-label': 'Survey progress' },

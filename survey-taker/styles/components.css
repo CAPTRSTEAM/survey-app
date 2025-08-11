@@ -40,7 +40,7 @@
 .header-brand {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-2);
     min-height: 32px;
 }
 
@@ -727,11 +727,11 @@ div.likert-scale > div.likert-options > label.likert-option {
     color: var(--color-gray-500);
 }
 
-.dragon-icon {
-    width: 24px;
-    height: 24px;
+.captrs-icon {
+    width: 28px;
+    height: 28px;
     object-fit: contain;
-    filter: brightness(0.7); /* Make it slightly darker to match the footer icon color */
+    /* SVG files handle colors better, so no brightness filter needed */
 }
 
 /* Spacers */

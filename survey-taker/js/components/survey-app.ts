@@ -311,11 +311,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             ReactInstance.createElement('header', { className: 'survey-header' },
                 ReactInstance.createElement('div', { className: 'header-content' },
                     ReactInstance.createElement('div', { className: 'header-brand' },
-                        ReactInstance.createElement('img', { 
-                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
-                            alt: 'CAPTRS Logo',
-                            className: 'brand-logo'
-                        }),
                         ReactInstance.createElement('h1', { className: 'brand-title' }, 'Loading Survey...')
                     )
                 )
@@ -353,11 +348,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             ReactInstance.createElement('header', { className: 'survey-header' },
                 ReactInstance.createElement('div', { className: 'header-content' },
                     ReactInstance.createElement('div', { className: 'header-brand' },
-                        ReactInstance.createElement('img', { 
-                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
-                            alt: 'CAPTRS Logo',
-                            className: 'brand-logo'
-                        }),
                         ReactInstance.createElement('h1', { className: 'brand-title' }, 'Standalone Survey Taker App')
                     )
                 )
@@ -398,11 +388,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             ReactInstance.createElement('header', { className: 'survey-header' },
                 ReactInstance.createElement('div', { className: 'header-content' },
                     ReactInstance.createElement('div', { className: 'header-brand' },
-                        ReactInstance.createElement('img', { 
-                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
-                            alt: 'CAPTRS Logo',
-                            className: 'brand-logo'
-                        }),
                         ReactInstance.createElement('h1', { className: 'brand-title' }, survey.title || 'CAPTRS Survey')
                     ),
                     ReactInstance.createElement(SurveyProgress, {
@@ -471,11 +456,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             ReactInstance.createElement('header', { className: 'survey-header' },
                 ReactInstance.createElement('div', { className: 'header-content' },
                     ReactInstance.createElement('div', { className: 'header-brand' },
-                        ReactInstance.createElement('img', { 
-                            src: './CAPTRS_StackedLogo_White_Square-01-01.png',
-                            alt: 'CAPTRS Logo',
-                            className: 'brand-logo'
-                        }),
                         ReactInstance.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                     ),
                     ReactInstance.createElement(SurveyProgress, {
@@ -534,11 +514,6 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         },
             ReactInstance.createElement('div', { className: 'header-content' },
                 ReactInstance.createElement('div', { className: 'header-brand' },
-                    ReactInstance.createElement('img', { 
-                        src: './CAPTRS_StackedLogo_White_Square-01-01.png',
-                        alt: 'CAPTRS Logo',
-                        className: 'brand-logo'
-                    }),
                     ReactInstance.createElement('h1', { className: 'brand-title' }, survey?.title || 'CAPTRS Survey')
                 ),
                 ReactInstance.createElement(SurveyProgress, {
@@ -626,9 +601,9 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             ReactInstance.createElement('div', { className: 'footer-center' },
                 ReactInstance.createElement('div', { className: 'footer-icon', 'aria-hidden': 'true' },
                     ReactInstance.createElement('img', {
-                        src: './dragon.png',
-                        alt: 'Dragon icon',
-                        className: 'dragon-icon'
+                        src: './captrs-icon-blue.svg',
+                        alt: 'CAPTRS icon',
+                        className: 'captrs-icon'
                     })
                 )
             ),

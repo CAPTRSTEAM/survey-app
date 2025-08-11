@@ -30,9 +30,9 @@ export const SurveyFooter: React.FC<SurveyFooterProps> = ({
     ReactInstance.createElement('div', { className: 'footer-center' },
         ReactInstance.createElement('div', { className: 'footer-icon', 'aria-hidden': 'true' },
             ReactInstance.createElement('img', {
-                src: './dragon.png',
-                alt: 'Dragon icon',
-                className: 'dragon-icon'
+                src: './captrs-icon-blue.svg',
+                alt: 'CAPTRS icon',
+                className: 'captrs-icon'
             })
         )
     ),
