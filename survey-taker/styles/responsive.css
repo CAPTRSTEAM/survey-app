@@ -97,13 +97,21 @@
     }
 
     .likert-options {
-        flex-direction: column;
         gap: var(--space-2);
     }
 
     .likert-option {
-        font-size: var(--font-size-xs);
-        padding: var(--space-2);
+        font-size: var(--font-size-sm);
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .likert-label {
+        font-size: var(--font-size-sm);
+    }
+
+    .likert-input {
+        width: 16px;
+        height: 16px;
     }
 
     .star-rating {
@@ -178,12 +186,20 @@
     }
 
     .likert-options {
-        gap: var(--space-1);
+        gap: var(--space-2);
+        justify-content: space-between; /* Maintain even distribution */
+        width: 100%;
     }
 
     .likert-option {
-        font-size: var(--font-size-xs);
+        font-size: var(--font-size-sm);
         padding: var(--space-2) var(--space-3);
+        flex: 1; /* Maintain flex growth */
+        min-width: 0; /* Allow better flex behavior */
+    }
+
+    .likert-label {
+        font-size: var(--font-size-sm);
     }
 }
 
@@ -223,11 +239,15 @@
 
     .likert-options {
         gap: var(--space-3);
+        justify-content: space-between; /* Maintain even distribution */
+        width: 100%;
     }
 
     .likert-option {
         font-size: var(--font-size-sm);
         padding: var(--space-3) var(--space-4);
+        flex: 1; /* Maintain flex growth */
+        min-width: 0; /* Allow better flex behavior */
     }
 }
 
@@ -263,11 +283,15 @@
 
     .likert-options {
         gap: var(--space-4);
+        justify-content: space-between; /* Maintain even distribution */
+        width: 100%;
     }
 
     .likert-option {
-        font-size: var(--font-size-sm);
-        padding: var(--space-4);
+        font-size: var(--font-size-base);
+        padding: var(--space-3) var(--space-4);
+        flex: 1; /* Maintain flex growth */
+        min-width: 0; /* Allow better flex behavior */
     }
 }
 
@@ -528,5 +552,46 @@
     .button {
         padding: var(--space-2) var(--space-3);
         font-size: var(--font-size-xs);
+    }
+}
+
+/* Additional responsive breakpoints for Likert options */
+@media (max-width: 768px) {
+    .likert-options {
+        gap: var(--space-3);
+        flex-wrap: wrap;
+        justify-content: space-between; /* Maintain even distribution */
+        width: 100%;
+    }
+
+    .likert-option {
+        min-width: 0; /* Remove fixed min-width to allow better flex behavior */
+        padding: var(--space-2) var(--space-2);
+        flex: 1; /* Maintain flex growth */
+    }
+}
+
+@media (max-width: 480px) {
+    .likert-options {
+        gap: var(--space-2);
+        flex-direction: row; /* Keep horizontal even on small screens */
+        justify-content: space-between; /* Maintain even distribution */
+        width: 100%;
+    }
+
+    .likert-option {
+        min-width: 0; /* Remove fixed min-width to allow better flex behavior */
+        font-size: var(--font-size-sm);
+        padding: var(--space-1) var(--space-2);
+        flex: 1; /* Maintain flex growth */
+    }
+
+    .likert-label {
+        font-size: var(--font-size-sm);
+    }
+
+    .likert-input {
+        width: 16px;
+        height: 16px;
     }
 }

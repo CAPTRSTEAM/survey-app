@@ -87,22 +87,20 @@ const RadioQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCh
 // Likert Question Component
 const LikertQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
     return ReactInstance.createElement('div', { className: 'form-control' },
-        ReactInstance.createElement('div', { className: 'likert-scale' },
-            ReactInstance.createElement('div', { 
-                className: 'likert-options',
-                role: 'radiogroup',
-                'aria-labelledby': `${question.id}-label`
-            },
+        ReactInstance.createElement('div', {
+            className: 'likert-scale',
+            role: 'group',
+            'aria-labelledby': `${question.id}-label`
+        },
+            ReactInstance.createElement('div', { className: 'likert-options' },
                 question.options?.map((option) =>
                     ReactInstance.createElement('label', {
                         key: option,
                         className: `likert-option ${answer === option ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
-                        role: 'radio',
-                        'aria-checked': answer === option,
                         tabIndex: disabled ? -1 : 0
                     },
                         ReactInstance.createElement('input', {
-                            type: 'radio',
+                            type: 'checkbox',
                             name: question.id,
                             value: option,
                             checked: answer === option,

@@ -491,48 +491,100 @@
 
 /* Likert Scale */
 .likert-scale {
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
+    width: 100% !important;
 }
 
-.likert-options {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-2);
+.likert-scale .likert-options {
+    display: flex !important;
+    flex-direction: row !important; /* Force horizontal layout */
+    gap: var(--space-4); /* Space between options */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    width: 100% !important;
+    justify-content: space-between !important; /* Distribute options evenly */
+    align-items: stretch; /* Stretch options to fill height */
 }
 
-.likert-option {
-    flex: 1;
-    text-align: center;
-    padding: var(--space-3);
+.likert-scale .likert-option {
+    display: flex !important;
+    align-items: center;
+    gap: var(--space-2); /* Space between checkbox and text */
+    padding: var(--space-2) var(--space-3);
     border: 2px solid var(--color-gray-300);
     border-radius: var(--radius-md);
     background-color: var(--color-white);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
     min-height: var(--touch-target-min);
+    flex: 1 !important; /* Force options to grow and fill available space */
+    min-width: 0 !important; /* Allow flex items to shrink below content size */
+    justify-content: center; /* Center content within each option */
+    text-align: center; /* Center text */
 }
 
-.likert-option:hover {
+.likert-scale .likert-option:hover {
+    border-color: var(--color-primary-light);
+    background-color: var(--color-gray-50);
+}
+
+.likert-scale .likert-option.selected {
     border-color: var(--color-primary-medium);
-    background-color: var(--color-gray-100);
+    background-color: var(--color-primary-light);
 }
 
-.likert-option.selected {
-    border-color: var(--color-primary-medium);
-    background-color: var(--color-primary-medium);
-    color: var(--color-white);
-}
-
-.likert-option.disabled {
-    opacity: 0.5;
+.likert-scale .likert-option.disabled {
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
-.likert-label {
-    display: block;
-    text-align: center;
+.likert-scale .likert-label {
+    font-size: var(--font-size-base);
+    color: var(--color-gray-700);
+    white-space: nowrap; /* Prevent text wrapping within option */
+    flex: 1; /* Allow label to grow */
+    text-align: center; /* Center the text */
+}
+
+.likert-scale .likert-input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary-medium);
+    cursor: pointer;
+    flex-shrink: 0; /* Prevent checkbox from shrinking */
+}
+
+/* Additional specific rules to override any conflicts */
+.form-control .likert-scale .likert-options {
+    flex-direction: row !important;
+    display: flex !important;
+}
+
+.form-control .likert-scale .likert-option {
+    flex: 1 !important;
+    display: flex !important;
+}
+
+/* Override any inherited flex-direction from option-group */
+.likert-scale,
+.likert-scale *,
+.likert-options,
+.likert-option {
+    flex-direction: row !important;
+}
+
+/* Force horizontal layout with maximum specificity */
+div.likert-scale > div.likert-options {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+}
+
+div.likert-scale > div.likert-options > label.likert-option {
+    display: flex !important;
+    flex: 1 !important;
+    flex-direction: row !important;
 }
 
 /* Star Rating */
