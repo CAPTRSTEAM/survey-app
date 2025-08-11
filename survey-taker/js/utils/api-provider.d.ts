@@ -10,4 +10,9 @@ export declare class ApiProvider {
         timestamp: string;
         sessionId: string;
     }): Promise<any>;
+    getAppData(options?: {
+        exerciseId?: string;
+        appInstanceId?: string;
+        surveyId?: string;
+    }): Promise<any>;
 }

@@ -143,6 +143,11 @@ export interface ApiProvider {
     timestamp: string;
     sessionId: string;
   }) => Promise<any>;
+  getAppData: (options?: {
+    exerciseId?: string;
+    appInstanceId?: string;
+    surveyId?: string;
+  }) => Promise<any>;
 }
 
 export interface PlatformConfig {

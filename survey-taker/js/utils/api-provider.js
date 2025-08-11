@@ -323,6 +323,60 @@ export class ApiProvider {
         }
     }
 
+    /**
+     * Retrieve survey data from the database using the platform API
+     * @param {Object} options - Options for retrieving data
+     * @param {string} options.exerciseId - Exercise identifier (optional, uses stored config if not provided)
+     * @param {string} options.appInstanceId - App instance identifier (optional, uses stored config if not provided)
+     * @param {string} options.surveyId - Survey identifier (optional, retrieves all data if not provided)
+     * @returns {Promise<Object>} - The response from the API
+     */
+    async getAppData(options = {}) {
+        try {
+            // Check if we have the required platform configuration
+            if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
+                throw new Error('Platform configuration not available. Cannot retrieve survey data.');
+            }
+
+            const { token, url, exerciseId: configExerciseId, appInstanceId: configAppInstanceId } = this.platformConfig;
+            
+            // Use provided options or fall back to stored configuration
+            const exerciseId = options.exerciseId || configExerciseId;
+            const appInstanceId = options.appInstanceId || configAppInstanceId;
+            const surveyId = options.surveyId;
+
+            // Build query parameters
+            const queryParams = new URLSearchParams();
+            if (exerciseId) queryParams.append('exerciseId', exerciseId);
+            if (appInstanceId) queryParams.append('appInstanceId', appInstanceId);
+            if (surveyId) queryParams.append('surveyId', surveyId);
+
+            const queryString = queryParams.toString();
+            const apiUrl = `${url}/api/appData${queryString ? `?${queryString}` : ''}`;
+
+            // Make the API call to retrieve the survey data
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('Survey data retrieved successfully:', result);
+            return result;
+
+        } catch (error) {
+            console.error('Error retrieving survey data:', error);
+            throw error;
+        }
+    }
+
     subscribe(callback) {
         this.listeners.push(callback);
         if (this.isReady) {
