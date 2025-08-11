@@ -1,7 +1,13 @@
 import type { Survey } from '../types/index.js';
 
 export declare class ApiProvider {
-  subscribe(callback: (config: Survey | null) => void): void;
-  getGameConfig(): Survey | null;
-  isGameReady(): boolean;
+    subscribe(callback: (config: any) => void): void;
+    getGameConfig(): any;
+    isGameReady(): boolean;
+    createAppData(surveyData: {
+        surveyId: string;
+        answers: any;
+        timestamp: string;
+        sessionId: string;
+    }): Promise<any>;
 }

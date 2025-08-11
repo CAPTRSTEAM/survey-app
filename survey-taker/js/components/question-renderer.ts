@@ -151,9 +151,9 @@ const YesNoQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onCh
 
 // Rating Question Component
 const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onChange, disabled }) => {
-    const maxRating = 5;
-    const ratings = Array.from({ length: maxRating }, (_, i) => i + 1);
-
+    const ratings = [1, 2, 3, 4, 5];
+    const currentAnswer = typeof answer === 'number' ? answer : undefined;
+    
     return React.createElement('div', { className: 'form-control' },
         React.createElement('div', { 
             className: 'rating-scale',
@@ -162,19 +162,19 @@ const RatingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, onC
         },
             ratings.map((rating) => {
                 // A star should be highlighted if it's less than or equal to the selected rating
-                const isHighlighted = answer && rating <= answer;
+                const isHighlighted = currentAnswer && rating <= currentAnswer;
                 return React.createElement('label', {
                     key: rating,
                     className: `rating-option ${isHighlighted ? 'selected' : ''} ${disabled ? 'disabled' : ''}`,
                     role: 'radio',
-                    'aria-checked': answer === rating,
+                    'aria-checked': currentAnswer === rating,
                     tabIndex: disabled ? -1 : 0
                 },
                     React.createElement('input', {
                         type: 'radio',
                         name: question.id,
                         value: rating.toString(),
-                        checked: answer === rating,
+                        checked: currentAnswer === rating,
                         onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange(question.id, parseInt(e.target.value)),
                         required: question.required,
                         disabled,

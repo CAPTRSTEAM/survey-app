@@ -137,6 +137,12 @@ export interface ApiProvider {
   subscribe: (callback: (config: Survey | null) => void) => void;
   getGameConfig: () => Survey | null;
   isGameReady: () => boolean;
+  createAppData: (surveyData: {
+    surveyId: string;
+    answers: SurveyAnswers;
+    timestamp: string;
+    sessionId: string;
+  }) => Promise<any>;
 }
 
 export interface PlatformConfig {

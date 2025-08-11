@@ -9,6 +9,7 @@ This directory contains the survey taker application - a standalone HTML/JavaScr
 - `vite.config.ts` - Vite configuration for development
 - `package.json` - Dependencies and scripts
 - `survey-taker-spa.zip` - **Platform deployment package**
+- `DATABASE_INTEGRATION.md` - **Database integration documentation**
 
 ## Platform Integration
 
@@ -21,6 +22,7 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **Robust Error Handling**: Gracefully handles API failures and missing parameters
 - **Fallback Support**: Uses sample survey if platform data unavailable
 - **Completion Reporting**: Sends survey completion data back to platform
+- **Database Integration**: **NEW!** Saves survey responses directly to database using `createAppData`
 
 ### **📡 Platform Communication:**
 1. **Receives**: `{ type: 'CONFIG', token, url, exerciseId?, appInstanceId?, survey?, surveyConfig? }`
@@ -30,6 +32,15 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 5. **Extracts**: Intelligently finds survey data in various response formats
 6. **Falls Back**: Uses sample survey if API fails or returns 400/403/404
 7. **Sends**: `{ type: 'SURVEY_COMPLETE', data: {...} }` on completion
+8. **Saves to DB**: **NEW!** Automatically saves survey responses to database via `/api/appData`
+
+### **🗄️ Database Integration:**
+- **Automatic Saving**: Survey responses are automatically saved to the platform database
+- **API Endpoint**: Uses `POST /api/appData` with proper authentication
+- **Data Structure**: Saves exerciseId, appInstanceId, surveyId, answers, timestamps, and session data
+- **Fallback Support**: Gracefully falls back to postMessage if database save fails
+- **Error Handling**: Comprehensive error handling with detailed logging
+- **Standards Compliant**: Follows the same pattern used in data-collect and other platform apps
 
 ### **🛡️ Error Handling:**
 - **Missing Parameters**: Falls back to sample survey if `token` or `url` are missing
@@ -38,6 +49,7 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **CORS Issues**: Provides detailed logging for debugging platform integration
 - **No Survey Data**: Uses fallback survey if platform doesn't provide survey configuration
 - **Asset Loading**: Uses relative paths to avoid 403 errors on JavaScript files
+- **Database Failures**: **NEW!** Gracefully handles database save failures with fallback
 
 ### **🔍 Survey Data Extraction:**
 - **Direct CONFIG**: Checks for `survey` or `surveyConfig` in CONFIG message
@@ -55,6 +67,7 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **Platform-Safe**: Designed to work within platform iframe restrictions
 - **spa-api-provider Compatible**: Uses same API calls as official spa-api-provider
 - **Sections Processing**: Handles nested sections structure from platform surveys
+- **Database Ready**: **NEW!** Includes createAppData function for persistent data storage
 
 ## Usage
 
@@ -98,45 +111,7 @@ The `survey-taker-spa.zip` file is ready for platform deployment. This zip file 
 2. Configure the survey data in the platform
 3. The app will automatically fetch survey configuration via spa-api-provider
 4. If API fails, it will gracefully fall back to sample survey
+5. **NEW!** Survey responses are automatically saved to the platform database
 
-## Features
-
-- **Standalone Mode**: Loads sample survey for testing
-- **Platform Mode**: Uses spa-api-provider for platform integration
-- **Welcome/Thank You Screens**: Professional survey flow
-- **Multiple Question Types**: Radio, text, Likert scales, Yes/No, ranking, and more
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **API Integration**: Proper platform API communication with error handling
-- **Robust Fallback**: Always provides a working survey experience
-- **Platform-Safe**: No external dependencies or absolute paths
-- **Auto-Save Functionality**: Automatically saves user progress to localStorage
-- **Performance Monitoring**: Built-in performance tracking and optimization
-- **TypeScript Integration**: Full type safety and better development experience
-
-## Survey Data Format
-
-The app expects survey data in this format:
-```json
-{
-  "id": "survey-id",
-  "title": "Survey Title",
-  "description": "Survey description",
-  "welcome": {
-    "title": "Welcome Title",
-    "message": "Welcome message"
-  },
-  "thankYou": {
-    "title": "Thank You Title", 
-    "message": "Thank you message"
-  },
-  "questions": [
-    {
-      "id": "q1",
-      "type": "radio",
-      "question": "Question text?",
-      "options": ["Option 1", "Option 2"],
-      "required": true
-    }
-  ]
-}
-``` 
+### Database Integration
+For detailed information about the new database integration feature, see [DATABASE_INTEGRATION.md](./DATABASE_INTEGRATION.md). 

@@ -203,15 +203,25 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             
             // Send completion data to platform
             if (appMode === 'platform') {
-                window.parent.postMessage({
-                    type: 'SURVEY_COMPLETE',
-                    data: {
-                        surveyId: survey?.id,
-                        answers,
-                        timestamp: new Date().toISOString(),
-                        sessionId: `session_${Date.now()}`
-                    }
-                }, '*');
+                const surveyData = {
+                    surveyId: survey?.id,
+                    answers,
+                    timestamp: new Date().toISOString(),
+                    sessionId: `session_${Date.now()}`
+                };
+
+                try {
+                    // Try to save survey data to database using createAppData
+                    await apiProvider.createAppData(surveyData);
+                    console.log('Survey data saved to database successfully');
+                } catch (dbError) {
+                    console.warn('Failed to save to database, falling back to postMessage:', dbError);
+                    // Fallback to postMessage if database save fails
+                    window.parent.postMessage({
+                        type: 'SURVEY_COMPLETE',
+                        data: surveyData
+                    }, '*');
+                }
             }
             
             setIsCompleted(true);
@@ -221,7 +231,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [appMode, survey?.id, answers, clearSavedAnswers]);
+    }, [appMode, survey?.id, answers, clearSavedAnswers, apiProvider]);
 
     // Navigation helpers
     const canNavigateNext = React.useCallback(() => {

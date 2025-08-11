@@ -5,6 +5,7 @@ export class ApiProvider {
         this.gameData = null;
         this.isReady = false;
         this.listeners = [];
+        this.platformConfig = null; // Store platform configuration for API calls
         this.setupMessageListener();
         
         // Don't auto-load fallback survey - let the app handle survey loading
@@ -22,6 +23,9 @@ export class ApiProvider {
         try {
             // Extract platform configuration
             const { token, url, exerciseId, appInstanceId, survey, surveyConfig } = data;
+            
+            // Store platform configuration for later use in createAppData
+            this.platformConfig = { token, url, exerciseId, appInstanceId };
             
             // First, check if survey data is directly in the CONFIG message
             if (survey && this.isValidSurvey(survey)) {
@@ -262,6 +266,61 @@ export class ApiProvider {
                 }
             ]
         };
+    }
+
+    /**
+     * Save survey data to the database using the platform API
+     * @param {Object} surveyData - The survey data to save
+     * @param {string} surveyData.surveyId - The survey ID
+     * @param {Object} surveyData.answers - The survey answers
+     * @param {string} surveyData.timestamp - Timestamp of completion
+     * @param {string} surveyData.sessionId - Session identifier
+     * @returns {Promise<Object>} - The response from the API
+     */
+    async createAppData(surveyData) {
+        try {
+            // Check if we have the required platform configuration
+            if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
+                throw new Error('Platform configuration not available. Cannot save survey data.');
+            }
+
+            const { token, url, exerciseId, appInstanceId } = this.platformConfig;
+
+            // Prepare the data payload following the data-collect app pattern
+            const payload = {
+                exerciseId: exerciseId,
+                appInstanceId: appInstanceId,
+                surveyId: surveyData.surveyId,
+                answers: surveyData.answers,
+                timestamp: surveyData.timestamp,
+                sessionId: surveyData.sessionId,
+                completedAt: new Date().toISOString(),
+                status: 'completed'
+            };
+
+            // Make the API call to save the survey data
+            const response = await fetch(`${url}/api/appData`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('Survey data saved successfully:', result);
+            return result;
+
+        } catch (error) {
+            console.error('Error saving survey data:', error);
+            throw error;
+        }
     }
 
     subscribe(callback) {

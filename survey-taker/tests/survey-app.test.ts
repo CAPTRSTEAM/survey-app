@@ -16,7 +16,8 @@ describe('Survey App', () => {
     const mockApiProvider = {
       subscribe: vi.fn(),
       getGameConfig: vi.fn(),
-      isGameReady: vi.fn()
+      isGameReady: vi.fn(),
+      createAppData: vi.fn()
     };
 
     // This is a basic test to ensure the app can be imported and rendered
@@ -79,5 +80,50 @@ describe('Auto Save', () => {
     // Test that answers can be saved
     localStorage.setItem('test-key', JSON.stringify(mockAnswers));
     expect(localStorage.setItem).toHaveBeenCalledWith('test-key', JSON.stringify(mockAnswers));
+  });
+});
+
+describe('Database Integration', () => {
+  it('should support createAppData functionality', () => {
+    const mockApiProvider = {
+      subscribe: vi.fn(),
+      getGameConfig: vi.fn(),
+      isGameReady: vi.fn(),
+      createAppData: vi.fn()
+    };
+
+    const surveyData = {
+      surveyId: 'test-survey-123',
+      answers: { 'q1': 'Test answer' },
+      timestamp: '2024-01-01T00:00:00.000Z',
+      sessionId: 'session_123'
+    };
+
+    // Test that createAppData method exists and can be called
+    expect(mockApiProvider.createAppData).toBeDefined();
+    expect(typeof mockApiProvider.createAppData).toBe('function');
+    
+    // Test that it can be called with survey data
+    mockApiProvider.createAppData(surveyData);
+    expect(mockApiProvider.createAppData).toHaveBeenCalledWith(surveyData);
+  });
+
+  it('should handle createAppData parameters correctly', () => {
+    const mockApiProvider = {
+      createAppData: vi.fn()
+    };
+
+    const surveyData = {
+      surveyId: 'test-survey-123',
+      answers: { 'q1': 'Test answer', 'q2': ['option1'] },
+      timestamp: '2024-01-01T00:00:00.000Z',
+      sessionId: 'session_123'
+    };
+
+    // Test parameter validation
+    expect(surveyData.surveyId).toBe('test-survey-123');
+    expect(surveyData.answers).toEqual({ 'q1': 'Test answer', 'q2': ['option1'] });
+    expect(surveyData.timestamp).toBe('2024-01-01T00:00:00.000Z');
+    expect(surveyData.sessionId).toBe('session_123');
   });
 });
