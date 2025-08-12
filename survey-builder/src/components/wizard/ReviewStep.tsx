@@ -5,9 +5,7 @@ import {
   Paper,
   Grid,
   Chip,
-  Divider,
-  Alert,
-  Button
+  Alert
 } from '@mui/material'
 import {
   Warning as WarningIcon
@@ -18,12 +16,10 @@ import { getQuestionTypeLabel, getTotalQuestions } from '../../utils/surveyUtils
 
 interface ReviewStepProps {
   survey: Survey
-  onComplete: () => void
 }
 
 export const ReviewStep: React.FC<ReviewStepProps> = ({
-  survey,
-  onComplete
+  survey
 }) => {
   const hasQuestions = getTotalQuestions(survey) > 0
   const hasWelcome = survey.welcome.title.trim() && survey.welcome.message.trim()

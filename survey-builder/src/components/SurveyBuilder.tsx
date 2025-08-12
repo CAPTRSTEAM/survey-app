@@ -21,12 +21,14 @@ import { useSurveyContext } from '../context/SurveyContext'
 import { exportSurveyWithSections } from '../utils/surveyUtils'
 import { SurveyLibraryView } from './SurveyLibraryView'
 import { SurveyWizard } from './SurveyWizard'
+import { PreviewMode } from './PreviewMode'
 
 const SurveyBuilder: React.FC = () => {
   const { surveys, loading, deleteSurvey, duplicateSurvey } = useSurveyContext()
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null)
   const [view, setView] = useState<'library' | 'wizard'>('library')
   const [refreshKey, setRefreshKey] = useState(0)
+  const [previewSurvey, setPreviewSurvey] = useState<Survey | null>(null)
   const [snackbar, setSnackbar] = useState<{
     open: boolean
     message: string
@@ -58,6 +60,10 @@ const SurveyBuilder: React.FC = () => {
   const handleDuplicateSurvey = (survey: Survey) => {
     duplicateSurvey(survey)
     showSnackbar('Survey duplicated successfully')
+  }
+
+  const handlePreviewSurvey = (survey: Survey) => {
+    setPreviewSurvey(survey)
   }
 
   const handleDeleteSurvey = (survey: Survey) => {
@@ -298,6 +304,7 @@ const SurveyBuilder: React.FC = () => {
             onDuplicate={handleDuplicateSurvey}
             onDelete={handleDeleteSurvey}
             onExport={handleExportSurvey}
+            onPreview={handlePreviewSurvey}
           />
         </Box>
 
@@ -330,6 +337,15 @@ const SurveyBuilder: React.FC = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Preview Mode */}
+      {previewSurvey && (
+        <PreviewMode
+          survey={previewSurvey}
+          open={!!previewSurvey}
+          onClose={() => setPreviewSurvey(null)}
+        />
+      )}
     </Container>
   </Box>
   )

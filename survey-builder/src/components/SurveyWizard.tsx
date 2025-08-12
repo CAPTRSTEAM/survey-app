@@ -14,7 +14,8 @@ import {
 } from '@mui/material'
 import {
   ArrowBack as BackIcon,
-  Save as SaveIcon
+  Save as SaveIcon,
+  Visibility as PreviewIcon
 } from '@mui/icons-material'
 
 import { Survey } from '../types/survey'
@@ -26,6 +27,7 @@ import { WelcomeStep } from './wizard/WelcomeStep'
 import { QuestionsStep } from './wizard/QuestionsStep'
 import { ThankYouStep } from './wizard/ThankYouStep'
 import { ReviewStep } from './wizard/ReviewStep'
+import { PreviewMode } from './PreviewMode'
 
 interface SurveyWizardProps {
   survey?: Survey | null
@@ -58,6 +60,8 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
     }
     return createNewSurvey()
   })
+
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const prevSurveyRef = useRef(survey)
 
@@ -164,7 +168,6 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
         return (
           <ReviewStep
             survey={currentSurvey}
-            onComplete={handleComplete}
           />
         )
       default:
@@ -261,6 +264,29 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
          />
        </Paper>
 
+       {/* Preview Button */}
+       <Paper sx={{ p: 3, mb: 3 }}>
+         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+           <Button
+             variant="outlined"
+             startIcon={<PreviewIcon />}
+             onClick={() => setPreviewOpen(true)}
+             sx={{
+               borderColor: '#4358a3',
+               color: '#4358a3',
+               px: 4,
+               py: 1.5,
+               '&:hover': {
+                 borderColor: '#2b3d8b',
+                 backgroundColor: 'rgba(67, 88, 163, 0.04)'
+               }
+             }}
+           >
+             Preview Survey
+           </Button>
+         </Box>
+       </Paper>
+
        {/* Stepper */}
        <Paper sx={{ p: 3 }}>
          <Stepper activeStep={wizard.currentStepIndex} orientation="vertical">
@@ -340,6 +366,13 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
           )}
         </Box>
       </Box>
+
+      {/* Preview Mode */}
+      <PreviewMode
+        survey={currentSurvey}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+      />
   </Box>
   )
 } 

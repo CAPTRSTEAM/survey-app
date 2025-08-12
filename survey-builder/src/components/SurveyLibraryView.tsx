@@ -15,7 +15,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   ContentCopy as CopyIcon,
-  Download as DownloadIcon
+  Download as DownloadIcon,
+  Visibility as PreviewIcon
 } from '@mui/icons-material'
 
 import { Survey } from '../types/survey'
@@ -27,6 +28,7 @@ interface SurveyLibraryViewProps {
   onDuplicate: (survey: Survey) => void
   onDelete: (survey: Survey) => void
   onExport: (survey: Survey) => void
+  onPreview: (survey: Survey) => void
 }
 
 export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
@@ -34,7 +36,8 @@ export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
   onEdit,
   onDuplicate,
   onDelete,
-  onExport
+  onExport,
+  onPreview
 }) => {
   if (surveys.length === 0) {
     return (
@@ -118,6 +121,16 @@ export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
               
               <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
                 <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Tooltip title="Preview Survey">
+                    <IconButton
+                      size="small"
+                      color="default"
+                      onClick={() => onPreview(survey)}
+                    >
+                      <PreviewIcon />
+                    </IconButton>
+                  </Tooltip>
+                  
                   <Tooltip title="Edit Survey">
                     <IconButton
                       size="small"
