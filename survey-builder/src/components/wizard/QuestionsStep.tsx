@@ -47,6 +47,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
   const [editingSectionIndex, setEditingSectionIndex] = useState<number>(-1)
   const [newQuestion, setNewQuestion] = useState<Question>(createNewQuestion())
   const [newSection, setNewSection] = useState<Section>(createNewSection())
+  const [showAddSection, setShowAddSection] = useState<boolean>(false)
 
   const sections = data.sections || survey.sections || []
 
@@ -56,6 +57,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
     const updatedSections = [...sections, { ...newSection, order: sections.length + 1 }]
     onChange({ sections: updatedSections })
     setNewSection(createNewSection())
+    setShowAddSection(false)
   }
 
   const handleDeleteSection = (sectionIndex: number) => {
@@ -182,54 +184,83 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
         Yes/No (binary choice), Ranking (drag to reorder)
       </Alert>
 
-      {/* Add New Section */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Add New Section
+      {/* Sections Header with Add Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h6">
+          {sections.length} Questions Section{sections.length !== 1 ? 's' : ''}
         </Typography>
-        
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Section Title"
-              value={newSection.title}
-              onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
-              placeholder="Enter section title"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Section Description"
-              value={newSection.description}
-              onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
-              placeholder="Enter section description"
-              multiline
-              rows={3}
-              minRows={2}
-              maxRows={6}
-            />
-          </Grid>
-          <Grid item xs={12}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setShowAddSection(true)}
+          size="medium"
+        >
+          Add Section
+        </Button>
+      </Box>
+
+      {/* Add New Section Form (conditionally shown) */}
+      {showAddSection && (
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">
+              Add New Section
+            </Typography>
             <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddSection}
-              disabled={!newSection.title.trim()}
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setShowAddSection(false)
+                setNewSection(createNewSection())
+              }}
             >
-              Add Section
+              Cancel
             </Button>
+          </Box>
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Section Title"
+                value={newSection.title}
+                onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
+                placeholder="Enter section title"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Section Description"
+                value={newSection.description}
+                onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
+                placeholder="Enter section description"
+                multiline
+                rows={3}
+                minRows={2}
+                maxRows={6}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddSection}
+                disabled={!newSection.title.trim()}
+              >
+                Add Section
+              </Button>
+            </Grid>
           </Grid>
-        </Grid>
-      </Paper>
+        </Paper>
+      )}
 
       {/* Existing Sections */}
       {sections.map((section: Section, sectionIndex: number) => (
         <Accordion key={section.id} defaultExpanded={sectionIndex === 0} sx={{ mb: 2 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <Typography variant="h6">{section.title} ({section.questions.length} questions)</Typography>
+              <Typography variant="h6">{section.title} - {section.questions.length} Questions Section</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails>
