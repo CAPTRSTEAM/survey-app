@@ -10,14 +10,7 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
-  List,
-  ListItem,
-  Chip,
-  Divider,
-  Alert,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails
+  Chip
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -25,7 +18,14 @@ import {
   Edit as EditIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
-  ExpandMore as ExpandMoreIcon
+  ExpandMore as ExpandMoreIcon,
+  TextFields as TextIcon,
+  RadioButtonChecked as RadioIcon,
+  CheckBox as CheckboxIcon,
+  Star as RatingIcon,
+  ThumbUp as LikertIcon,
+  ToggleOn as YesNoIcon,
+  Reorder as RankingIcon
 } from '@mui/icons-material'
 
 import { Survey, Question, Section } from '../../types/survey'
@@ -48,8 +48,45 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
   const [newQuestion, setNewQuestion] = useState<Question>(createNewQuestion())
   const [newSection, setNewSection] = useState<Section>(createNewSection())
   const [showAddSection, setShowAddSection] = useState<boolean>(false)
+  const [addingQuestionToSection, setAddingQuestionToSection] = useState<number>(-1)
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0]))
 
   const sections = data.sections || survey.sections || []
+
+  // Helper function to get question type icon
+  const getQuestionTypeIcon = (type: string) => {
+    switch (type) {
+      case 'text': return <TextIcon />
+      case 'radio': return <RadioIcon />
+      case 'checkbox': return <CheckboxIcon />
+      case 'rating': return <RatingIcon />
+      case 'likert': return <LikertIcon />
+      case 'yesno': return <YesNoIcon />
+      case 'ranking': return <RankingIcon />
+      default: return <TextIcon />
+    }
+  }
+
+  // Question types for visual picker
+  const questionTypes = [
+    { value: 'text', label: 'Text Input', icon: <TextIcon />, desc: 'Free text response' },
+    { value: 'radio', label: 'Multiple Choice', icon: <RadioIcon />, desc: 'Single selection' },
+    { value: 'checkbox', label: 'Checkboxes', icon: <CheckboxIcon />, desc: 'Multiple selection' },
+    { value: 'rating', label: 'Rating Scale', icon: <RatingIcon />, desc: '1-5 scale' },
+    { value: 'likert', label: 'Likert Scale', icon: <LikertIcon />, desc: 'Agreement levels' },
+    { value: 'yesno', label: 'Yes/No', icon: <YesNoIcon />, desc: 'Binary choice' },
+    { value: 'ranking', label: 'Ranking', icon: <RankingIcon />, desc: 'Drag to reorder' }
+  ]
+
+  const toggleSectionExpansion = (sectionIndex: number) => {
+    const newExpanded = new Set(expandedSections)
+    if (newExpanded.has(sectionIndex)) {
+      newExpanded.delete(sectionIndex)
+    } else {
+      newExpanded.add(sectionIndex)
+    }
+    setExpandedSections(newExpanded)
+  }
 
   const handleAddSection = () => {
     if (!newSection.title.trim()) return
@@ -81,6 +118,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
     
     onChange({ sections: updatedSections })
     setNewQuestion(createNewQuestion())
+    setAddingQuestionToSection(-1)
   }
 
   const handleEditQuestion = (sectionIndex: number, questionIndex: number) => {
@@ -174,225 +212,450 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
       <Typography variant="h6" gutterBottom>
         Survey Questions
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Add sections and questions for your survey. Each section can have its own title, description, and set of questions.
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        Organize your survey into sections and add questions. Each section can have its own theme and multiple questions.
       </Typography>
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <strong>Question Types:</strong> Text Input (free text), Multiple Choice (single selection), 
-        Checkboxes (multiple selection), Rating Scale (1-5), Likert Scale (agreement levels), 
-        Yes/No (binary choice), Ranking (drag to reorder)
-      </Alert>
+      {/* Sections Overview */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" sx={{ color: '#181a43', fontWeight: 600 }}>
+            Sections ({sections.length})
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setShowAddSection(true)}
+            sx={{ 
+              background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+              '&:hover': { background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)' }
+            }}
+          >
+            Add Section
+          </Button>
+        </Box>
 
-      {/* Sections Header with Add Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">
-          {sections.length} Questions Section{sections.length !== 1 ? 's' : ''}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setShowAddSection(true)}
-          size="medium"
-        >
-          Add Section
-        </Button>
+        {/* Add New Section Form */}
+        {showAddSection && (
+          <Paper sx={{ p: 3, mb: 3, border: '2px solid #e3f2fd', borderRadius: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ color: '#181a43' }}>Create New Section</Typography>
+              <Button variant="outlined" size="small" onClick={() => { setShowAddSection(false); setNewSection(createNewSection()) }}>
+                Cancel
+              </Button>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Section Title"
+                  value={newSection.title}
+                  onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
+                  placeholder="e.g., Personal Information, Feedback Questions"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Section Description (Optional)"
+                  value={newSection.description}
+                  onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
+                  placeholder="Brief description of this section"
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={handleAddSection}
+                  disabled={!newSection.title.trim()}
+                  sx={{ background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)' }}
+                >
+                  Create Section
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        )}
       </Box>
 
-      {/* Add New Section Form (conditionally shown) */}
-      {showAddSection && (
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">
-              Add New Section
-            </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setShowAddSection(false)
-                setNewSection(createNewSection())
-              }}
-            >
-              Cancel
-            </Button>
-          </Box>
-          
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Section Title"
-                value={newSection.title}
-                onChange={(e) => setNewSection({ ...newSection, title: e.target.value })}
-                placeholder="Enter section title"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Section Description"
-                value={newSection.description}
-                onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
-                placeholder="Enter section description"
-                multiline
-                rows={3}
-                minRows={2}
-                maxRows={6}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddSection}
-                disabled={!newSection.title.trim()}
-              >
-                Add Section
-              </Button>
-            </Grid>
-          </Grid>
-        </Paper>
-      )}
-
-      {/* Existing Sections */}
-      {sections.map((section: Section, sectionIndex: number) => (
-        <Accordion key={section.id} defaultExpanded={sectionIndex === 0} sx={{ mb: 2 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <Typography variant="h6">{section.title} - {section.questions.length} Questions Section</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            {/* Section Header with Delete Button (moved here to fix nesting) */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Section Details</Typography>
-              <IconButton color="error" onClick={() => handleDeleteSection(sectionIndex)} disabled={sections.length === 1} size="small"><DeleteIcon /></IconButton>
-            </Box>
-            {/* Section Details (title, description inputs) */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={12} md={6}><TextField fullWidth label="Section Title" value={section.title} onChange={(e) => handleUpdateSection(sectionIndex, 'title', e.target.value)} /></Grid>
-              <Grid item xs={12} md={6}><TextField fullWidth label="Section Description" value={section.description} onChange={(e) => handleUpdateSection(sectionIndex, 'description', e.target.value)} multiline rows={3} minRows={2} maxRows={6} /></Grid>
-            </Grid>
-
-            {/* Add New Question (within section) */}
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" gutterBottom>Add New Question to {section.title}</Typography>
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Question"
-                    value={newQuestion.question}
-                    onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
-                    placeholder="Enter your question here"
+      {/* Sections as Cards */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {sections.map((section: Section, sectionIndex: number) => (
+          <Paper 
+            key={section.id} 
+            sx={{ 
+              borderRadius: 3,
+              border: '1px solid #eef0f8',
+              overflow: 'hidden',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+            }}
+          >
+            {/* Section Header */}
+            <Box sx={{ 
+              p: 3, 
+              background: 'linear-gradient(135deg, #f8f9ff 0%, #eef0f8 100%)',
+              borderBottom: '1px solid #eef0f8'
+            }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h6" sx={{ color: '#181a43', fontWeight: 600, mb: 1 }}>
+                    {section.title}
+                  </Typography>
+                  {section.description && (
+                    <Typography variant="body2" color="text.secondary">
+                      {section.description}
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                  <Chip 
+                    label={`${section.questions.length} questions`} 
+                    size="small" 
+                    sx={{ 
+                      backgroundColor: '#181a43', 
+                      color: 'white',
+                      fontWeight: 500
+                    }} 
                   />
-                </Grid>
-                <Grid item xs={12} sx={{ mb: 2 }}>
-                  {/* Spacer for better visual separation */}
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Question Type"
-                    value={newQuestion.type}
-                    onChange={(e) => {
-                      const newType = e.target.value as string
-                      setNewQuestion({
-                        ...newQuestion,
-                        type: newType as any,
-                        options: getDefaultOptions(newType)
-                      })
+                  <IconButton
+                    size="small"
+                    onClick={() => toggleSectionExpansion(sectionIndex)}
+                    sx={{ 
+                      backgroundColor: 'white',
+                      '&:hover': { backgroundColor: '#f5f5f5' }
                     }}
-                    select
                   >
-                    <MenuItem value="text">Text Input</MenuItem>
-                    <MenuItem value="radio">Multiple Choice</MenuItem>
-                    <MenuItem value="checkbox">Checkboxes</MenuItem>
-                    <MenuItem value="rating">Rating Scale</MenuItem>
-                    <MenuItem value="likert">Likert Scale</MenuItem>
-                    <MenuItem value="yesno">Yes/No</MenuItem>
-                    <MenuItem value="ranking">Ranking</MenuItem>
-                  </TextField>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={newQuestion.required}
-                        onChange={(e) => setNewQuestion({ ...newQuestion, required: e.target.checked })}
+                    <ExpandMoreIcon 
+                      sx={{ 
+                        transform: expandedSections.has(sectionIndex) ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s'
+                      }} 
+                    />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleDeleteSection(sectionIndex)}
+                    disabled={sections.length === 1}
+                    sx={{ 
+                      backgroundColor: 'white',
+                      '&:hover': { backgroundColor: '#ffebee' }
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Expanded Section Content */}
+            {expandedSections.has(sectionIndex) && (
+              <Box sx={{ p: 3 }}>
+                {/* Section Settings */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#181a43' }}>
+                    Section Settings
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <TextField 
+                        fullWidth 
+                        label="Section Title" 
+                        value={section.title} 
+                        onChange={(e) => handleUpdateSection(sectionIndex, 'title', e.target.value)}
+                        variant="outlined"
                       />
-                    }
-                    label="Required"
-                  />
-                </Grid>
-                {(newQuestion.type === 'radio' || newQuestion.type === 'checkbox' || newQuestion.type === 'rating' || newQuestion.type === 'likert' || newQuestion.type === 'yesno' || newQuestion.type === 'ranking') && (
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle2" gutterBottom>Options</Typography>
-                    {newQuestion.options?.map((option, optionIndex) => (
-                      <Box key={optionIndex} sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          value={option}
-                          onChange={(e) => handleOptionChange(newQuestion, optionIndex, e.target.value)}
-                          placeholder={`Option ${optionIndex + 1}`}
-                        />
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemoveOption(newQuestion, optionIndex)}
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    ))}
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField 
+                        fullWidth 
+                        label="Section Description" 
+                        value={section.description} 
+                        onChange={(e) => handleUpdateSection(sectionIndex, 'description', e.target.value)} 
+                        multiline 
+                        rows={2}
+                        variant="outlined"
+                        placeholder="Optional description for this section"
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                {/* Questions Section */}
+                <Box sx={{ mb: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#181a43' }}>
+                      Questions ({section.questions.length})
+                    </Typography>
                     <Button
                       variant="outlined"
-                      size="small"
                       startIcon={<AddIcon />}
-                      onClick={() => handleAddOption(newQuestion)}
+                      onClick={() => setAddingQuestionToSection(sectionIndex)}
+                      size="small"
+                      sx={{ 
+                        borderColor: '#181a43',
+                        color: '#181a43',
+                        '&:hover': { 
+                          borderColor: '#181a43',
+                          backgroundColor: 'rgba(24, 26, 67, 0.04)'
+                        }
+                      }}
                     >
-                      Add Option
+                      Add Question
                     </Button>
-                  </Grid>
-                )}
-              </Grid>
-              <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleAddQuestion(sectionIndex)} disabled={!newQuestion.question.trim()}>Add Question</Button>
-            </Paper>
+                  </Box>
 
-            {/* Existing Questions (within section) */}
-            {section.questions.length > 0 && (
-              <Paper sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>Questions in {section.title} ({section.questions.length})</Typography>
-                <List>
-                  {section.questions.map((question: Question, questionIndex: number) => (
-                    <React.Fragment key={question.id}>
-                      <ListItem>
-                        {/* Restructured ListItem content to avoid div in p error */}
-                        <Box sx={{ width: '100%' }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                            <Typography variant="body1" sx={{ flexGrow: 1 }}>{questionIndex + 1}. {question.question}</Typography>
+                  {/* Add Question Form */}
+                  {addingQuestionToSection === sectionIndex && (
+                    <Paper sx={{ p: 3, mb: 3, border: '2px solid #e3f2fd', borderRadius: 2 }}>
+                      <Typography variant="h6" gutterBottom sx={{ color: '#181a43' }}>
+                        Add New Question
+                      </Typography>
+                      
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <TextField
+                            fullWidth
+                            label="Question Text"
+                            value={newQuestion.question}
+                            onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
+                            placeholder="What would you like to ask?"
+                            variant="outlined"
+                          />
+                        </Grid>
+
+                        {/* Visual Question Type Picker */}
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                            Question Type
+                          </Typography>
+                          <Grid container spacing={1}>
+                            {questionTypes.map((type) => (
+                              <Grid item xs={6} sm={4} md={3} key={type.value}>
+                                <Paper
+                                  sx={{
+                                    p: 2,
+                                    textAlign: 'center',
+                                    cursor: 'pointer',
+                                    border: newQuestion.type === type.value ? '2px solid #181a43' : '1px solid #eee',
+                                    backgroundColor: newQuestion.type === type.value ? 'rgba(24, 26, 67, 0.04)' : 'white',
+                                    '&:hover': {
+                                      borderColor: '#181a43',
+                                      backgroundColor: 'rgba(24, 26, 67, 0.04)'
+                                    },
+                                    transition: 'all 0.2s'
+                                  }}
+                                  onClick={() => setNewQuestion({
+                                    ...newQuestion,
+                                    type: type.value as any,
+                                    options: getDefaultOptions(type.value)
+                                  })}
+                                >
+                                  <Box sx={{ color: newQuestion.type === type.value ? '#181a43' : '#666', mb: 1 }}>
+                                    {type.icon}
+                                  </Box>
+                                  <Typography variant="caption" sx={{ 
+                                    fontWeight: newQuestion.type === type.value ? 600 : 400,
+                                    color: newQuestion.type === type.value ? '#181a43' : 'text.primary',
+                                    display: 'block',
+                                    lineHeight: 1.2
+                                  }}>
+                                    {type.label}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                                    {type.desc}
+                                  </Typography>
+                                </Paper>
+                              </Grid>
+                            ))}
+                          </Grid>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={newQuestion.required}
+                                onChange={(e) => setNewQuestion({ ...newQuestion, required: e.target.checked })}
+                                sx={{
+                                  '& .MuiSwitch-switchBase.Mui-checked': {
+                                    color: '#181a43',
+                                  },
+                                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                    backgroundColor: '#181a43',
+                                  },
+                                }}
+                              />
+                            }
+                            label="Required Question"
+                            sx={{ mt: 1 }}
+                          />
+                        </Grid>
+
+                        {/* Options for choice-based questions */}
+                        {(newQuestion.type === 'radio' || newQuestion.type === 'checkbox' || newQuestion.type === 'rating' || newQuestion.type === 'likert' || newQuestion.type === 'yesno' || newQuestion.type === 'ranking') && (
+                          <Grid item xs={12}>
+                            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                              Answer Options
+                            </Typography>
+                            {newQuestion.options?.map((option, optionIndex) => (
+                              <Box key={optionIndex} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  value={option}
+                                  onChange={(e) => handleOptionChange(newQuestion, optionIndex, e.target.value)}
+                                  placeholder={`Option ${optionIndex + 1}`}
+                                  variant="outlined"
+                                />
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleRemoveOption(newQuestion, optionIndex)}
+                                  color="error"
+                                  sx={{ '&:hover': { backgroundColor: '#ffebee' } }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Box>
+                            ))}
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<AddIcon />}
+                              onClick={() => handleAddOption(newQuestion)}
+                              sx={{ 
+                                borderColor: '#181a43',
+                                color: '#181a43',
+                                '&:hover': { borderColor: '#181a43', backgroundColor: 'rgba(24, 26, 67, 0.04)' }
+                              }}
+                            >
+                              Add Option
+                            </Button>
+                          </Grid>
+                        )}
+
+                        {/* Action Buttons */}
+                        <Grid item xs={12}>
+                          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                            <Button 
+                              variant="outlined" 
+                              onClick={() => {
+                                setAddingQuestionToSection(-1)
+                                setNewQuestion(createNewQuestion())
+                              }}
+                              size="medium"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              variant="contained" 
+                              startIcon={<AddIcon />} 
+                              onClick={() => handleAddQuestion(sectionIndex)} 
+                              disabled={!newQuestion.question.trim()}
+                              sx={{ 
+                                background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+                                '&:hover': { background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)' }
+                              }}
+                            >
+                              Add Question
+                            </Button>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Paper>
+                  )}
+
+                  {/* Existing Questions List */}
+                  {section.questions.length > 0 ? (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {section.questions.map((question: Question, questionIndex: number) => (
+                        <Paper
+                          key={question.id}
+                          sx={{ 
+                            p: 3,
+                            border: '1px solid #f0f0f0',
+                            borderRadius: 2,
+                            '&:hover': { 
+                              borderColor: '#181a43',
+                              boxShadow: '0 2px 8px rgba(24, 26, 67, 0.1)'
+                            },
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                                <Box sx={{ color: '#181a43' }}>
+                                  {getQuestionTypeIcon(question.type)}
+                                </Box>
+                                <Typography variant="body1" sx={{ fontWeight: 500, color: '#181a43' }}>
+                                  Q{questionIndex + 1}. {question.question}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', ml: 4 }}>
+                                <Chip 
+                                  label={getQuestionTypeLabel(question.type)} 
+                                  size="small" 
+                                  variant="outlined"
+                                  sx={{ borderColor: '#181a43', color: '#181a43' }}
+                                />
+                                <Chip 
+                                  label={question.required ? 'Required' : 'Optional'} 
+                                  size="small" 
+                                  color={question.required ? 'primary' : 'default'}
+                                  sx={question.required ? { 
+                                    backgroundColor: '#181a43', 
+                                    color: 'white' 
+                                  } : {}}
+                                />
+                              </Box>
+                            </Box>
                             <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                              <IconButton color="primary" size="small" onClick={() => handleEditQuestion(sectionIndex, questionIndex)}><EditIcon /></IconButton>
-                              <IconButton color="error" size="small" onClick={() => handleDeleteQuestion(sectionIndex, questionIndex)}><DeleteIcon /></IconButton>
+                              <IconButton 
+                                size="small" 
+                                onClick={() => handleEditQuestion(sectionIndex, questionIndex)}
+                                sx={{ 
+                                  color: '#181a43',
+                                  '&:hover': { backgroundColor: 'rgba(24, 26, 67, 0.04)' }
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton 
+                                size="small" 
+                                color="error" 
+                                onClick={() => handleDeleteQuestion(sectionIndex, questionIndex)}
+                                sx={{ '&:hover': { backgroundColor: '#ffebee' } }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
                             </Box>
                           </Box>
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                            <Chip label={getQuestionTypeLabel(question.type)} size="small" variant="outlined" />
-                            <Chip label={question.required ? 'Required' : 'Optional'} size="small" color={question.required ? 'primary' : 'default'} />
-                          </Box>
-                        </Box>
-                      </ListItem>
-                      {questionIndex < section.questions.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
-                </List>
-              </Paper>
+                        </Paper>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Box sx={{ 
+                      textAlign: 'center', 
+                      py: 4, 
+                      color: 'text.secondary',
+                      border: '1px dashed #ddd',
+                      borderRadius: 2
+                    }}>
+                      <Typography variant="body2">
+                        No questions yet. Click "Add Question" to get started.
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
             )}
-          </AccordionDetails>
-        </Accordion>
-      ))}
+          </Paper>
+        ))}
+      </Box>
 
       {/* Edit Question Dialog */}
       {editingQuestion && (
