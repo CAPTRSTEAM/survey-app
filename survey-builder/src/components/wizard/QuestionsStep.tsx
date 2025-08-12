@@ -25,7 +25,9 @@ import {
   Star as RatingIcon,
   ThumbUp as LikertIcon,
   ToggleOn as YesNoIcon,
-  Reorder as RankingIcon
+  Reorder as RankingIcon,
+  KeyboardArrowUp as ArrowUpIcon,
+  KeyboardArrowDown as ArrowDownIcon
 } from '@mui/icons-material'
 
 import { Survey, Question, Section } from '../../types/survey'
@@ -48,7 +50,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
   const [newQuestion, setNewQuestion] = useState<Question>(createNewQuestion())
   const [newSection, setNewSection] = useState<Section>(createNewSection())
   const [showAddSection, setShowAddSection] = useState<boolean>(false)
-  const [addingQuestionToSection, setAddingQuestionToSection] = useState<number>(-1)
+  const [addingQuestionToSection, setAddingQuestionToSection] = useState<Set<number>>(new Set())
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0]))
 
   const sections = data.sections || survey.sections || []
@@ -88,6 +90,41 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
     setExpandedSections(newExpanded)
   }
 
+  // Section reordering handlers
+  const handleMoveSectionUp = (sectionIndex: number) => {
+    if (sectionIndex <= 0) return
+    
+    const reorderedSections = [...sections]
+    const temp = reorderedSections[sectionIndex]
+    reorderedSections[sectionIndex] = reorderedSections[sectionIndex - 1]
+    reorderedSections[sectionIndex - 1] = temp
+    
+    // Update order property for all sections
+    const updatedSections = reorderedSections.map((section, index) => ({
+      ...section,
+      order: index + 1
+    }))
+    
+    onChange({ sections: updatedSections })
+  }
+
+  const handleMoveSectionDown = (sectionIndex: number) => {
+    if (sectionIndex >= sections.length - 1) return
+    
+    const reorderedSections = [...sections]
+    const temp = reorderedSections[sectionIndex]
+    reorderedSections[sectionIndex] = reorderedSections[sectionIndex + 1]
+    reorderedSections[sectionIndex + 1] = temp
+    
+    // Update order property for all sections
+    const updatedSections = reorderedSections.map((section, index) => ({
+      ...section,
+      order: index + 1
+    }))
+    
+    onChange({ sections: updatedSections })
+  }
+
   const handleAddSection = () => {
     if (!newSection.title.trim()) return
 
@@ -118,7 +155,11 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
     
     onChange({ sections: updatedSections })
     setNewQuestion(createNewQuestion())
-    setAddingQuestionToSection(-1)
+    
+    // Remove this section from the adding set
+    const newAddingSet = new Set(addingQuestionToSection)
+    newAddingSet.delete(sectionIndex)
+    setAddingQuestionToSection(newAddingSet)
   }
 
   const handleEditQuestion = (sectionIndex: number, questionIndex: number) => {
@@ -290,7 +331,11 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
               borderRadius: 3,
               border: '1px solid #eef0f8',
               overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                boxShadow: '0 4px 16px rgba(24, 26, 67, 0.1)'
+              }
             }}
           >
             {/* Section Header */}
@@ -300,17 +345,50 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
               borderBottom: '1px solid #eef0f8'
             }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ color: '#181a43', fontWeight: 600, mb: 1 }}>
-                    {section.title}
-                  </Typography>
-                  {section.description && (
-                    <Typography variant="body2" color="text.secondary">
-                      {section.description}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
+                  {/* Move Up/Down Arrows */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleMoveSectionUp(sectionIndex)}
+                      disabled={sectionIndex === 0}
+                      sx={{ 
+                        backgroundColor: 'white',
+                        padding: '2px',
+                        '&:hover': { backgroundColor: '#f5f5f5' },
+                        '&:disabled': { opacity: 0.3 }
+                      }}
+                    >
+                      <ArrowUpIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleMoveSectionDown(sectionIndex)}
+                      disabled={sectionIndex === sections.length - 1}
+                      sx={{ 
+                        backgroundColor: 'white',
+                        padding: '2px',
+                        '&:hover': { backgroundColor: '#f5f5f5' },
+                        '&:disabled': { opacity: 0.3 }
+                      }}
+                    >
+                      <ArrowDownIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ color: '#181a43', fontWeight: 600, mb: 1 }}>
+                      {section.title}
                     </Typography>
-                  )}
+                    {section.description && (
+                      <Typography variant="body2" color="text.secondary">
+                        {section.description}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+                
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', ml: 2 }}>
                   <Chip 
                     label={`${section.questions.length} questions`} 
                     size="small" 
@@ -320,6 +398,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                       fontWeight: 500
                     }} 
                   />
+
                   <IconButton
                     size="small"
                     onClick={() => toggleSectionExpansion(sectionIndex)}
@@ -393,7 +472,11 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     <Button
                       variant="outlined"
                       startIcon={<AddIcon />}
-                      onClick={() => setAddingQuestionToSection(sectionIndex)}
+                      onClick={() => {
+                        const newAddingSet = new Set(addingQuestionToSection)
+                        newAddingSet.add(sectionIndex)
+                        setAddingQuestionToSection(newAddingSet)
+                      }}
                       size="small"
                       sx={{ 
                         borderColor: '#181a43',
@@ -409,7 +492,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                   </Box>
 
                   {/* Add Question Form */}
-                  {addingQuestionToSection === sectionIndex && (
+                  {addingQuestionToSection.has(sectionIndex) && (
                     <Paper sx={{ p: 3, mb: 3, border: '2px solid #e3f2fd', borderRadius: 2 }}>
                       <Typography variant="h6" gutterBottom sx={{ color: '#181a43' }}>
                         Add New Question
@@ -543,7 +626,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                             <Button 
                               variant="outlined" 
                               onClick={() => {
-                                setAddingQuestionToSection(-1)
+                                const newAddingSet = new Set(addingQuestionToSection)
+                                newAddingSet.delete(sectionIndex)
+                                setAddingQuestionToSection(newAddingSet)
                                 setNewQuestion(createNewQuestion())
                               }}
                               size="medium"
