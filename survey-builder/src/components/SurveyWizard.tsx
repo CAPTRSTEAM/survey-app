@@ -203,7 +203,7 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
           {/* CAPTRS Logo */}
           <Box
             component="img"
-            src="/CAPTRS_StackedLogo_White_Square-01-01.png"
+            src="./CAPTRS_StackedLogo_White_Square-01-01.png"
             alt="CAPTRS Logo"
             sx={{
               height: 48,
