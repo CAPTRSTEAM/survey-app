@@ -122,7 +122,7 @@ const SurveyBuilder: React.FC = () => {
           {/* CAPTRS Logo */}
           <Box
             component="img"
-            src="/CAPTRS_StackedLogo_White_Square-01-01.png"
+            src="./CAPTRS_StackedLogo_White_Square-01-01.png"
             alt="CAPTRS Logo"
             sx={{
               height: 48,
@@ -189,7 +189,7 @@ const SurveyBuilder: React.FC = () => {
           {/* CAPTRS Logo */}
           <Box
             component="img"
-            src="/CAPTRS_StackedLogo_White_Square-01-01.png"
+            src="./CAPTRS_StackedLogo_White_Square-01-01.png"
             alt="CAPTRS Logo"
             sx={{
               height: 48,
@@ -210,24 +210,7 @@ const SurveyBuilder: React.FC = () => {
             CAPTRS Survey Builder
           </Typography>
         </Box>
-        
-        {/* Right side controls */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* User Profile Icon */}
-          <Box sx={{ 
-            width: 32, 
-            height: 32, 
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: 'white'
-          }}>
-            👤
-          </Box>
-        </Box>
+
       </Box>
 
       {/* Main Content with top padding for fixed header */}
