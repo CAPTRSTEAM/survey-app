@@ -106,10 +106,19 @@ npm run build
 
 ### Adding Questions
 1. In the Questions step, click "Add Section" to create a new section
-2. Fill in section title and description
-3. Add questions to the section using the "Add Question" form
-4. Configure question type, options, and required status
-5. Questions are automatically saved as you work
+2. Fill in section title and description (only shown when adding)
+3. Click "Add Question" within any section to add questions
+4. Select question type from visual picker with icons and descriptions
+5. Configure question options and required status
+6. Use up/down arrows (left of section titles) to reorder sections
+7. Questions are automatically saved as you work
+
+### Question Section Management
+- **Card-Based Interface**: Each section displays as a modern card with gradient header
+- **Progressive Disclosure**: Add Question forms appear only when needed
+- **Visual Question Types**: Icon-based picker showing all 7 question types with descriptions
+- **Independent Forms**: Multiple sections can show Add Question forms simultaneously
+- **Intuitive Reordering**: Up/down arrow controls positioned next to section titles
 
 ## 🔧 Configuration
 

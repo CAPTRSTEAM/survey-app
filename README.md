@@ -96,8 +96,9 @@ For detailed documentation, see [survey-taker/README.md](./survey-taker/README.m
 ### Creating and Deploying Surveys
 
 1. **Create Survey**: Use the Survey Builder to create a new survey
-   - Follow the 5-step wizard to configure survey details
-   - Add sections and questions as needed
+   - Follow the 5-step wizard with modern card-based interface
+   - Add sections with visual question type picker and intuitive controls
+   - Reorder sections using up/down arrow controls
    - Export the survey as a JSON file to you PC
 
 2. **Deploy Survey**: Use the Survey Taker to administer the survey

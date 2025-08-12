@@ -43,6 +43,14 @@ This document outlines the development practices, recent improvements, and techn
 - **Section Support**: Multiple question sections with titles and descriptions
 - **Export Compatibility**: Generates JSON compatible with survey taker
 
+#### **UX Improvements**
+- **Card-Based Design**: Modern card layout replacing accordion interface
+- **Visual Question Picker**: Icon-based question type selection with descriptions
+- **Progressive Disclosure**: Show forms only when needed to reduce cognitive load
+- **Intuitive Reordering**: Up/down arrow controls for section management
+- **Multiple Question Forms**: Each section can independently show "Add Question" forms
+- **Improved Visual Hierarchy**: Clean gradients, consistent spacing, and professional styling
+
 ## 🛠️ **Development Setup**
 
 ### **Prerequisites**
