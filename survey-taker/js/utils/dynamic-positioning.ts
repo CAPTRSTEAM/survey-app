@@ -14,7 +14,20 @@ export const useDynamicPositioning = (currentSectionIndex: number): DynamicStyle
         let resizeObserver: ResizeObserver | undefined;
         let mutationObserver: MutationObserver | undefined;
 
+        let isUpdating = false;
+        let lastUpdateTime = 0;
+        const UPDATE_THROTTLE = 100; // Minimum time between updates
+
         const updatePositions = () => {
+            // Prevent concurrent updates and throttle frequent calls
+            const now = Date.now();
+            if (isUpdating || (now - lastUpdateTime) < UPDATE_THROTTLE) {
+                return;
+            }
+            
+            isUpdating = true;
+            lastUpdateTime = now;
+            
             try {
                 const headerHeight = 64; // var(--header-height)
                 const sectionTitleContainer = document.querySelector('.section-title-container');
@@ -26,23 +39,50 @@ export const useDynamicPositioning = (currentSectionIndex: number): DynamicStyle
                     const questionProgressTop = headerHeight + sectionTitleHeight;
                     const questionsPaddingTop = questionProgressTop + 60; // var(--question-progress-height)
 
-                    setDynamicStyles({
+                    const newStyles = {
                         questionProgressTop: `${questionProgressTop}px`,
                         questionsPaddingTop: `${questionsPaddingTop}px`
+                    };
+
+                    // Only update if values actually changed
+                    setDynamicStyles(prevStyles => {
+                        if (prevStyles.questionProgressTop !== newStyles.questionProgressTop ||
+                            prevStyles.questionsPaddingTop !== newStyles.questionsPaddingTop) {
+                            return newStyles;
+                        }
+                        return prevStyles;
                     });
                 } else {
-                    setDynamicStyles({
+                    const defaultStyles = {
                         questionProgressTop: '144px', // 64 + 80
                         questionsPaddingTop: '204px'  // 144 + 60
+                    };
+                    
+                    setDynamicStyles(prevStyles => {
+                        if (prevStyles.questionProgressTop !== defaultStyles.questionProgressTop ||
+                            prevStyles.questionsPaddingTop !== defaultStyles.questionsPaddingTop) {
+                            return defaultStyles;
+                        }
+                        return prevStyles;
                     });
                 }
             } catch (error) {
                 console.error('Error updating positions:', error);
                 // Fallback to default values
-                setDynamicStyles({
+                const fallbackStyles = {
                     questionProgressTop: '144px', // 64 + 80
                     questionsPaddingTop: '204px'  // 144 + 60
+                };
+                
+                setDynamicStyles(prevStyles => {
+                    if (prevStyles.questionProgressTop !== fallbackStyles.questionProgressTop ||
+                        prevStyles.questionsPaddingTop !== fallbackStyles.questionsPaddingTop) {
+                        return fallbackStyles;
+                    }
+                    return prevStyles;
                 });
+            } finally {
+                isUpdating = false;
             }
         };
 
@@ -51,16 +91,33 @@ export const useDynamicPositioning = (currentSectionIndex: number): DynamicStyle
 
         // Set up observers for dynamic content changes
         try {
-            resizeObserver = new ResizeObserver(updatePositions);
-            mutationObserver = new MutationObserver(updatePositions);
+            // Use debounced version for observers to prevent rapid firing
+            const debouncedUpdate = () => {
+                setTimeout(updatePositions, 50);
+            };
+
+            resizeObserver = new ResizeObserver(debouncedUpdate);
+            
+            // More conservative MutationObserver configuration
+            mutationObserver = new MutationObserver((mutations) => {
+                // Only trigger if there are actual structural changes
+                const hasStructuralChanges = mutations.some(mutation => 
+                    mutation.type === 'childList' && 
+                    (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)
+                );
+                
+                if (hasStructuralChanges) {
+                    debouncedUpdate();
+                }
+            });
 
             const sectionTitleContainer = document.querySelector('.section-title-container');
             if (sectionTitleContainer) {
                 resizeObserver.observe(sectionTitleContainer);
                 mutationObserver.observe(sectionTitleContainer, {
                     childList: true,
-                    subtree: true,
-                    characterData: true
+                    subtree: false, // Only immediate children to reduce overhead
+                    characterData: false // Don't track text changes to reduce overhead
                 });
             }
         } catch (error) {

@@ -410,17 +410,24 @@
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     :root {
-        --color-white: #1a1a1a;
-        --color-light-gray: #2a2a2a;
-        --color-gray-100: #3a3a3a;
-        --color-gray-200: #4a4a4a;
-        --color-gray-300: #5a5a5a;
-        --color-gray-400: #6a6a6a;
-        --color-gray-500: #7a7a7a;
-        --color-gray-600: #8a8a8a;
-        --color-gray-700: #9a9a9a;
-        --color-gray-800: #aaaaaa;
+        /* Improved dark mode colors with better contrast */
+        --color-white: #1e1e1e;
+        --color-light-gray: #121212;
+        --color-gray-100: #2d2d2d;
+        --color-gray-200: #404040;
+        --color-gray-300: #525252;
+        --color-gray-400: #737373;
+        --color-gray-500: #a3a3a3;
+        --color-gray-600: #d4d4d4;
+        --color-gray-700: #e5e5e5;
+        --color-gray-800: #f5f5f5;
         --color-gray-900: #ffffff;
+        
+        /* Ensure primary colors work well in dark mode */
+        --color-primary-light: #3b4a8f;
+        --color-error: #ff6b6b;
+        --color-success: #51cf66;
+        --color-warning: #ffd43b;
     }
 
     body {
@@ -430,37 +437,103 @@
 
     .questions-section {
         background-color: var(--color-white);
+        color: var(--color-gray-900);
     }
 
     .question-card {
         background-color: var(--color-white);
+        color: var(--color-gray-900);
+        border-color: var(--color-gray-200);
     }
 
     .option-item {
-        background-color: var(--color-white);
+        background-color: var(--color-gray-100);
         color: var(--color-gray-900);
+        border-color: var(--color-gray-300);
+    }
+    
+    .option-item:hover {
+        background-color: var(--color-gray-200);
+    }
+    
+    .option-item.selected {
+        background-color: var(--color-primary-medium);
+        color: var(--color-white);
     }
 
     .likert-option {
-        background-color: var(--color-white);
+        background-color: var(--color-gray-100);
         color: var(--color-gray-900);
+        border-color: var(--color-gray-300);
+    }
+    
+    .likert-option:hover {
+        background-color: var(--color-gray-200);
+    }
+    
+    .likert-option.selected {
+        background-color: var(--color-primary-medium);
+        color: var(--color-white);
     }
 
     .text-input {
-        background-color: var(--color-white);
+        background-color: var(--color-gray-100);
         color: var(--color-gray-900);
+        border-color: var(--color-gray-300);
+    }
+    
+    .text-input:focus {
+        border-color: var(--color-primary-medium);
+        background-color: var(--color-white);
     }
 
     .survey-footer {
         background-color: var(--color-white);
+        border-color: var(--color-gray-200);
     }
 
     .section-title-container {
         background-color: var(--color-white);
+        color: var(--color-gray-900);
     }
 
     .question-progress-container {
         background-color: var(--color-white);
+        color: var(--color-gray-900);
+    }
+    
+    /* Improve header visibility in dark mode */
+    .survey-header {
+        background-color: var(--color-white);
+        color: var(--color-gray-900);
+        border-color: var(--color-gray-200);
+    }
+    
+    /* Better contrast for question text */
+    .question-text {
+        color: var(--color-gray-900);
+    }
+    
+    .question-title {
+        color: var(--color-gray-900);
+    }
+    
+    /* Improve button contrast */
+    .button--secondary {
+        background-color: var(--color-gray-100);
+        color: var(--color-gray-900);
+        border-color: var(--color-gray-300);
+    }
+    
+    .button--secondary:hover {
+        background-color: var(--color-gray-200);
+    }
+    
+    /* Mode indicator dark mode styling */
+    .mode-indicator {
+        background-color: var(--color-primary-medium);
+        color: var(--color-white);
+        border: 1px solid var(--color-gray-300);
     }
 }
 

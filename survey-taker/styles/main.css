@@ -108,7 +108,20 @@ html {
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
+}
+
+/* Conditionally enable smooth scroll - disabled on Mac to prevent freezing */
+@supports not (-webkit-touch-callout: none) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* For non-Mac browsers, enable smooth scroll */
+@media not all and (-webkit-min-device-pixel-ratio: 0) {
+    html {
+        scroll-behavior: smooth;
+    }
 }
 
 body {
@@ -194,8 +207,8 @@ body {
 /* Mode Indicator */
 .mode-indicator {
     position: fixed;
-    top: var(--space-4);
-    right: var(--space-4);
+    bottom: var(--space-4);
+    left: var(--space-4);
     background-color: var(--color-primary-medium);
     color: var(--color-white);
     padding: var(--space-2) var(--space-4);
@@ -204,6 +217,12 @@ body {
     font-weight: var(--font-weight-medium);
     z-index: var(--z-tooltip);
     box-shadow: var(--shadow-sm);
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.mode-indicator:hover {
+    opacity: 1;
 }
 
 /* Welcome and Thank You Screens */
