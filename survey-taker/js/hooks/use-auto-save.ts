@@ -31,12 +31,17 @@ export const useAutoSave = (surveyId: string | null, answers: SurveyAnswers) => 
     }
   }, [surveyId]);
 
-  // Auto-save when answers change
+  // Auto-save when answers change - throttled to prevent excessive saves
   ReactInstance.useEffect(() => {
     if (surveyId && Object.keys(answers).length > 0) {
-      saveAnswers(answers);
+      // Throttle auto-save to prevent excessive localStorage writes
+      const timeoutId = setTimeout(() => {
+        saveAnswers(answers);
+      }, 500); // 500ms delay to batch changes
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [answers, saveAnswers]);
+  }, [answers, saveAnswers, surveyId]);
 
   // Clear saved answers when survey changes
   ReactInstance.useEffect(() => {

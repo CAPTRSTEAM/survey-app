@@ -12,10 +12,7 @@ import { QuestionProgress as QuestionProgressComponent } from './question-progre
 const ReactInstance = window.React || (window as any).React;
 
 export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
-    // Performance tracking
-    usePerformanceTracking('SurveyApp');
-    useRenderCount('SurveyApp');
-    useMemoryUsage();
+    // Performance tracking disabled to prevent browser crashes
     
     // State management
     const [survey, setSurvey] = ReactInstance.useState(null as Survey | null);
@@ -25,6 +22,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     const [appMode, setAppMode] = ReactInstance.useState('loading' as AppMode);
     const [isSubmitting, setIsSubmitting] = ReactInstance.useState(false);
     const [error, setError] = ReactInstance.useState(null as string | null);
+    const [isTimeoutError, setIsTimeoutError] = ReactInstance.useState(false);
 
     const fileInputRef = ReactInstance.useRef(null as HTMLInputElement | null);
 
@@ -35,6 +33,33 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
 
     // Auto-save functionality
     const { loadSavedAnswers, clearSavedAnswers } = useAutoSave(survey?.id || null, answers);
+
+    // Handle timeout error
+    const handleTimeoutError = ReactInstance.useCallback(() => {
+        setIsTimeoutError(true);
+        setAppMode('error');
+    }, []);
+
+    // Handle retry after timeout
+    const handleRetry = ReactInstance.useCallback(() => {
+        setIsTimeoutError(false);
+        setError(null);
+        setAppMode('loading');
+        // Reset API provider and try again
+        if (apiProvider) {
+            apiProvider.reset();
+        }
+    }, [apiProvider]);
+
+    // Handle quit after timeout
+    const handleQuit = ReactInstance.useCallback(() => {
+        // Close the window or navigate away
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'CLOSE_APP' }, '*');
+        } else {
+            window.close();
+        }
+    }, []);
 
     // Handle survey file upload
     const handleSurveyLoad = ReactInstance.useCallback((surveyData: Survey) => {
@@ -160,6 +185,9 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                         console.warn('API provider callback received null/undefined surveyConfig');
                     }
                 });
+
+                // Register timeout handler
+                apiProvider.onTimeout = handleTimeoutError;
 
                 // Send ready message to platform
                 try {
@@ -297,9 +325,65 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         return ReactInstance.createElement('div', { className: 'loading' }, 'Loading survey...');
     }
 
+    // Show timeout error
+    if (isTimeoutError) {
+        return ReactInstance.createElement('div', { className: 'survey-app' },
+            ReactInstance.createElement('div', { className: 'timeout-error' }, 
+                ReactInstance.createElement('div', { className: 'timeout-icon' }, '⏱️'),
+                ReactInstance.createElement('h2', null, 'Connection Timeout'),
+                ReactInstance.createElement('p', null, 'The survey failed to load within the expected time. This could be due to a slow connection or server issues.'),
+                ReactInstance.createElement('div', { className: 'timeout-actions' },
+                    ReactInstance.createElement('button', {
+                        onClick: handleRetry,
+                        className: 'button button--primary',
+                        style: { marginRight: 'var(--space-3)' }
+                    }, 'Try Again'),
+                    ReactInstance.createElement('button', {
+                        onClick: handleQuit,
+                        className: 'button button--secondary'
+                    }, 'Quit')
+                ),
+                ReactInstance.createElement('p', { className: 'timeout-help' }, 
+                    'If this problem persists, please check your internet connection and try again.'
+                )
+            )
+        );
+    }
+
     // Show error
     if (error) {
-        return ReactInstance.createElement('div', { className: 'error-message' }, error);
+        return ReactInstance.createElement('div', { className: 'survey-app' },
+            ReactInstance.createElement('div', { className: 'error-message' }, 
+                ReactInstance.createElement('h2', null, 'Configuration Error'),
+                ReactInstance.createElement('p', null, error),
+                ReactInstance.createElement('p', null, 'The survey will load with sample data for testing purposes.'),
+                ReactInstance.createElement('button', {
+                    onClick: () => {
+                        setError(null);
+                        // Try to load sample survey
+                        const sampleSurvey = {
+                            "id": "sample-survey-001",
+                            "title": "Sample Survey",
+                            "description": "This is a sample survey for testing purposes.",
+                            "sections": [{
+                                "id": "sample-section",
+                                "title": "Sample Questions",
+                                "description": "Please answer these sample questions.",
+                                "questions": [{
+                                    "id": "q1",
+                                    "type": "text",
+                                    "question": "What is your feedback?",
+                                    "required": false
+                                }]
+                            }]
+                        };
+                        handleSurveyLoad(sampleSurvey);
+                    },
+                    className: 'button button--primary',
+                    style: { marginTop: 'var(--space-4)' }
+                }, 'Load Sample Survey')
+            )
+        );
     }
 
     // Show loading state for platform mode when survey is not yet loaded

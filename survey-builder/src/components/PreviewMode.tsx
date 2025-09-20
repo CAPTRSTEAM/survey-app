@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  useTheme,
   LinearProgress,
   Container
 } from '@mui/material'
@@ -37,6 +38,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
   open,
   onClose
 }) => {
+  const theme = useTheme()
   const [previewState, setPreviewState] = useState<PreviewState>({
     currentSectionIndex: -1, // Start at welcome screen
     answers: {},
@@ -80,10 +82,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
 
   const renderWelcomeScreen = () => (
     <Box sx={{ textAlign: 'center', py: 6 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: '#181a43' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'primary.main' }}>
         {survey.welcome?.title || 'Welcome to the Survey'}
       </Typography>
-      <Typography variant="body1" sx={{ mb: 4, color: '#6b7280', maxWidth: 600, mx: 'auto' }}>
+      <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', maxWidth: 600, mx: 'auto' }}>
         {survey.welcome?.message || 'Thank you for participating in this survey. Please click the button below to begin.'}
       </Typography>
       <Button
@@ -93,9 +95,9 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         sx={{
           px: 4,
           py: 1.5,
-          background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+          backgroundColor: 'primary.main',
           '&:hover': {
-            background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+            backgroundColor: 'primary.dark',
           }
         }}
       >
@@ -116,7 +118,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
             <textarea
@@ -127,7 +129,8 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                 width: '100%',
                 minHeight: '120px',
                 padding: '12px',
-                border: '2px solid #d1d5db',
+                border: '2px solid',
+                borderColor: 'divider',
                 borderRadius: '8px',
                 fontFamily: 'inherit',
                 fontSize: '16px',
@@ -141,10 +144,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: '#6b7280', fontStyle: 'italic' }}>
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontStyle: 'italic' }}>
               Select one option
             </Typography>
             <Box sx={{ 
@@ -161,9 +164,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                   alignItems: 'center', 
                   cursor: 'pointer',
                   padding: '8px 12px',
-                  border: '2px solid #d1d5db',
+                  border: '2px solid',
+                  borderColor: answer === option ? theme.palette.primary.main : theme.palette.divider,
                   borderRadius: '6px',
-                  backgroundColor: answer === option ? '#eef0f8' : 'white',
+                  backgroundColor: answer === option ? theme.palette.action.selected : theme.palette.background.paper,
                   flex: 1,
                   minWidth: 0,
                   justifyContent: 'center',
@@ -177,7 +181,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     onChange={(e) => handleInputChange(e.target.value)}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center' }}>{option}</span>
+                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
                 </label>
               ))}
             </Box>
@@ -188,10 +192,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: '#6b7280', fontStyle: 'italic' }}>
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontStyle: 'italic' }}>
               Select all that apply
             </Typography>
             <Box sx={{ 
@@ -208,9 +212,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                   alignItems: 'center', 
                   cursor: 'pointer',
                   padding: '8px 12px',
-                  border: '2px solid #d1d5db',
+                  border: '2px solid',
+                  borderColor: Array.isArray(answer) && answer.includes(option) ? theme.palette.primary.main : theme.palette.divider,
                   borderRadius: '6px',
-                  backgroundColor: Array.isArray(answer) && answer.includes(option) ? '#eef0f8' : 'white',
+                  backgroundColor: Array.isArray(answer) && answer.includes(option) ? theme.palette.action.selected : theme.palette.background.paper,
                   flex: 1,
                   minWidth: 0,
                   justifyContent: 'center',
@@ -230,7 +235,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     }}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center' }}>{option}</span>
+                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
                 </label>
               ))}
             </Box>
@@ -241,16 +246,16 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
             <Box sx={{ 
-              display: 'flex !important', 
-              flexDirection: 'row !important', 
+              display: 'flex', 
+              flexDirection: 'row', 
               gap: 2, 
               flexWrap: 'wrap', 
-              width: '100% !important', 
-              justifyContent: 'space-between !important', 
+              width: '100%', 
+              justifyContent: 'space-between', 
               alignItems: 'stretch' 
             }}>
               {question.options?.map((option) => (
@@ -258,18 +263,19 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                   key={option}
                   component="label"
                   sx={{ 
-                    display: 'flex !important', 
+                    display: 'flex', 
                     alignItems: 'center', 
                     cursor: 'pointer',
                     padding: '8px 12px',
-                    border: '2px solid #d1d5db',
+                    border: '2px solid',
+                    borderColor: answer === option ? 'primary.main' : 'divider',
                     borderRadius: '6px',
-                    backgroundColor: answer === option ? '#eef0f8' : 'white',
-                    flex: '1 !important',
-                    minWidth: '0 !important',
+                    backgroundColor: answer === option ? 'action.selected' : 'background.paper',
+                    flex: 1,
+                    minWidth: 0,
                     justifyContent: 'center',
                     textAlign: 'center',
-                    flexDirection: 'row !important',
+                    flexDirection: 'row',
                     gap: '8px'
                   }}
                 >
@@ -281,7 +287,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     onChange={(e) => handleInputChange(e.target.value)}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center' }}>{option}</span>
+                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
                 </Box>
               ))}
             </Box>
@@ -292,7 +298,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
             <Box sx={{ 
@@ -310,7 +316,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     component="label"
                     sx={{
                       fontSize: '1.5rem', // var(--font-size-2xl) 
-                      color: isHighlighted ? '#ffc107' : '#d1d5db', // var(--color-warning) : var(--color-gray-300)
+                      color: isHighlighted ? theme.palette.warning.main : theme.palette.grey[400],
                       cursor: 'pointer',
                       transition: 'color 0.2s ease',
                       display: 'flex',
@@ -319,7 +325,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                       width: '40px',
                       height: '40px',
                       '&:hover': {
-                        color: '#ffc107' // var(--color-warning)
+                        color: theme.palette.warning.main
                       }
                     }}
                     onClick={() => handleInputChange(rating)}
@@ -348,7 +354,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
             <Box sx={{ 
@@ -363,9 +369,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                   alignItems: 'center', 
                   cursor: 'pointer',
                   padding: '8px 24px',
-                  border: '2px solid #d1d5db',
+                  border: '2px solid',
+                  borderColor: answer === option ? theme.palette.primary.main : theme.palette.divider,
                   borderRadius: '6px',
-                  backgroundColor: answer === option ? '#eef0f8' : 'white',
+                  backgroundColor: answer === option ? theme.palette.action.selected : theme.palette.background.paper,
                   flex: 1,
                   minWidth: 0,
                   justifyContent: 'center',
@@ -379,7 +386,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     onChange={(e) => handleInputChange(e.target.value)}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center' }}>{option}</span>
+                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
                 </label>
               ))}
             </Box>
@@ -482,10 +489,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
           return (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-                {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+                {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
                 {question.question}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 2, color: '#6b7280', fontStyle: 'italic' }}>
+              <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontStyle: 'italic' }}>
                 Drag and drop options to rank them, or click to toggle ranking. Higher ranked items appear at the top.
               </Typography>
               
@@ -496,9 +503,9 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                 borderRadius: '6px',
                 fontSize: '14px',
                 fontWeight: '500',
-                backgroundColor: Object.keys(answer || {}).length === question.options?.length ? '#d1fae5' : '#fef3c7',
-                color: Object.keys(answer || {}).length === question.options?.length ? '#065f46' : '#92400e',
-                border: Object.keys(answer || {}).length === question.options?.length ? '1px solid #10b981' : '1px solid #f59e0b'
+                backgroundColor: Object.keys(answer || {}).length === question.options?.length ? theme.palette.success.light : theme.palette.warning.light,
+                color: Object.keys(answer || {}).length === question.options?.length ? theme.palette.success.dark : theme.palette.warning.dark,
+                border: Object.keys(answer || {}).length === question.options?.length ? `1px solid ${theme.palette.success.main}` : `1px solid ${theme.palette.warning.main}`
               }}>
                 {Object.keys(answer || {}).length === question.options?.length 
                   ? `All ${question.options?.length} options ranked`
@@ -528,15 +535,16 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                         alignItems: 'center',
                         gap: 2,
                         padding: '12px 16px',
-                        border: '2px solid #d1d5db',
+                        border: '2px solid',
+                        borderColor: isRanked ? theme.palette.primary.main : theme.palette.divider,
                         borderRadius: '8px',
-                        backgroundColor: isRanked ? '#eef0f8' : 'white',
+                        backgroundColor: isRanked ? theme.palette.action.selected : theme.palette.background.paper,
                         cursor: 'grab',
                         position: 'relative',
                         transition: 'all 0.2s ease',
                         '&:hover': {
-                          borderColor: '#4358a3',
-                          backgroundColor: '#f9fafb',
+                          borderColor: theme.palette.primary.main,
+                          backgroundColor: theme.palette.action.hover,
                           transform: 'translateY(-1px)',
                           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                         },
@@ -544,8 +552,8 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                           cursor: 'grabbing'
                         },
                         '&.drag-over': {
-                          borderColor: '#4358a3',
-                          backgroundColor: '#eef0f8',
+                          borderColor: theme.palette.primary.main,
+                          backgroundColor: theme.palette.action.selected,
                           transform: 'scale(1.02)',
                           boxShadow: '0 4px 8px rgba(67, 88, 163, 0.3)'
                         }
@@ -570,7 +578,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     >
                       {/* Drag handle */}
                       <Box sx={{ 
-                        color: '#9ca3af', 
+                        color: theme.palette.grey[400], 
                         fontSize: '18px', 
                         cursor: 'grab', 
                         userSelect: 'none', 
@@ -586,16 +594,16 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                       <Box sx={{
                         width: '32px',
                         height: '32px',
-                        border: '2px solid #d1d5db',
+                        border: '2px solid',
+                        borderColor: isRanked ? theme.palette.primary.main : theme.palette.divider,
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 'bold',
                         fontSize: '14px',
-                        backgroundColor: isRanked ? '#4358a3' : 'white',
-                        color: isRanked ? 'white' : '#6b7280',
-                        borderColor: isRanked ? '#4358a3' : '#d1d5db'
+                        backgroundColor: isRanked ? theme.palette.primary.main : theme.palette.background.paper,
+                        color: isRanked ? theme.palette.primary.contrastText : theme.palette.text.secondary
                       }}>
                         {isRanked ? rankNumber : ''}
                       </Box>
@@ -621,7 +629,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                             style={{
                               background: 'none',
                               border: 'none',
-                              color: '#10b981',
+                              color: theme.palette.success.main,
                               fontSize: '16px',
                               cursor: 'pointer',
                               padding: '4px 8px',
@@ -634,12 +642,12 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                               justifyContent: 'center'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#d1fae5';
-                              e.currentTarget.style.color = '#065f46';
+                              e.currentTarget.style.backgroundColor = theme.palette.success.light;
+                              e.currentTarget.style.color = theme.palette.success.dark;
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.color = '#10b981';
+                              e.currentTarget.style.color = theme.palette.success.main;
                             }}
                           >
                             ↑
@@ -662,7 +670,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                             style={{
                               background: 'none',
                               border: 'none',
-                              color: '#f59e0b',
+                              color: theme.palette.warning.main,
                               fontSize: '16px',
                               cursor: 'pointer',
                               padding: '4px 8px',
@@ -675,12 +683,12 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                               justifyContent: 'center'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#fef3c7';
-                              e.currentTarget.style.color = '#92400e';
+                              e.currentTarget.style.backgroundColor = theme.palette.warning.light;
+                              e.currentTarget.style.color = theme.palette.warning.dark;
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.color = '#f59e0b';
+                              e.currentTarget.style.color = theme.palette.warning.main;
                             }}
                           >
                             ↓
@@ -699,7 +707,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                             style={{
                               background: 'none',
                               border: 'none',
-                              color: '#6b7280',
+                              color: theme.palette.text.secondary,
                               fontSize: '18px',
                               cursor: 'pointer',
                               padding: '4px 8px',
@@ -712,12 +720,12 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                               justifyContent: 'center'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#fee2e2';
-                              e.currentTarget.style.color = '#dc2626';
+                              e.currentTarget.style.backgroundColor = theme.palette.error.light;
+                              e.currentTarget.style.color = theme.palette.error.dark;
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent';
-                              e.currentTarget.style.color = '#6b7280';
+                              e.currentTarget.style.color = theme.palette.text.secondary;
                             }}
                           >
                             ×
@@ -738,10 +746,10 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         return (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'semibold', display: 'flex', alignItems: 'center', gap: 1 }}>
-              {question.required && <span style={{ color: '#ef4444', order: -1 }}>*</span>}
+              {question.required && <span style={{ color: 'error.main', order: -1 }}>*</span>}
               {question.question}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#ef4444' }}>
+            <Typography variant="body2" sx={{ color: 'error.main' }}>
               Question type "{question.type}" is not supported in preview mode.
             </Typography>
           </Box>
@@ -751,16 +759,16 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
 
   const renderSection = (section: Section, index: number) => (
     <Box key={section.id} sx={{ mb: 4 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: '#181a43' }}>
+      <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: 'primary.main' }}>
         {index + 1}. {section.title}
       </Typography>
       {section.description && (
-        <Typography variant="body1" sx={{ mb: 3, color: '#6b7280' }}>
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
           {section.description}
         </Typography>
       )}
              {section.questions.map((question) => (
-        <Paper key={question.id} sx={{ p: 3, mb: 3, border: '1px solid #e5e7eb' }}>
+        <Paper key={question.id} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider' }}>
           {renderQuestion(question)}
         </Paper>
       ))}
@@ -769,16 +777,16 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
 
   const renderThankYouScreen = () => (
     <Box sx={{ textAlign: 'center', py: 6 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: '#181a43' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'primary.main' }}>
         {survey.thankYou?.title || 'Thank You!'}
       </Typography>
-      <Typography variant="body1" sx={{ mb: 4, color: '#6b7280', maxWidth: 600, mx: 'auto' }}>
+      <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', maxWidth: 600, mx: 'auto' }}>
         {survey.thankYou?.message || 'Thank you for completing this survey. Your responses have been recorded.'}
       </Typography>
       <Button
         variant="outlined"
         onClick={handleReset}
-        sx={{ borderColor: '#4358a3', color: '#4358a3' }}
+        sx={{ borderColor: 'primary.main', color: 'primary.main' }}
       >
         Preview Again
       </Button>
@@ -823,14 +831,15 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         justifyContent: 'space-between', 
         mt: 4,
         pt: 3,
-        borderTop: '1px solid #e5e7eb'
+        borderTop: '1px solid',
+        borderColor: 'divider'
       }}>
         <Button
           variant="outlined"
           startIcon={<BackIcon />}
           onClick={handlePrevious}
           disabled={!canGoBack}
-          sx={{ borderColor: '#4358a3', color: '#4358a3' }}
+          sx={{ borderColor: 'primary.main', color: 'primary.main' }}
         >
           {previewState.currentSectionIndex === 0 ? 'Back to Welcome' : 'Previous'}
         </Button>
@@ -840,9 +849,9 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
           endIcon={isLastSection ? undefined : <NextIcon />}
           onClick={handleNext}
           sx={{
-            background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+            backgroundColor: 'primary.main',
             '&:hover': {
-              background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+              backgroundColor: 'primary.dark',
             }
           }}
         >
@@ -890,7 +899,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
       <DialogTitle sx={{ 
         m: 0, 
         p: 2, 
-        background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+        backgroundColor: 'primary.main',
         color: 'white',
         display: 'flex',
         justifyContent: 'space-between',

@@ -100,10 +100,10 @@ const SurveyBuilder: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ minHeight: '100vh', backgroundColor: '#eef0f8' }}>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
         {/* 3/4 Width Header Bar */}
         <Box sx={{ 
-          background: '#181a43',
+          backgroundColor: 'primary.dark',
           color: 'white',
           position: 'fixed',
           top: 0,
@@ -167,10 +167,10 @@ const SurveyBuilder: React.FC = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#eef0f8' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* 3/4 Width Header Bar */}
       <Box sx={{ 
-        background: '#181a43',
+        backgroundColor: 'primary.dark',
         color: 'white',
         position: 'fixed',
         top: 0,
@@ -220,7 +220,8 @@ const SurveyBuilder: React.FC = () => {
           backgroundColor: 'white',
           borderRadius: 3,
           boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          border: '1px solid #eef0f8',
+          border: '1px solid',
+          borderColor: 'divider',
           p: 4,
           position: 'relative',
           width: '100%',
@@ -230,7 +231,8 @@ const SurveyBuilder: React.FC = () => {
           <Box sx={{ 
             mb: 4,
             pb: 3,
-            borderBottom: '2px solid #eef0f8',
+            borderBottom: '2px solid',
+            borderColor: 'divider',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start'
@@ -239,13 +241,13 @@ const SurveyBuilder: React.FC = () => {
               <Typography variant="h4" sx={{ 
                 fontWeight: 'bold',
                 fontFamily: '"DM Sans", sans-serif',
-                color: '#181a43',
+                color: 'primary.main',
                 mb: 1
               }}>
                 Survey Library
               </Typography>
               <Typography variant="body1" sx={{ 
-                color: '#6b7280',
+                color: 'text.secondary',
                 fontFamily: '"Open Sans", sans-serif',
                 fontWeight: 400
               }}>
@@ -262,12 +264,12 @@ const SurveyBuilder: React.FC = () => {
               sx={{ 
                 px: 3, 
                 py: 1.5,
-                background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+                backgroundColor: 'primary.main',
                 color: 'white',
                 borderRadius: 2,
                 boxShadow: '0 2px 8px rgba(43, 61, 139, 0.2)',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+                  backgroundColor: 'primary.dark',
                   boxShadow: '0 4px 12px rgba(43, 61, 139, 0.3)',
                   transform: 'translateY(-1px)',
                 },

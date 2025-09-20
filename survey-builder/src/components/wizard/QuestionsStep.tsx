@@ -95,9 +95,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
     if (sectionIndex <= 0) return
     
     const reorderedSections = [...sections]
-    const temp = reorderedSections[sectionIndex]
+    const currentSection = reorderedSections[sectionIndex]
     reorderedSections[sectionIndex] = reorderedSections[sectionIndex - 1]
-    reorderedSections[sectionIndex - 1] = temp
+    reorderedSections[sectionIndex - 1] = currentSection
     
     // Update order property for all sections
     const updatedSections = reorderedSections.map((section, index) => ({
@@ -112,9 +112,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
     if (sectionIndex >= sections.length - 1) return
     
     const reorderedSections = [...sections]
-    const temp = reorderedSections[sectionIndex]
+    const currentSection = reorderedSections[sectionIndex]
     reorderedSections[sectionIndex] = reorderedSections[sectionIndex + 1]
-    reorderedSections[sectionIndex + 1] = temp
+    reorderedSections[sectionIndex + 1] = currentSection
     
     // Update order property for all sections
     const updatedSections = reorderedSections.map((section, index) => ({
@@ -260,7 +260,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
       {/* Sections Overview */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6" sx={{ color: '#181a43', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
             Sections ({sections.length})
           </Typography>
           <Button
@@ -268,8 +268,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
             startIcon={<AddIcon />}
             onClick={() => setShowAddSection(true)}
             sx={{ 
-              background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
-              '&:hover': { background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)' }
+              backgroundColor: 'primary.main',
+              '&:hover': { backgroundColor: 'primary.dark' }
             }}
           >
             Add Section
@@ -278,9 +278,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
         {/* Add New Section Form */}
         {showAddSection && (
-          <Paper sx={{ p: 3, mb: 3, border: '2px solid #e3f2fd', borderRadius: 2 }}>
+          <Paper sx={{ p: 3, mb: 3, border: '2px solid', borderColor: 'primary.light', borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ color: '#181a43' }}>Create New Section</Typography>
+              <Typography variant="h6" sx={{ color: 'primary.main' }}>Create New Section</Typography>
               <Button variant="outlined" size="small" onClick={() => { setShowAddSection(false); setNewSection(createNewSection()) }}>
                 Cancel
               </Button>
@@ -312,7 +312,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                   startIcon={<AddIcon />}
                   onClick={handleAddSection}
                   disabled={!newSection.title.trim()}
-                  sx={{ background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)' }}
+                  sx={{ backgroundColor: 'primary.main', '&:hover': { backgroundColor: 'primary.dark' } }}
                 >
                   Create Section
                 </Button>
@@ -329,9 +329,10 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
             key={section.id} 
             sx={{ 
               borderRadius: 3,
-              border: '1px solid #eef0f8',
+              border: '1px solid',
+              borderColor: 'divider',
               overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              boxShadow: 1,
               transition: 'all 0.2s ease',
               '&:hover': {
                 boxShadow: '0 4px 16px rgba(24, 26, 67, 0.1)'
@@ -341,8 +342,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
             {/* Section Header */}
             <Box sx={{ 
               p: 3, 
-              background: 'linear-gradient(135deg, #f8f9ff 0%, #eef0f8 100%)',
-              borderBottom: '1px solid #eef0f8'
+              backgroundColor: 'grey.50',
+              borderBottom: '1px solid',
+              borderColor: 'divider'
             }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
@@ -353,9 +355,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                       onClick={() => handleMoveSectionUp(sectionIndex)}
                       disabled={sectionIndex === 0}
                       sx={{ 
-                        backgroundColor: 'white',
+                        backgroundColor: 'background.paper',
                         padding: '2px',
-                        '&:hover': { backgroundColor: '#f5f5f5' },
+                        '&:hover': { backgroundColor: 'action.hover' },
                         '&:disabled': { opacity: 0.3 }
                       }}
                     >
@@ -366,9 +368,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                       onClick={() => handleMoveSectionDown(sectionIndex)}
                       disabled={sectionIndex === sections.length - 1}
                       sx={{ 
-                        backgroundColor: 'white',
+                        backgroundColor: 'background.paper',
                         padding: '2px',
-                        '&:hover': { backgroundColor: '#f5f5f5' },
+                        '&:hover': { backgroundColor: 'action.hover' },
                         '&:disabled': { opacity: 0.3 }
                       }}
                     >
@@ -377,7 +379,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                   </Box>
 
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ color: '#181a43', fontWeight: 600, mb: 1 }}>
+                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 1 }}>
                       {section.title}
                     </Typography>
                     {section.description && (
@@ -393,8 +395,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     label={`${section.questions.length} questions`} 
                     size="small" 
                     sx={{ 
-                      backgroundColor: '#181a43', 
-                      color: 'white',
+                      backgroundColor: 'primary.main', 
+                      color: 'primary.contrastText',
                       fontWeight: 500
                     }} 
                   />
@@ -403,8 +405,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     size="small"
                     onClick={() => toggleSectionExpansion(sectionIndex)}
                     sx={{ 
-                      backgroundColor: 'white',
-                      '&:hover': { backgroundColor: '#f5f5f5' }
+                      backgroundColor: 'background.paper',
+                      '&:hover': { backgroundColor: 'action.hover' }
                     }}
                   >
                     <ExpandMoreIcon 
@@ -421,7 +423,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     disabled={sections.length === 1}
                     sx={{ 
                       backgroundColor: 'white',
-                      '&:hover': { backgroundColor: '#ffebee' }
+                      '&:hover': { backgroundColor: 'error.light', opacity: 0.1 }
                     }}
                   >
                     <DeleteIcon />
@@ -435,7 +437,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
               <Box sx={{ p: 3 }}>
                 {/* Section Settings */}
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: '#181a43' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: 'primary.main' }}>
                     Section Settings
                   </Typography>
                   <Grid container spacing={2}>
@@ -466,7 +468,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                 {/* Questions Section */}
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#181a43' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
                       Questions ({section.questions.length})
                     </Typography>
                     <Button
@@ -479,11 +481,12 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                       }}
                       size="small"
                       sx={{ 
-                        borderColor: '#181a43',
-                        color: '#181a43',
+                        borderColor: 'primary.main',
+                        color: 'primary.main',
                         '&:hover': { 
-                          borderColor: '#181a43',
-                          backgroundColor: 'rgba(24, 26, 67, 0.04)'
+                          borderColor: 'primary.main',
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText'
                         }
                       }}
                     >
@@ -493,8 +496,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
 
                   {/* Add Question Form */}
                   {addingQuestionToSection.has(sectionIndex) && (
-                    <Paper sx={{ p: 3, mb: 3, border: '2px solid #e3f2fd', borderRadius: 2 }}>
-                      <Typography variant="h6" gutterBottom sx={{ color: '#181a43' }}>
+                    <Paper sx={{ p: 3, mb: 3, border: '2px solid', borderColor: 'primary.light', borderRadius: 2 }}>
+                      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
                         Add New Question
                       </Typography>
                       
@@ -523,11 +526,12 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                     p: 2,
                                     textAlign: 'center',
                                     cursor: 'pointer',
-                                    border: newQuestion.type === type.value ? '2px solid #181a43' : '1px solid #eee',
-                                    backgroundColor: newQuestion.type === type.value ? 'rgba(24, 26, 67, 0.04)' : 'white',
+                                    border: newQuestion.type === type.value ? '2px solid' : '1px solid',
+                                    borderColor: newQuestion.type === type.value ? 'primary.main' : 'divider',
+                                    backgroundColor: newQuestion.type === type.value ? 'primary.light' : 'background.paper',
                                     '&:hover': {
-                                      borderColor: '#181a43',
-                                      backgroundColor: 'rgba(24, 26, 67, 0.04)'
+                                      borderColor: 'primary.main',
+                                      backgroundColor: 'primary.light'
                                     },
                                     transition: 'all 0.2s'
                                   }}
@@ -537,12 +541,12 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                     options: getDefaultOptions(type.value)
                                   })}
                                 >
-                                  <Box sx={{ color: newQuestion.type === type.value ? '#181a43' : '#666', mb: 1 }}>
+                                  <Box sx={{ color: newQuestion.type === type.value ? 'primary.main' : 'text.secondary', mb: 1 }}>
                                     {type.icon}
                                   </Box>
                                   <Typography variant="caption" sx={{ 
                                     fontWeight: newQuestion.type === type.value ? 600 : 400,
-                                    color: newQuestion.type === type.value ? '#181a43' : 'text.primary',
+                                    color: newQuestion.type === type.value ? 'primary.main' : 'text.primary',
                                     display: 'block',
                                     lineHeight: 1.2
                                   }}>
@@ -565,10 +569,10 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                 onChange={(e) => setNewQuestion({ ...newQuestion, required: e.target.checked })}
                                 sx={{
                                   '& .MuiSwitch-switchBase.Mui-checked': {
-                                    color: '#181a43',
+                                    color: 'primary.main',
                                   },
                                   '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                                    backgroundColor: '#181a43',
+                                    backgroundColor: 'primary.main',
                                   },
                                 }}
                               />
@@ -598,7 +602,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                   size="small"
                                   onClick={() => handleRemoveOption(newQuestion, optionIndex)}
                                   color="error"
-                                  sx={{ '&:hover': { backgroundColor: '#ffebee' } }}
+                                  sx={{ '&:hover': { backgroundColor: 'error.light', opacity: 0.1 } }}
                                 >
                                   <DeleteIcon />
                                 </IconButton>
@@ -610,9 +614,9 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                               startIcon={<AddIcon />}
                               onClick={() => handleAddOption(newQuestion)}
                               sx={{ 
-                                borderColor: '#181a43',
-                                color: '#181a43',
-                                '&:hover': { borderColor: '#181a43', backgroundColor: 'rgba(24, 26, 67, 0.04)' }
+                                borderColor: 'primary.main',
+                                color: 'primary.main',
+                                '&:hover': { borderColor: 'primary.main', backgroundColor: 'primary.light' }
                               }}
                             >
                               Add Option
@@ -641,8 +645,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                               onClick={() => handleAddQuestion(sectionIndex)} 
                               disabled={!newQuestion.question.trim()}
                               sx={{ 
-                                background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
-                                '&:hover': { background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)' }
+                                backgroundColor: 'primary.main',
+                                '&:hover': { backgroundColor: 'primary.dark' }
                               }}
                             >
                               Add Question
@@ -661,11 +665,12 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                           key={question.id}
                           sx={{ 
                             p: 3,
-                            border: '1px solid #f0f0f0',
+                            border: '1px solid',
+                            borderColor: 'divider',
                             borderRadius: 2,
                             '&:hover': { 
-                              borderColor: '#181a43',
-                              boxShadow: '0 2px 8px rgba(24, 26, 67, 0.1)'
+                              borderColor: 'primary.main',
+                              boxShadow: 2
                             },
                             transition: 'all 0.2s'
                           }}
@@ -673,10 +678,10 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                             <Box sx={{ flex: 1 }}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                <Box sx={{ color: '#181a43' }}>
+                                <Box sx={{ color: 'primary.main' }}>
                                   {getQuestionTypeIcon(question.type)}
                                 </Box>
-                                <Typography variant="body1" sx={{ fontWeight: 500, color: '#181a43' }}>
+                                <Typography variant="body1" sx={{ fontWeight: 500, color: 'primary.main' }}>
                                   Q{questionIndex + 1}. {question.question}
                                 </Typography>
                               </Box>
@@ -685,15 +690,15 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                   label={getQuestionTypeLabel(question.type)} 
                                   size="small" 
                                   variant="outlined"
-                                  sx={{ borderColor: '#181a43', color: '#181a43' }}
+                                  sx={{ borderColor: 'primary.main', color: 'primary.main' }}
                                 />
                                 <Chip 
                                   label={question.required ? 'Required' : 'Optional'} 
                                   size="small" 
                                   color={question.required ? 'primary' : 'default'}
                                   sx={question.required ? { 
-                                    backgroundColor: '#181a43', 
-                                    color: 'white' 
+                                    backgroundColor: 'primary.main', 
+                                    color: 'primary.contrastText' 
                                   } : {}}
                                 />
                               </Box>
@@ -703,8 +708,8 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                 size="small" 
                                 onClick={() => handleEditQuestion(sectionIndex, questionIndex)}
                                 sx={{ 
-                                  color: '#181a43',
-                                  '&:hover': { backgroundColor: 'rgba(24, 26, 67, 0.04)' }
+                                  color: 'primary.main',
+                                  '&:hover': { backgroundColor: 'primary.light' }
                                 }}
                               >
                                 <EditIcon />
@@ -713,7 +718,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                                 size="small" 
                                 color="error" 
                                 onClick={() => handleDeleteQuestion(sectionIndex, questionIndex)}
-                                sx={{ '&:hover': { backgroundColor: '#ffebee' } }}
+                                sx={{ '&:hover': { backgroundColor: 'error.light', opacity: 0.1 } }}
                               >
                                 <DeleteIcon />
                               </IconButton>
@@ -727,8 +732,10 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                       textAlign: 'center', 
                       py: 4, 
                       color: 'text.secondary',
-                      border: '1px dashed #ddd',
-                      borderRadius: 2
+                      border: '1px dashed',
+                      borderColor: 'divider',
+                      borderRadius: 2,
+                      backgroundColor: 'background.paper'
                     }}>
                       <Typography variant="body2">
                         No questions yet. Click "Add Question" to get started.

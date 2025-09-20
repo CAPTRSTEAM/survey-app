@@ -199,11 +199,11 @@
 .question-progress-bar {
     width: 100%;
     height: 12px;
-    background-color: #e8ecf5;
+    background-color: var(--color-gray-200);
     border-radius: var(--radius-full);
     overflow: hidden;
     position: relative;
-    border: 1px solid var(--color-primary-medium);
+    border: 1px solid var(--color-gray-300);
 }
 
 .question-progress-fill {
@@ -1164,6 +1164,76 @@ div.likert-scale > div.likert-options > label.likert-option {
     background-color: var(--color-warning-light);
     color: var(--color-warning-dark);
     border: 1px solid var(--color-warning-medium);
+}
+
+/* Timeout Error Styles */
+.timeout-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: var(--space-8);
+    text-align: center;
+    background: var(--color-background);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    margin: var(--space-8) auto;
+    max-width: 500px;
+}
+
+.timeout-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.8;
+}
+
+.timeout-error h2 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-3);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.timeout-error p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+    line-height: var(--line-height-relaxed);
+    font-size: var(--font-size-base);
+}
+
+.timeout-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.timeout-help {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-4);
+    font-style: italic;
+}
+
+/* Responsive timeout error */
+@media (max-width: 640px) {
+    .timeout-error {
+        margin: var(--space-4);
+        padding: var(--space-6);
+        min-height: 300px;
+    }
+    
+    .timeout-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .timeout-actions .button {
+        width: 100%;
+        max-width: 200px;
+    }
 }
 
 

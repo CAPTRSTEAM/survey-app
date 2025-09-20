@@ -176,10 +176,10 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#eef0f8' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* 3/4 Width Header Bar */}
       <Box sx={{ 
-        background: '#181a43',
+        backgroundColor: 'primary.dark',
         color: 'white',
         position: 'fixed',
         top: 0,
@@ -272,12 +272,12 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
              startIcon={<PreviewIcon />}
              onClick={() => setPreviewOpen(true)}
              sx={{
-               borderColor: '#4358a3',
-               color: '#4358a3',
+               borderColor: 'primary.main',
+               color: 'primary.main',
                px: 4,
                py: 1.5,
                '&:hover': {
-                 borderColor: '#2b3d8b',
+                 borderColor: 'primary.dark',
                  backgroundColor: 'rgba(67, 88, 163, 0.04)'
                }
              }}
@@ -311,7 +311,8 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
         left: '12.5%',
         right: '12.5%',
         backgroundColor: 'white',
-        borderTop: '1px solid #eef0f8',
+        borderTop: '1px solid',
+        borderColor: 'divider',
         boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',
         zIndex: 1100,
         py: 3,
@@ -339,9 +340,9 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
               endIcon={<SaveIcon />}
               sx={{ 
                 minWidth: 120,
-                background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+                backgroundColor: 'primary.main',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+                  backgroundColor: 'primary.dark',
                 }
               }}
             >
@@ -355,9 +356,9 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
               startIcon={<SaveIcon />}
               sx={{ 
                 minWidth: 140,
-                background: 'linear-gradient(45deg, #2e7d32 0%, #4caf50 100%)',
+                backgroundColor: 'success.main',
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #1b5e20 0%, #388e3c 100%)',
+                  backgroundColor: 'success.dark',
                 }
               }}
             >

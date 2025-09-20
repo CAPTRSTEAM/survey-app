@@ -518,7 +518,59 @@
         color: var(--color-gray-900);
     }
     
-    /* Improve button contrast */
+    /* Improve button contrast - use gray-900 which is white in dark mode */
+    .button--primary,
+    button.button--primary,
+    .button.button--primary {
+        background-color: var(--color-primary-medium) !important;
+        color: var(--color-gray-900) !important;
+    }
+    
+    .button--primary:hover,
+    button.button--primary:hover,
+    .button.button--primary:hover,
+    .button--primary:focus,
+    button.button--primary:focus,
+    .button.button--primary:focus {
+        background-color: var(--color-primary-dark) !important;
+        color: var(--color-gray-900) !important;
+    }
+    
+    /* Ensure loading state also has white text */
+    .button--primary.button--loading,
+    button.button--primary.button--loading,
+    .button.button--primary.button--loading {
+        color: var(--color-gray-900) !important;
+    }
+    
+    /* Additional specificity for button text and any nested elements */
+    .button--primary *,
+    button.button--primary *,
+    .button.button--primary * {
+        color: inherit !important;
+    }
+    
+    /* Ensure footer buttons have white text - use gray-900 which is white in dark mode */
+    .survey-footer .button--primary,
+    .footer-section .button--primary {
+        color: var(--color-gray-900) !important;
+    }
+    
+    /* Force white text for question numbers in dark mode - use gray-900 which is white in dark mode */
+    .question-number {
+        background-color: var(--color-primary-medium) !important;
+        color: var(--color-gray-900) !important;
+    }
+    
+    /* Override any global text color rules that might affect buttons and numbers - use gray-900 which is white in dark mode */
+    .button--primary,
+    .question-number,
+    button.button--primary,
+    .footer-section button,
+    .survey-footer button {
+        color: var(--color-gray-900) !important;
+    }
+    
     .button--secondary {
         background-color: var(--color-gray-100);
         color: var(--color-gray-900);
@@ -529,11 +581,61 @@
         background-color: var(--color-gray-200);
     }
     
-    /* Mode indicator dark mode styling */
-    .mode-indicator {
-        background-color: var(--color-primary-medium);
-        color: var(--color-white);
-        border: 1px solid var(--color-gray-300);
+    /* ===== COMPREHENSIVE DARK MODE OVERRIDES ===== */
+    
+    /* Fix progress bar - use CSS variables instead of hardcoded colors */
+    .progress-bar {
+        background-color: var(--color-gray-200) !important;
+        border-color: var(--color-gray-300) !important;
+    }
+    
+    .progress-bar-fill {
+        background-color: var(--color-primary-medium) !important;
+    }
+    
+    /* Fix error messages - use CSS variables instead of hardcoded colors */
+    .error-message {
+        background-color: var(--color-error) !important;
+        color: var(--color-white) !important;
+        border-color: var(--color-error) !important;
+    }
+    
+    /* Fix any remaining hardcoded colors in various elements */
+    .question-progress-bar {
+        background-color: var(--color-gray-200) !important;
+        border-color: var(--color-gray-300) !important;
+    }
+    
+    .question-progress-fill {
+        background-color: var(--color-primary-medium) !important;
+    }
+    
+    /* Ensure all text inputs work in dark mode */
+    input, textarea, select {
+        background-color: var(--color-gray-100) !important;
+        color: var(--color-gray-900) !important;
+        border-color: var(--color-gray-300) !important;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+        background-color: var(--color-gray-100) !important;
+        border-color: var(--color-primary-medium) !important;
+    }
+    
+    /* Fix any remaining option styling issues */
+    .option-item, .likert-option {
+        background-color: var(--color-gray-100) !important;
+        color: var(--color-gray-900) !important;
+        border-color: var(--color-gray-300) !important;
+    }
+    
+    .option-item:hover, .likert-option:hover {
+        background-color: var(--color-gray-200) !important;
+    }
+    
+    .option-item.selected, .likert-option.selected {
+        background-color: var(--color-primary-medium) !important;
+        color: var(--color-gray-900) !important;
     }
 }
 
@@ -542,8 +644,7 @@
     .survey-header,
     .survey-footer,
     .section-title-container,
-    .question-progress-container,
-    .mode-indicator {
+    .question-progress-container {
         display: none !important;
     }
 
@@ -559,15 +660,15 @@
 
     .option-item,
     .likert-option {
-        border: 1px solid #000;
-        background: none !important;
-        color: #000 !important;
+        border: 1px solid var(--color-gray-900);
+        background: var(--color-white) !important;
+        color: var(--color-gray-900) !important;
     }
 
     .option-item.selected,
     .likert-option.selected {
-        background: #000 !important;
-        color: #fff !important;
+        background: var(--color-gray-900) !important;
+        color: var(--color-white) !important;
     }
 }
 

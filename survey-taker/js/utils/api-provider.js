@@ -12,11 +12,33 @@ export class ApiProvider {
     }
 
     setupMessageListener() {
+        console.log('Setting up message listener for CONFIG messages...');
+        
         window.addEventListener('message', (event) => {
-            if (event.data.type === 'CONFIG') {
-                this.handleConfigMessage(event.data);
+            try {
+                if (event.data && event.data.type === 'CONFIG') {
+                    console.log('CONFIG message received:', event.data);
+                    this.handleConfigMessage(event.data);
+                }
+            } catch (error) {
+                console.error('Error handling message:', error);
+                // Fall back to sample survey on message handling errors
+                this.useFallbackSurvey();
             }
         });
+        
+        // Set up a timeout to show timeout error if no CONFIG message arrives
+        setTimeout(() => {
+            if (!this.isReady) {
+                console.warn('No CONFIG message received within 15 second timeout');
+                if (this.onTimeout) {
+                    this.onTimeout();
+                } else {
+                    // Fallback to sample survey if no timeout handler is registered
+                    this.useFallbackSurvey();
+                }
+            }
+        }, 15000); // 15 second timeout - more time for platform to send CONFIG
     }
 
     handleConfigMessage(data) {
@@ -44,7 +66,9 @@ export class ApiProvider {
             
             // Validate required parameters for API call
             if (!url || !token) {
-                console.warn('Missing required parameters for API call');
+                console.warn('Missing required parameters for API call - falling back to sample survey');
+                // Fall back to sample survey instead of failing
+                this.useFallbackSurvey();
                 return;
             }
             
@@ -52,6 +76,8 @@ export class ApiProvider {
             this.fetchGameConfig(url, token, exerciseId, appInstanceId);
         } catch (error) {
             console.error('Error handling config message:', error);
+            // Fall back to sample survey on any error
+            this.useFallbackSurvey();
         }
     }
 
@@ -81,10 +107,13 @@ export class ApiProvider {
                 this.isReady = true;
                 this.notifyListeners();
             } else {
-                console.warn('No valid survey config found in API response');
+                console.warn('No valid survey config found in API response - falling back to sample survey');
+                this.useFallbackSurvey();
             }
         } catch (error) {
             console.error('Error fetching game config:', error);
+            // Fall back to sample survey on API errors
+            this.useFallbackSurvey();
         }
     }
 
@@ -92,6 +121,14 @@ export class ApiProvider {
         this.gameConfig = this.getSampleSurvey();
         this.isReady = true;
         this.notifyListeners();
+    }
+
+    reset() {
+        console.log('Resetting API provider');
+        this.isReady = false;
+        this.gameConfig = null;
+        this.platformConfig = null;
+        this.setupMessageListener();
     }
 
     extractSurveyConfig(gameStartingData) {

@@ -1,31 +1,57 @@
+import React, { Suspense } from 'react'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import SurveyBuilder from './components/SurveyBuilder'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { CircularProgress, Box } from '@mui/material'
 import { SurveyProvider } from './context/SurveyContext'
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2b3d8b', // CAPTRS primary.dark
-      light: '#4358a3', // CAPTRS primary.medium
-      dark: '#181a43', // CAPTRS primary.darkest
-      contrastText: '#ffffff',
+// Lazy load the main SurveyBuilder component
+const SurveyBuilder = React.lazy(() => import('./components/SurveyBuilder'))
+
+function App() {
+  // Detect user's system theme preference
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+  
+
+  // Create theme based on user preference
+  const theme = React.useMemo(() => createTheme({
+    palette: {
+      mode: prefersDarkMode ? 'dark' : 'light',
+      primary: {
+        main: prefersDarkMode ? '#6366f1' : '#4358a3', // Lighter blue for dark mode, original for light mode
+        light: prefersDarkMode ? '#818cf8' : '#6366f1',
+        dark: prefersDarkMode ? '#4338ca' : '#181a43',
+        contrastText: '#ffffff',
+      },
+      secondary: {
+        main: prefersDarkMode ? '#6366f1' : '#4358a3',
+        light: prefersDarkMode ? '#818cf8' : '#6366f1',
+        dark: prefersDarkMode ? '#4338ca' : '#2b3d8b',
+        contrastText: '#ffffff',
+      },
+      // MUI will automatically generate dark/light variants based on mode
+      ...(prefersDarkMode ? {
+        // Dark mode specific overrides
+        background: {
+          default: '#121212',
+          paper: '#1e1e1e',
+        },
+        text: {
+          primary: '#ffffff',
+          secondary: '#b3b3b3',
+        },
+      } : {
+        // Light mode specific overrides
+        background: {
+          default: '#eef0f8', // CAPTRS neutral.lightGray
+          paper: '#ffffff',
+        },
+        text: {
+          primary: '#000000', // CAPTRS neutral.black
+          secondary: '#6b7280',
+        },
+      }),
     },
-    secondary: {
-      main: '#4358a3', // CAPTRS primary.medium
-      light: '#eef0f8', // CAPTRS neutral.lightGray
-      dark: '#2b3d8b', // CAPTRS primary.dark
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#eef0f8', // CAPTRS neutral.lightGray
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#000000', // CAPTRS neutral.black
-      secondary: '#6b7280',
-    },
-  },
   typography: {
     fontFamily: '"Open Sans", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
@@ -93,47 +119,57 @@ const theme = createTheme({
           borderRadius: 8,
           fontWeight: 'semibold',
           padding: '12px 24px',
-          boxShadow: '0 2px 4px rgba(43, 61, 139, 0.2)',
+          boxShadow: prefersDarkMode 
+            ? '0 2px 4px rgba(0, 0, 0, 0.3)' 
+            : '0 2px 4px rgba(43, 61, 139, 0.2)',
           '&:hover': {
-            boxShadow: '0 4px 8px rgba(43, 61, 139, 0.3)',
+            boxShadow: prefersDarkMode 
+              ? '0 4px 8px rgba(0, 0, 0, 0.4)' 
+              : '0 4px 8px rgba(43, 61, 139, 0.3)',
           },
-                     '&.Mui-disabled': {
-             backgroundColor: '#d1d5db',
-             color: '#374151',
-             borderColor: '#9ca3af',
-             boxShadow: 'none',
-             '&:hover': {
-               backgroundColor: '#d1d5db',
-               boxShadow: 'none',
-             },
-           },
+          '&.Mui-disabled': {
+            backgroundColor: prefersDarkMode ? '#424242' : '#d1d5db',
+            color: prefersDarkMode ? '#757575' : '#374151',
+            borderColor: prefersDarkMode ? '#616161' : '#9ca3af',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: prefersDarkMode ? '#424242' : '#d1d5db',
+              boxShadow: 'none',
+            },
+          },
         },
         contained: {
-          background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+          background: prefersDarkMode 
+            ? 'linear-gradient(45deg, #4358a3 0%, #6366f1 100%)'
+            : 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
           '&:hover': {
-            background: 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
+            background: prefersDarkMode 
+              ? 'linear-gradient(45deg, #3b4a8f 0%, #5a5fcf 100%)'
+              : 'linear-gradient(45deg, #2b3d8b 0%, #4358a3 100%)',
           },
-                     '&.Mui-disabled': {
-             background: '#d1d5db',
-             color: '#374151',
-             '&:hover': {
-               background: '#d1d5db',
-             },
-           },
+          '&.Mui-disabled': {
+            background: prefersDarkMode ? '#424242' : '#d1d5db',
+            color: prefersDarkMode ? '#757575' : '#374151',
+            '&:hover': {
+              background: prefersDarkMode ? '#424242' : '#d1d5db',
+            },
+          },
         },
         outlined: {
-          borderColor: '#2b3d8b',
-          color: '#2b3d8b',
+          borderColor: prefersDarkMode ? '#4358a3' : '#2b3d8b',
+          color: prefersDarkMode ? '#6366f1' : '#2b3d8b',
           '&:hover': {
-            backgroundColor: 'rgba(43, 61, 139, 0.04)',
+            backgroundColor: prefersDarkMode 
+              ? 'rgba(67, 88, 163, 0.08)' 
+              : 'rgba(43, 61, 139, 0.04)',
           },
-                     '&.Mui-disabled': {
-             borderColor: '#9ca3af',
-             color: '#374151',
-             '&:hover': {
-               backgroundColor: 'transparent',
-             },
-           },
+          '&.Mui-disabled': {
+            borderColor: prefersDarkMode ? '#616161' : '#9ca3af',
+            color: prefersDarkMode ? '#757575' : '#374151',
+            '&:hover': {
+              backgroundColor: 'transparent',
+            },
+          },
         },
       },
     },
@@ -157,8 +193,12 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
-          boxShadow: '0 2px 8px rgba(43, 61, 139, 0.2)',
+          background: prefersDarkMode 
+            ? 'linear-gradient(45deg, #1e1e1e 0%, #4358a3 100%)'
+            : 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
+          boxShadow: prefersDarkMode 
+            ? '0 2px 8px rgba(0, 0, 0, 0.3)'
+            : '0 2px 8px rgba(43, 61, 139, 0.2)',
         },
       },
     },
@@ -202,15 +242,30 @@ const theme = createTheme({
          },
       },
     },
-  },
-})
+    },
+  }), [prefersDarkMode])
 
-function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <SurveyProvider>
-        <SurveyBuilder />
+        <Suspense fallback={
+          <Box 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            minHeight="100vh"
+            flexDirection="column"
+            gap={2}
+          >
+            <CircularProgress size={48} />
+            <Box component="p" color="text.secondary">
+              Loading Survey Builder...
+            </Box>
+          </Box>
+        }>
+          <SurveyBuilder />
+        </Suspense>
       </SurveyProvider>
     </ThemeProvider>
   )

@@ -233,16 +233,19 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     const currentAnswer = typeof answer === 'object' && answer !== null ? answer as Record<string, number> : {};
     const totalOptions = question.options?.length || 0;
     
-    // Use a simple variable instead of React state to avoid useState issues
-    let localRankings = currentAnswer;
+    // Use refs to avoid re-renders and prevent memory leaks
+    const localRankingsRef = ReactInstance.useRef(currentAnswer);
+    const draggedOptionRef = ReactInstance.useRef<string | null>(null);
+    const draggedOverOptionRef = ReactInstance.useRef<string | null>(null);
     
-    // Drag and drop state variables
-    let draggedOption: string | null = null;
-    let draggedOverOption: string | null = null;
+    // Update ref when answer changes
+    ReactInstance.useEffect(() => {
+        localRankingsRef.current = currentAnswer;
+    }, [currentAnswer]);
     
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, option: string) => {
         if (disabled) return;
-        draggedOption = option;
+        draggedOptionRef.current = option;
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', option);
         
@@ -254,8 +257,8 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     
     const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
         if (disabled) return;
-        draggedOption = null;
-        draggedOverOption = null;
+        draggedOptionRef.current = null;
+        draggedOverOptionRef.current = null;
         
         // Remove visual feedback
         const target = e.currentTarget as HTMLElement;
@@ -270,11 +273,11 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     };
     
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>, option: string) => {
-        if (disabled || !draggedOption || draggedOption === option) return;
+        if (disabled || !draggedOptionRef.current || draggedOptionRef.current === option) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
         
-        draggedOverOption = option;
+        draggedOverOptionRef.current = option;
         
         // Add visual feedback
         const target = e.currentTarget as HTMLElement;
@@ -288,7 +291,7 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     };
     
     const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropTarget: string) => {
-        if (disabled || !draggedOption || draggedOption === dropTarget) return;
+        if (disabled || !draggedOptionRef.current || draggedOptionRef.current === dropTarget) return;
         e.preventDefault();
         
         // Remove drag-over styling
@@ -296,7 +299,8 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
         target.classList.remove('drag-over');
         
         // Get current rankings
-        const currentRankings = { ...localRankings };
+        const currentRankings = { ...localRankingsRef.current };
+        const draggedOption = draggedOptionRef.current;
         const draggedRank = currentRankings[draggedOption];
         const targetRank = currentRankings[dropTarget];
         
@@ -318,38 +322,38 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
             currentRankings[draggedOption] = nextRank;
         }
         
-        // Update local variable and parent state
-        localRankings = currentRankings;
+        // Update local ref and parent state
+        localRankingsRef.current = currentRankings;
         onChange(question.id, currentRankings);
     };
     
     const handleItemClick = (option: string) => {
         if (disabled) return;
         
-        if (localRankings[option]) {
+        if (localRankingsRef.current[option]) {
             // Remove ranking if already ranked
-            const newAnswer = { ...localRankings };
+            const newAnswer = { ...localRankingsRef.current };
             delete newAnswer[option];
-            localRankings = newAnswer;
+            localRankingsRef.current = newAnswer;
         } else {
             // Add ranking if not ranked
             const nextRank = getNextAvailableRank();
-            const newAnswer = { ...localRankings, [option]: nextRank };
-            localRankings = newAnswer;
+            const newAnswer = { ...localRankingsRef.current, [option]: nextRank };
+            localRankingsRef.current = newAnswer;
         }
         
-        onChange(question.id, localRankings);
+        onChange(question.id, localRankingsRef.current);
     };
     
     const getRankForOption = (option: string): number => {
-        return localRankings[option] || 0;
+        return localRankingsRef.current[option] || 0;
     };
     
     const getNextAvailableRank = (): number => {
         const maxRank = totalOptions;
         if (maxRank === 0) return 1;
         
-        const ranks = Object.values(localRankings);
+        const ranks = Object.values(localRankingsRef.current);
         if (ranks.length === 0) return 1;
         
         // Find the next available rank within the valid range
@@ -364,7 +368,7 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
     };
     
     // Check if all options are ranked
-    const isComplete = Object.keys(localRankings).length === totalOptions;
+    const isComplete = Object.keys(localRankingsRef.current).length === totalOptions;
     
     // Sort options by rank for display
     const sortedOptions = question.options?.slice().sort((a, b) => {
@@ -427,14 +431,14 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
                                 className: 'ranking-arrow ranking-arrow-up',
                                 onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
                                     e.stopPropagation();
-                                    const newAnswer = { ...localRankings };
+                                    const newAnswer = { ...localRankingsRef.current };
                                     // Find the option with the rank above this one
                                     const optionAbove = Object.keys(newAnswer).find(key => newAnswer[key] === rankNumber - 1);
                                     if (optionAbove) {
                                         // Swap ranks
                                         newAnswer[option] = rankNumber - 1;
                                         newAnswer[optionAbove] = rankNumber;
-                                        localRankings = newAnswer;
+                                        localRankingsRef.current = newAnswer;
                                         onChange(question.id, newAnswer);
                                     }
                                 },
@@ -442,19 +446,19 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
                                 'aria-label': `Move ${option} up in ranking`
                             }, '↑'),
                             // Down arrow button
-                            isRanked && rankNumber < Object.keys(localRankings).length && ReactInstance.createElement('button', {
+                            isRanked && rankNumber < Object.keys(localRankingsRef.current).length && ReactInstance.createElement('button', {
                                 type: 'button',
                                 className: 'ranking-arrow ranking-arrow-down',
                                 onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
                                     e.stopPropagation();
-                                    const newAnswer = { ...localRankings };
+                                    const newAnswer = { ...localRankingsRef.current };
                                     // Find the option with the rank below this one
                                     const optionBelow = Object.keys(newAnswer).find(key => newAnswer[key] === rankNumber + 1);
                                     if (optionBelow) {
                                         // Swap ranks
                                         newAnswer[option] = rankNumber + 1;
                                         newAnswer[optionBelow] = rankNumber;
-                                        localRankings = newAnswer;
+                                        localRankingsRef.current = newAnswer;
                                         onChange(question.id, newAnswer);
                                     }
                                 },
@@ -467,9 +471,9 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
                                 className: 'ranking-remove',
                                 onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
                                     e.stopPropagation();
-                                    const newAnswer = { ...localRankings };
+                                    const newAnswer = { ...localRankingsRef.current };
                                     delete newAnswer[option];
-                                    localRankings = newAnswer;
+                                    localRankingsRef.current = newAnswer;
                                     onChange(question.id, newAnswer);
                                 },
                                 disabled,
