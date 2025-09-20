@@ -50,6 +50,8 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **No Survey Data**: Uses fallback survey if platform doesn't provide survey configuration
 - **Asset Loading**: Uses relative paths to avoid 403 errors on JavaScript files
 - **Database Failures**: **NEW!** Gracefully handles database save failures with fallback
+- **Timeout Errors**: **NEW!** Professional timeout error UI with retry/quit options
+- **Performance Issues**: **NEW!** Comprehensive performance fixes to prevent browser crashes
 
 ### **🔍 Survey Data Extraction:**
 - **Direct CONFIG**: Checks for `survey` or `surveyConfig` in CONFIG message
@@ -68,6 +70,17 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **spa-api-provider Compatible**: Uses same API calls as official spa-api-provider
 - **Sections Processing**: Handles nested sections structure from platform surveys
 - **Database Ready**: **NEW!** Includes createAppData function for persistent data storage
+- **Performance Optimized**: **NEW!** Fixed memory leaks and excessive re-renders
+- **Timeout Handling**: **NEW!** Professional error UI with retry/quit options
+- **Browser Stability**: **NEW!** Prevents browser crashes and hanging
+
+### **⏱️ Timeout Error Handling:**
+- **15-Second Timeout**: Waits up to 15 seconds for CONFIG message from platform
+- **Professional UI**: Clean timeout error screen with clock icon and clear messaging
+- **User Options**: "Try Again" button to retry connection or "Quit" to close app
+- **Retry Logic**: Resets API provider and attempts connection again
+- **Graceful Fallback**: Falls back to sample survey if no timeout handler registered
+- **Helpful Messaging**: Explains possible causes and suggests checking connection
 
 ## Usage
 
@@ -102,16 +115,19 @@ npm run build
 This creates a `dist` folder that can be zipped and uploaded to the platform.
 
 ### Platform Deployment
-The `survey-taker-production-v2.zip` file is ready for platform deployment. This zip file contains:
+The latest `survey-taker-production-spa-v14.zip` file is ready for platform deployment. This zip file contains:
 - `index.html` - The main survey taker application with spa-api-provider
 - `assets/` - Compiled JavaScript and CSS files (using relative paths)
+- **NEW!** Timeout error handling with retry/quit options
+- **NEW!** Performance optimizations to prevent browser crashes
 
 **To deploy to the platform:**
-1. Upload `survey-taker-production-v2.zip` to the platform CMS
+1. Upload `survey-taker-production-spa-v14.zip` to the platform CMS
 2. Configure the survey data in the platform
 3. The app will automatically fetch survey configuration via spa-api-provider
 4. If API fails, it will gracefully fall back to sample survey
 5. **NEW!** Survey responses are automatically saved to the platform database
+6. **NEW!** Users get professional timeout error UI if connection fails
 
 ### Database Integration
 For detailed information about the new database integration feature, see [DATABASE_INTEGRATION.md](./DATABASE_INTEGRATION.md). 

@@ -60,6 +60,8 @@ The **Survey Taker** is a standalone HTML/JavaScript application designed for su
 - **Auto-Save Functionality**: Automatically saves user progress to localStorage
 - **Performance Monitoring**: Built-in performance tracking and optimization
 - **TypeScript Integration**: Full type safety and better development experience
+- **Timeout Error Handling**: Professional error UI with retry/quit options
+- **Performance Optimized**: Fixed memory leaks and browser stability issues
 
 ### Platform Integration
 
@@ -190,12 +192,14 @@ The Survey Builder is designed for local use and development. Builds can be depl
 
 ### Survey Taker
 
-The Survey Taker includes a deployment package (`survey-taker-production-v2.zip`) ready for platform deployment:
+The Survey Taker includes a deployment package (`survey-taker-production-spa-v14.zip`) ready for platform deployment:
 
-1. Upload `survey-taker-spa.zip` to the platform CMS
+1. Upload `survey-taker-production-spa-v14.zip` to the platform CMS
 2. Configure survey data in the platform
 3. The app automatically fetches survey configuration
 4. If API fails, it gracefully falls back to sample survey
+5. **NEW!** Users get professional timeout error UI with retry/quit options
+6. **NEW!** Performance optimizations prevent browser crashes
 
 ## 🤝 Contributing
 
