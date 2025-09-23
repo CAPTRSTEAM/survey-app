@@ -181,7 +181,11 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     onChange={(e) => handleInputChange(e.target.value)}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
+                  <span style={{ 
+                    flex: 1, 
+                    textAlign: 'center', 
+                    color: answer === option ? '#ffffff' : theme.palette.text.primary 
+                  }}>{option}</span>
                 </label>
               ))}
             </Box>
@@ -235,7 +239,11 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     }}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
+                  <span style={{ 
+                    flex: 1, 
+                    textAlign: 'center', 
+                    color: answer === option ? '#ffffff' : theme.palette.text.primary 
+                  }}>{option}</span>
                 </label>
               ))}
             </Box>
@@ -287,7 +295,11 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     onChange={(e) => handleInputChange(e.target.value)}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
+                  <span style={{ 
+                    flex: 1, 
+                    textAlign: 'center', 
+                    color: answer === option ? '#ffffff' : theme.palette.text.primary 
+                  }}>{option}</span>
                 </Box>
               ))}
             </Box>
@@ -386,7 +398,11 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                     onChange={(e) => handleInputChange(e.target.value)}
                     style={{ flexShrink: 0 }}
                   />
-                  <span style={{ flex: 1, textAlign: 'center', color: theme.palette.text.primary }}>{option}</span>
+                  <span style={{ 
+                    flex: 1, 
+                    textAlign: 'center', 
+                    color: answer === option ? '#ffffff' : theme.palette.text.primary 
+                  }}>{option}</span>
                 </label>
               ))}
             </Box>
@@ -609,7 +625,11 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
                       </Box>
 
                       {/* Option text */}
-                      <span style={{ flex: 1, fontWeight: '500' }}>{option}</span>
+                      <span style={{ 
+                        flex: 1, 
+                        fontWeight: '500',
+                        color: isRanked ? '#ffffff' : theme.palette.text.primary
+                      }}>{option}</span>
 
                       {/* Action buttons */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
@@ -913,7 +933,7 @@ export const PreviewMode: React.FC<PreviewModeProps> = ({
         </Box>
         <IconButton
           onClick={onClose}
-          sx={{ color: 'white' }}
+          sx={{ color: 'text.primary' }}
         >
           <CloseIcon />
         </IconButton>

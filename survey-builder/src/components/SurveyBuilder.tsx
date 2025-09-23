@@ -217,7 +217,7 @@ const SurveyBuilder: React.FC = () => {
       <Container maxWidth="lg" sx={{ py: 4, pt: 16, display: 'flex', justifyContent: 'center' }}>
         {/* Survey Library Box - Centered */}
         <Box sx={{ 
-          backgroundColor: 'white',
+          backgroundColor: 'background.paper',
           borderRadius: 3,
           boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
           border: '1px solid',

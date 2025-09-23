@@ -31,14 +31,17 @@ function App() {
       },
       // MUI will automatically generate dark/light variants based on mode
       ...(prefersDarkMode ? {
-        // Dark mode specific overrides
+        // Dark mode specific overrides - consistent with survey taker
         background: {
-          default: '#121212',
-          paper: '#1e1e1e',
+          default: '#0f1419', // Consistent with survey taker
+          paper: '#1a1f2e',   // Consistent with survey taker
         },
         text: {
-          primary: '#ffffff',
-          secondary: '#b3b3b3',
+          primary: '#e2e8f0',  // Consistent with survey taker
+          secondary: '#94a3b8', // Improved contrast for better readability
+        },
+        action: {
+          selected: '#4358a3', // Use primary medium for selected states - consistent with survey taker
         },
       } : {
         // Light mode specific overrides
@@ -49,6 +52,9 @@ function App() {
         text: {
           primary: '#000000', // CAPTRS neutral.black
           secondary: '#6b7280',
+        },
+        action: {
+          selected: '#4358a3', // Use primary medium for selected states
         },
       }),
     },
@@ -177,8 +183,12 @@ function App() {
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          border: '1px solid #eef0f8',
+          boxShadow: prefersDarkMode 
+            ? '0 2px 8px rgba(0,0,0,0.3)'
+            : '0 2px 8px rgba(0,0,0,0.1)',
+          border: prefersDarkMode 
+            ? '1px solid #334155'
+            : '1px solid #eef0f8',
         },
       },
     },
@@ -186,7 +196,9 @@ function App() {
       styleOverrides: {
         root: {
           borderRadius: 8,
-          border: '1px solid #eef0f8',
+          border: prefersDarkMode 
+            ? '1px solid #334155'
+            : '1px solid #eef0f8',
         },
       },
     },
@@ -194,7 +206,7 @@ function App() {
       styleOverrides: {
         root: {
           background: prefersDarkMode 
-            ? 'linear-gradient(45deg, #1e1e1e 0%, #4358a3 100%)'
+            ? 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)' // Consistent with survey taker
             : 'linear-gradient(45deg, #181a43 0%, #4358a3 100%)',
           boxShadow: prefersDarkMode 
             ? '0 2px 8px rgba(0, 0, 0, 0.3)'

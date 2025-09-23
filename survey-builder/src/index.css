@@ -7,8 +7,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #eef0f8;
-  color: #000000;
+  background-color: var(--captrs-neutral-light-gray);
+  color: var(--captrs-neutral-black);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {
@@ -16,7 +17,7 @@ code {
     monospace;
 }
 
-/* CAPTRS Brand Colors */
+/* CAPTRS Brand Colors - Light Mode (Default) */
 :root {
   --captrs-primary-darkest: #181a43;
   --captrs-primary-dark: #2b3d8b;
@@ -24,6 +25,20 @@ code {
   --captrs-neutral-black: #000000;
   --captrs-neutral-white: #ffffff;
   --captrs-neutral-light-gray: #eef0f8;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --captrs-neutral-black: #e2e8f0;
+    --captrs-neutral-white: #1a1f2e;
+    --captrs-neutral-light-gray: #0f1419;
+  }
+  
+  body {
+    background-color: var(--captrs-neutral-light-gray);
+    color: var(--captrs-neutral-black);
+  }
 }
 
 /* Typography Classes */

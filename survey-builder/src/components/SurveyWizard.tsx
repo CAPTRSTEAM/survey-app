@@ -196,7 +196,7 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flex: 1 }}>
           {/* Back Button */}
-          <IconButton onClick={onCancel} sx={{ mr: 2, color: 'white' }}>
+          <IconButton onClick={onCancel} sx={{ mr: 2, color: 'text.primary' }}>
             <BackIcon />
           </IconButton>
           
@@ -310,7 +310,7 @@ export const SurveyWizard: React.FC<SurveyWizardProps> = ({
         bottom: 0,
         left: '12.5%',
         right: '12.5%',
-        backgroundColor: 'white',
+        backgroundColor: 'background.paper',
         borderTop: '1px solid',
         borderColor: 'divider',
         boxShadow: '0 -2px 8px rgba(0,0,0,0.1)',

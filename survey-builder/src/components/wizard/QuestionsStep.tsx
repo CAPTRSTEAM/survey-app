@@ -422,7 +422,7 @@ export const QuestionsStep: React.FC<QuestionsStepProps> = ({
                     onClick={() => handleDeleteSection(sectionIndex)}
                     disabled={sections.length === 1}
                     sx={{ 
-                      backgroundColor: 'white',
+                      backgroundColor: 'background.paper',
                       '&:hover': { backgroundColor: 'error.light', opacity: 0.1 }
                     }}
                   >

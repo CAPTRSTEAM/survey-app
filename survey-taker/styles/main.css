@@ -95,6 +95,20 @@
     --touch-target-min: 44px;
     --button-min-height: 44px;
     --input-min-height: 44px;
+
+    /* Semantic Color System - Light Mode (Default) */
+    --color-background: var(--color-light-gray);
+    --color-surface: var(--color-white);
+    --color-surface-secondary: var(--color-gray-100);
+    --color-text-primary: var(--color-gray-900);
+    --color-text-secondary: var(--color-gray-700);
+    --color-text-tertiary: var(--color-gray-600);
+    --color-text-muted: var(--color-gray-500);
+    --color-border: var(--color-gray-200);
+    --color-border-secondary: var(--color-gray-300);
+    --color-overlay: rgba(255, 255, 255, 0.2);
+    --color-overlay-hover: rgba(255, 255, 255, 0.3);
+    --color-overlay-light: rgba(255, 255, 255, 0.1);
 }
 
 /* Reset and Base Styles */
@@ -392,5 +406,310 @@ body {
         border: 2px solid CanvasText;
         background-color: Canvas;
         color: CanvasText;
+    }
+}
+
+/* Dark Mode Support - Comprehensive Theme Override */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Dark Mode Semantic Colors */
+        --color-background: #0f1419;
+        --color-surface: #1a1f2e;
+        --color-surface-secondary: #252b3d;
+        --color-text-primary: #e2e8f0;
+        --color-text-secondary: #94a3b8;
+        --color-text-tertiary: #94a3b8;
+        --color-text-muted: #64748b;
+        --color-border: #334155;
+        --color-border-secondary: #475569;
+        --color-overlay: rgba(255, 255, 255, 0.1);
+        --color-overlay-hover: rgba(255, 255, 255, 0.15);
+        --color-overlay-light: rgba(255, 255, 255, 0.05);
+        
+        /* Override base color palette for dark mode */
+        --color-light-gray: #0f1419;
+        --color-gray-100: #1a1f2e;
+        --color-gray-200: #334155;
+        --color-gray-300: #475569;
+        --color-gray-400: #64748b;
+        --color-gray-500: #94a3b8;
+        --color-gray-600: #cbd5e1;
+        --color-gray-700: #e2e8f0;
+        --color-gray-800: #f1f5f9;
+        --color-gray-900: #ffffff;
+    }
+
+    /* Base element overrides */
+    body {
+        background-color: var(--color-background);
+        color: var(--color-text-primary);
+    }
+
+    .survey-app {
+        background-color: var(--color-background);
+    }
+
+    /* Screen components */
+    .welcome-screen,
+    .thank-you-screen {
+        background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-secondary) 100%);
+        border-color: var(--color-border);
+    }
+
+    /* Loading states */
+    .loading {
+        color: var(--color-text-secondary);
+    }
+
+    .loading-spinner {
+        color: var(--color-primary-medium);
+    }
+
+    .loading-title {
+        color: var(--color-primary-medium);
+    }
+
+    .loading-message {
+        color: var(--color-text-secondary);
+    }
+
+    /* Error states */
+    .error-content {
+        background-color: var(--color-surface);
+        border-color: var(--color-border);
+    }
+
+    .error-content h2 {
+        color: var(--color-error);
+    }
+
+    .error-content p {
+        color: var(--color-text-secondary);
+    }
+
+    .error-message {
+        background-color: var(--color-error);
+        border-color: var(--color-error);
+        color: var(--color-white);
+    }
+
+    /* Branding */
+    .branding {
+        border-color: var(--color-border);
+        color: var(--color-text-tertiary);
+    }
+
+    .company-name {
+        color: var(--color-primary-medium);
+    }
+
+    /* Component-specific dark mode overrides */
+    
+    /* Progress components */
+    .progress-step.active {
+        background-color: var(--color-text-primary);
+        color: var(--color-background);
+    }
+
+    .question-progress-bar {
+        background-color: var(--color-border);
+        border-color: var(--color-border-secondary);
+    }
+
+    .question-progress-text {
+        color: var(--color-text-secondary);
+    }
+
+    .question-progress-count {
+        color: var(--color-text-tertiary);
+    }
+
+    /* Form components */
+    .section-title-container,
+    .question-progress-container {
+        background-color: var(--color-surface);
+        border-color: var(--color-border);
+    }
+
+    .fixed-section-title {
+        color: var(--color-text-primary);
+    }
+
+    .fixed-section-description {
+        color: var(--color-text-secondary);
+    }
+
+    .questions-section {
+        background-color: var(--color-surface);
+    }
+
+    .question-card {
+        border-color: var(--color-border);
+    }
+
+    .question-text {
+        color: var(--color-text-primary);
+    }
+
+    .question-description {
+        color: var(--color-text-secondary);
+    }
+
+    .text-input {
+        background-color: var(--color-surface);
+        color: var(--color-text-primary);
+        border-color: var(--color-border-secondary);
+    }
+
+    .text-input::placeholder {
+        color: var(--color-text-muted);
+    }
+
+    /* Option components */
+    .option-item,
+    .checkbox-item {
+        background-color: var(--color-surface) !important;
+        border-color: var(--color-border-secondary) !important;
+        color: var(--color-text-primary) !important;
+    }
+
+    .option-item:hover,
+    .checkbox-item:hover {
+        background-color: var(--color-surface-secondary) !important;
+    }
+
+    .option-item.selected,
+    .checkbox-item.selected {
+        background-color: var(--color-primary-medium) !important;
+        border-color: var(--color-primary-medium) !important;
+        color: var(--color-white) !important;
+    }
+
+    /* Likert scale */
+    .likert-scale .likert-option {
+        background-color: var(--color-surface) !important;
+        border-color: var(--color-border-secondary) !important;
+        color: var(--color-text-primary) !important;
+    }
+
+    .likert-scale .likert-option:hover {
+        background-color: var(--color-surface-secondary) !important;
+    }
+
+    .likert-scale .likert-option.selected {
+        background-color: var(--color-primary-medium) !important;
+        border-color: var(--color-primary-medium) !important;
+        color: var(--color-white) !important;
+    }
+
+    .likert-scale .likert-label {
+        color: var(--color-text-secondary) !important;
+    }
+
+    /* Rating components */
+    .star-item,
+    .rating-option {
+        color: var(--color-border-secondary);
+    }
+
+    /* Ranking components */
+    .ranking-item {
+        background-color: var(--color-surface);
+        border-color: var(--color-border-secondary);
+    }
+
+    .ranking-item:hover {
+        background-color: var(--color-surface-secondary);
+    }
+
+    .ranking-item.ranked {
+        background-color: var(--color-primary-light);
+    }
+
+    .ranking-circle {
+        background-color: var(--color-surface);
+        border-color: var(--color-border-secondary);
+        color: var(--color-text-tertiary);
+    }
+
+    .ranking-circle.filled {
+        background-color: var(--color-primary-medium);
+        border-color: var(--color-primary-medium);
+        color: var(--color-white);
+    }
+
+    .ranking-summary {
+        background-color: var(--color-surface-secondary);
+    }
+
+    .ranking-summary-text {
+        color: var(--color-text-secondary);
+    }
+
+    .ranking-title {
+        color: var(--color-text-primary);
+    }
+
+    .ranking-empty {
+        color: var(--color-text-tertiary);
+    }
+
+    /* Footer */
+    .survey-footer {
+        background-color: var(--color-surface);
+        border-color: var(--color-border);
+    }
+
+    .footer-icon {
+        color: var(--color-text-tertiary);
+    }
+
+    /* Buttons */
+    .button--secondary {
+        background-color: var(--color-border);
+        color: var(--color-text-primary);
+    }
+
+    .button--secondary:hover {
+        background-color: var(--color-border-secondary);
+    }
+
+    /* File upload */
+    .file-upload-error {
+        background: var(--color-error-light);
+        border-color: var(--color-error);
+        color: var(--color-error);
+    }
+
+    /* Standalone mode */
+    .standalone-action {
+        background: var(--color-surface);
+        border-color: var(--color-border);
+        color: var(--color-text-primary);
+    }
+
+    .standalone-action:hover {
+        background: var(--color-surface-secondary);
+    }
+
+    .standalone-action-description {
+        color: var(--color-text-secondary);
+    }
+
+    /* Timeout error */
+    .timeout-error {
+        background: var(--color-surface);
+    }
+
+    .timeout-error h2 {
+        color: var(--color-text-primary);
+    }
+
+    .timeout-error p {
+        color: var(--color-text-secondary);
+    }
+
+    .timeout-help {
+        color: var(--color-text-tertiary);
     }
 }
