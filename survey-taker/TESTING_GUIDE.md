@@ -24,6 +24,9 @@ The tests cover:
 - ✅ Error handling
 - ✅ Different answer types
 - ✅ Response processing
+- ✅ **NEW!** Helper method performance
+- ✅ **NEW!** Object allocation efficiency
+- ✅ **NEW!** Response parsing robustness
 
 ## 🔍 **Manual Testing Scenarios**
 
@@ -162,6 +165,27 @@ The app provides clean logging:
 - [ ] Database save time
 - [ ] API response time
 - [ ] Overall completion time
+
+### **NEW! API Provider Performance Testing (v21)**
+With the recent refactoring, test these performance improvements:
+
+#### **Helper Method Performance**
+- [ ] `_validatePlatformConfig()` execution time
+- [ ] `_createHeaders()` object creation efficiency
+- [ ] `_createBasePayload()` reuse patterns
+- [ ] `_handleResponse()` parsing performance
+
+#### **Memory Usage Testing**
+- [ ] Object allocation reduction (should be ~50% less)
+- [ ] Memory leak prevention
+- [ ] Garbage collection efficiency
+- [ ] Bundle size verification (should be 8.52 kB or smaller)
+
+#### **Error Handling Performance**
+- [ ] Empty response handling speed
+- [ ] Non-JSON response parsing
+- [ ] Network timeout handling
+- [ ] Fallback mechanism efficiency
 
 ## 🔧 **Testing Environment Setup**
 

@@ -8,7 +8,7 @@ This directory contains the survey taker application - a standalone HTML/JavaScr
 - `sample-survey.json` - Sample survey data for testing
 - `vite.config.ts` - Vite configuration for development
 - `package.json` - Dependencies and scripts
-- `survey-taker-production-vx.zip` - **Platform deployment package**
+- `survey-taker-production-spa-v21.zip` - **Latest platform deployment package**
 - `DATABASE_INTEGRATION.md` - **Database integration documentation**
 
 ## Platform Integration
@@ -73,6 +73,8 @@ The survey taker uses **spa-api-provider** for proper platform integration:
 - **Performance Optimized**: **NEW!** Fixed memory leaks and excessive re-renders
 - **Timeout Handling**: **NEW!** Professional error UI with retry/quit options
 - **Browser Stability**: **NEW!** Prevents browser crashes and hanging
+- **Code Refactoring**: **NEW!** Eliminated redundancy and improved maintainability
+- **API Optimization**: **NEW!** Reduced object allocations and improved performance
 
 ### **⏱️ Timeout Error Handling:**
 - **15-Second Timeout**: Waits up to 15 seconds for CONFIG message from platform
@@ -115,19 +117,21 @@ npm run build
 This creates a `dist` folder that can be zipped and uploaded to the platform.
 
 ### Platform Deployment
-The latest `survey-taker-production-spa-v14.zip` file is ready for platform deployment. This zip file contains:
+The latest `survey-taker-production-spa-v21.zip` file is ready for platform deployment. This zip file contains:
 - `index.html` - The main survey taker application with spa-api-provider
 - `assets/` - Compiled JavaScript and CSS files (using relative paths)
 - **NEW!** Timeout error handling with retry/quit options
 - **NEW!** Performance optimizations to prevent browser crashes
+- **NEW!** Refactored API provider with improved performance and maintainability
 
 **To deploy to the platform:**
-1. Upload `survey-taker-production-spa-v14.zip` to the platform CMS
+1. Upload `survey-taker-production-spa-v21.zip` to the platform CMS
 2. Configure the survey data in the platform
 3. The app will automatically fetch survey configuration via spa-api-provider
 4. If API fails, it will gracefully fall back to sample survey
 5. **NEW!** Survey responses are automatically saved to the platform database
 6. **NEW!** Users get professional timeout error UI if connection fails
+7. **NEW!** Optimized API calls with reduced memory usage and faster performance
 
 ### Database Integration
 For detailed information about the new database integration feature, see [DATABASE_INTEGRATION.md](./DATABASE_INTEGRATION.md). 

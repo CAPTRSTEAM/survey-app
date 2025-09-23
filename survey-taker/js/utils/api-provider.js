@@ -2,7 +2,6 @@
 export class ApiProvider {
     constructor() {
         this.gameConfig = null;
-        this.gameData = null;
         this.isReady = false;
         this.listeners = [];
         this.platformConfig = null; // Store platform configuration for API calls
@@ -208,6 +207,71 @@ export class ApiProvider {
         }
     }
 
+    /**
+     * Validate platform configuration is available
+     * @returns {Object} Platform configuration
+     * @throws {Error} If platform configuration is not available
+     */
+    _validatePlatformConfig() {
+        if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
+            throw new Error('Platform configuration not available.');
+        }
+        return this.platformConfig;
+    }
+
+    /**
+     * Create common HTTP headers for API requests
+     * @param {string} token - Authorization token
+     * @returns {Object} HTTP headers
+     */
+    _createHeaders(token) {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    /**
+     * Create common base payload structure for API requests
+     * @param {string} exerciseId - Exercise identifier
+     * @param {string} appInstanceId - App instance identifier
+     * @returns {Object} Base payload structure
+     */
+    _createBasePayload(exerciseId, appInstanceId) {
+        return {
+            exerciseId: exerciseId,
+            gameConfigId: appInstanceId,
+            organizationId: exerciseId
+        };
+    }
+
+    /**
+     * Handle HTTP response with common error handling
+     * @param {Response} response - Fetch response object
+     * @returns {Promise<Object>} Parsed response or error
+     */
+    async _handleResponse(response) {
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        // Check if response has content before trying to parse JSON
+        const responseText = await response.text();
+        if (!responseText || responseText.trim() === '') {
+            // Empty response - API call was successful but no data returned
+            return { success: true, message: 'Request completed successfully' };
+        }
+
+        // Try to parse as JSON
+        try {
+            return JSON.parse(responseText);
+        } catch (parseError) {
+            // Response is not JSON, return the text as success message
+            return { success: true, message: responseText };
+        }
+    }
+
     getSampleSurvey() {
         return {
             "id": "sample-survey-001",
@@ -313,51 +377,83 @@ export class ApiProvider {
      * @param {Object} surveyData.answers - The survey answers
      * @param {string} surveyData.timestamp - Timestamp of completion
      * @param {string} surveyData.sessionId - Session identifier
+     * @param {Object} surveyData.surveyStructure - Complete survey structure
+     * @param {number} surveyData.timeSpent - Time spent in seconds
      * @returns {Promise<Object>} - The response from the API
      */
     async createAppData(surveyData) {
         try {
-            // Check if we have the required platform configuration
-            if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
-                throw new Error('Platform configuration not available. Cannot save survey data.');
-            }
+            // Validate platform configuration
+            const { token, url, exerciseId, appInstanceId } = this._validatePlatformConfig();
 
-            const { token, url, exerciseId, appInstanceId } = this.platformConfig;
-
-            // Prepare the data payload following the spa-api-provider GameDataDTO pattern
+            // Prepare the enhanced data payload following the spa-api-provider GameDataDTO pattern
             // This matches the structure expected by /api/gameData endpoint
-            const payload = {
+            const enhancedData = {
+                // Platform Context
                 exerciseId: exerciseId,
                 gameConfigId: appInstanceId, // Using appInstanceId as gameConfigId
                 organizationId: exerciseId, // Using exerciseId as organizationId (adjust if needed)
-                data: JSON.stringify({
-                    surveyId: surveyData.surveyId,
-                    answers: surveyData.answers,
-                    timestamp: surveyData.timestamp,
-                    sessionId: surveyData.sessionId,
-                    completedAt: new Date().toISOString(),
-                    status: 'completed',
-                    type: 'survey-completion'
-                })
+                
+                // Survey Metadata
+                surveyId: surveyData.surveyId,
+                surveyTitle: surveyData.surveyTitle || 'Survey',
+                surveyDescription: surveyData.surveyDescription || null,
+                surveyVersion: null, // Set to null for now
+                
+                // Complete Survey Structure
+                surveyStructure: surveyData.surveyStructure || null,
+                
+                // User Responses
+                answers: surveyData.answers,
+                
+                // Completion Metadata
+                timestamp: surveyData.timestamp,
+                sessionId: surveyData.sessionId,
+                completedAt: new Date().toISOString(),
+                timeSpent: surveyData.timeSpent || 0, // Time in seconds
+                status: 'completed',
+                type: 'survey-completion'
             };
+
+            // Try enhanced data first, fallback to simple structure if it fails
+            let payload;
+            try {
+                // Validate enhanced data structure
+                if (!enhancedData.surveyId || !enhancedData.answers) {
+                    throw new Error('Missing required survey data');
+                }
+                
+                const basePayload = this._createBasePayload(exerciseId, appInstanceId);
+                payload = {
+                    ...basePayload,
+                    data: JSON.stringify(enhancedData)
+                };
+            } catch (enhancedError) {
+                console.warn('Enhanced data structure failed, falling back to simple structure:', enhancedError);
+                
+                // Fallback to simple structure - reuse basePayload from above
+                payload = {
+                    ...basePayload,
+                    data: JSON.stringify({
+                        surveyId: surveyData.surveyId,
+                        answers: surveyData.answers,
+                        timestamp: surveyData.timestamp,
+                        sessionId: surveyData.sessionId,
+                        completedAt: new Date().toISOString(),
+                        status: 'completed',
+                        type: 'survey-completion'
+                    })
+                };
+            }
 
             // Make the API call to save the survey data using the existing /api/gameData endpoint
             const response = await fetch(`${url}/api/gameData`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: this._createHeaders(token),
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-            }
-
-            const result = await response.json();
-            return result;
+            return await this._handleResponse(response);
 
         } catch (error) {
             console.error('Error saving survey data:', error);
@@ -372,44 +468,35 @@ export class ApiProvider {
      */
     async sendAppFinishedEvent() {
         try {
-            // Check if we have the required platform configuration
-            if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
-                throw new Error('Platform configuration not available. Cannot send APP_FINISHED event.');
-            }
-
-            const { token, url, exerciseId, appInstanceId } = this.platformConfig;
+            // Validate platform configuration
+            const { token, url, exerciseId, appInstanceId } = this._validatePlatformConfig();
 
             // Prepare the event payload for the /api/events endpoint
+            const basePayload = this._createBasePayload(exerciseId, appInstanceId);
             const eventPayload = {
-                exerciseId: exerciseId,
-                gameConfigId: appInstanceId,
-                organizationId: exerciseId,
-                eventType: 'APP_FINISHED',
+                ...basePayload,
+                type: 'APP_FINISHED',
                 timestamp: new Date().toISOString(),
-                data: {
+                data: JSON.stringify({
                     appInstanceId: appInstanceId,
                     exerciseId: exerciseId,
                     completedAt: new Date().toISOString(),
                     status: 'completed'
-                }
+                })
             };
 
             // Make the API call to send the APP_FINISHED event
             const response = await fetch(`${url}/api/events`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: this._createHeaders(token),
                 body: JSON.stringify(eventPayload)
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            const result = await this._handleResponse(response);
+            // Override the generic success message with a specific one for this event
+            if (result.success && result.message === 'Request completed successfully') {
+                result.message = 'APP_FINISHED event sent successfully';
             }
-
-            const result = await response.json();
             return result;
 
         } catch (error) {
@@ -429,12 +516,8 @@ export class ApiProvider {
      */
     async getAppData(options = {}) {
         try {
-            // Check if we have the required platform configuration
-            if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
-                throw new Error('Platform configuration not available. Cannot retrieve survey data.');
-            }
-
-            const { token, url, exerciseId: configExerciseId, appInstanceId: configAppInstanceId } = this.platformConfig;
+            // Validate platform configuration
+            const { token, url, exerciseId: configExerciseId, appInstanceId: configAppInstanceId } = this._validatePlatformConfig();
             
             // Use provided options or fall back to stored configuration
             const exerciseId = options.exerciseId || configExerciseId;
@@ -444,17 +527,10 @@ export class ApiProvider {
             // Make the API call to retrieve the survey data using the existing /api/gameData endpoint
             const response = await fetch(`${url}/api/gameData`, {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: this._createHeaders(token)
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-            }
-
-            const result = await response.json();
+            const result = await this._handleResponse(response);
             
             // Filter by surveyId if provided (since the endpoint returns all game data)
             if (surveyId && result.gameData) {

@@ -23,6 +23,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     const [isSubmitting, setIsSubmitting] = ReactInstance.useState(false);
     const [error, setError] = ReactInstance.useState(null as string | null);
     const [isTimeoutError, setIsTimeoutError] = ReactInstance.useState(false);
+    const [surveyStartTime, setSurveyStartTime] = ReactInstance.useState(null as number | null);
 
     const fileInputRef = ReactInstance.useRef(null as HTMLInputElement | null);
 
@@ -235,11 +236,23 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
             
             // Send completion data to platform
             if (appMode === 'platform') {
+                // Calculate time spent in seconds
+                const timeSpent = surveyStartTime ? Math.round((Date.now() - surveyStartTime) / 1000) : 0;
+                
                 const surveyData = {
                     surveyId: survey?.id,
+                    surveyTitle: survey?.title,
+                    surveyDescription: survey?.description,
+                    surveyStructure: survey ? {
+                        welcome: survey.welcome,
+                        thankYou: survey.thankYou,
+                        settings: survey.settings,
+                        sections: survey.sections
+                    } : null,
                     answers,
                     timestamp: new Date().toISOString(),
-                    sessionId: `session_${Date.now()}`
+                    sessionId: `session_${Date.now()}`,
+                    timeSpent: timeSpent
                 };
 
                 try {
@@ -511,6 +524,8 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                     ),
                     ReactInstance.createElement('button', {
                         onClick: () => {
+                            // Start timing when user begins the survey
+                            setSurveyStartTime(Date.now());
                             setCurrentSectionIndex(0);
                             
                             // Scroll to top when starting the survey and focus on section title
