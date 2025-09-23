@@ -8,7 +8,7 @@ This directory contains the survey taker application - a standalone HTML/JavaScr
 - `sample-survey.json` - Sample survey data for testing
 - `vite.config.ts` - Vite configuration for development
 - `package.json` - Dependencies and scripts
-- `survey-taker-production-v2.zip` - **Platform deployment package**
+- `survey-taker-production-vx.zip` - **Platform deployment package**
 - `DATABASE_INTEGRATION.md` - **Database integration documentation**
 
 ## Platform Integration

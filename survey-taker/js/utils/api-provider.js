@@ -366,6 +366,59 @@ export class ApiProvider {
     }
 
     /**
+     * Send APP_FINISHED event to the platform to increment finishCount
+     * This allows the next item in the sequence to become active
+     * @returns {Promise<Object>} - The response from the API
+     */
+    async sendAppFinishedEvent() {
+        try {
+            // Check if we have the required platform configuration
+            if (!this.platformConfig || !this.platformConfig.token || !this.platformConfig.url) {
+                throw new Error('Platform configuration not available. Cannot send APP_FINISHED event.');
+            }
+
+            const { token, url, exerciseId, appInstanceId } = this.platformConfig;
+
+            // Prepare the event payload for the /api/events endpoint
+            const eventPayload = {
+                exerciseId: exerciseId,
+                gameConfigId: appInstanceId,
+                organizationId: exerciseId,
+                eventType: 'APP_FINISHED',
+                timestamp: new Date().toISOString(),
+                data: {
+                    appInstanceId: appInstanceId,
+                    exerciseId: exerciseId,
+                    completedAt: new Date().toISOString(),
+                    status: 'completed'
+                }
+            };
+
+            // Make the API call to send the APP_FINISHED event
+            const response = await fetch(`${url}/api/events`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(eventPayload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const result = await response.json();
+            return result;
+
+        } catch (error) {
+            console.error('Error sending APP_FINISHED event:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Retrieve survey data from the database using the platform API
      * Updated to use the existing /api/gameData endpoint (spa-api-provider pattern)
      * @param {Object} options - Options for retrieving data

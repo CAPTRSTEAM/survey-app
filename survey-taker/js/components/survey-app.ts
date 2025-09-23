@@ -245,6 +245,14 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                 try {
                     // Try to save survey data to database using createAppData
                     await apiProvider.createAppData(surveyData);
+                    
+                    // Send APP_FINISHED event to increment finishCount and activate next item
+                    try {
+                        await apiProvider.sendAppFinishedEvent();
+                    } catch (eventError) {
+                        console.warn('Failed to send APP_FINISHED event:', eventError);
+                        // Continue with completion even if event fails
+                    }
                 } catch (dbError) {
                     // Fallback to postMessage if database save fails
                     window.parent.postMessage({

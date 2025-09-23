@@ -20,8 +20,9 @@ When the survey app receives a `CONFIG` message from the platform, it stores the
 
 When a survey is completed in platform mode, the app:
 1. Attempts to save the survey data using `createAppData`
-2. Falls back to the legacy `postMessage` method if database save fails
-3. Provides clean error handling without excessive logging
+2. Sends an `APP_FINISHED` event to increment finishCount and activate the next item in the sequence
+3. Falls back to the legacy `postMessage` method if database save fails
+4. Provides clean error handling without excessive logging
 
 ### 3. Data Structure
 
@@ -75,26 +76,54 @@ try {
 }
 ```
 
-## API Endpoint
+## API Endpoints
 
-The function makes a POST request to:
+### Survey Data Storage
+The `createAppData` function makes a POST request to:
 ```
 POST {platformUrl}/api/gameData
+```
+
+### App Completion Event
+The `sendAppFinishedEvent` function makes a POST request to:
+```
+POST {platformUrl}/api/events
 ```
 
 ### Headers
 - `Content-Type: application/json`
 - `Authorization: Bearer {token}`
 
-### Request Body
+### Request Bodies
+
+#### GameData Endpoint
 The survey data payload in `GameDataDTO` format as described above.
+
+#### Events Endpoint
+The APP_FINISHED event payload:
+```typescript
+{
+  exerciseId: string,
+  gameConfigId: string,        // Uses appInstanceId
+  organizationId: string,     // Uses exerciseId
+  eventType: 'APP_FINISHED',
+  timestamp: string,
+  data: {
+    appInstanceId: string,
+    exerciseId: string,
+    completedAt: string,
+    status: 'completed'
+  }
+}
+```
 
 ## Error Handling
 
-The function includes comprehensive error handling:
+Both functions include comprehensive error handling:
 - Validates platform configuration availability
 - Provides clear error messages for HTTP failures
 - Gracefully falls back to postMessage if database save fails
+- APP_FINISHED event failure doesn't prevent survey completion
 - No excessive logging in production builds
 
 ## Fallback Behavior
@@ -112,6 +141,7 @@ The functionality is covered by unit tests in `tests/survey-app.test.ts`:
 
 - Platform must provide valid `token` and `url` in CONFIG message
 - Platform must support the `/api/gameData` endpoint
+- Platform must support the `/api/events` endpoint for APP_FINISHED events
 - Survey must be running in platform mode (`appMode === 'platform'`)
 
 ## Benefits
