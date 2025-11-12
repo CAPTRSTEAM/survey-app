@@ -1,3 +1,12 @@
+import './react-globals.ts';
+import type { PlatformConfigMessage } from './types/index.ts';
+
+declare global {
+  interface Window {
+    initializeAppWhenReady?: () => void;
+  }
+}
+
 // Main Survey App Entry Point
 // Note: React and ReactDOM are loaded via script tags in HTML
 
@@ -12,31 +21,84 @@ window.addEventListener('unhandledrejection', (event) => {
   showErrorBoundary('An unexpected error occurred. Please refresh the page.');
 });
 
-// Global message listener setup - ensure it's ready before any components
-// Store early CONFIG messages to deliver to ApiProvider when ready
-let earlyConfigMessage: any = null;
-let apiProviderInstance: any = null;
+const configListeners = new Set<(config: PlatformConfigMessage) => void>();
+let pendingConfigMessage: PlatformConfigMessage | null = null;
+
+function notifyConfigListeners(config: PlatformConfigMessage) {
+  configListeners.forEach((listener) => {
+    try {
+      listener(config);
+    } catch (error) {
+      console.error('Error in config listener:', error);
+    }
+  });
+}
+
+function captureConfigMessage(config: PlatformConfigMessage) {
+  pendingConfigMessage = config;
+  notifyConfigListeners(config);
+}
+
+function subscribeToPlatformConfig(listener: (config: PlatformConfigMessage) => void) {
+  configListeners.add(listener);
+
+  if (pendingConfigMessage) {
+    try {
+      listener(pendingConfigMessage);
+    } catch (error) {
+      console.error('Error delivering pending config:', error);
+    }
+  }
+
+  return () => {
+    configListeners.delete(listener);
+  };
+}
+
+function resolveInitialConfig(): PlatformConfigMessage | null {
+  try {
+    const globalConfig = (window as any).__SURVEY_APP_CONFIG__;
+    if (globalConfig?.url && globalConfig?.token) {
+      return { ...globalConfig };
+    }
+
+    const globalUrl = (window as any).__SURVEY_APP_API_URL__;
+    const globalToken = (window as any).__SURVEY_APP_API_TOKEN__;
+    if (globalUrl && globalToken) {
+      return { url: String(globalUrl), token: String(globalToken) };
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const urlParam = params.get('apiUrl') ?? params.get('api_url');
+    const tokenParam = params.get('token') ?? params.get('apiToken');
+    if (urlParam && tokenParam) {
+      return {
+        url: decodeURIComponent(urlParam),
+        token: tokenParam,
+      };
+    }
+
+    const envUrl = (import.meta as any)?.env?.VITE_PLATFORM_API_URL;
+    const envToken = (import.meta as any)?.env?.VITE_PLATFORM_API_TOKEN;
+    if (envUrl && envToken) {
+      return { url: envUrl, token: envToken };
+    }
+  } catch (error: any) {
+    console.warn('Unable to resolve initial platform configuration:', error);
+  }
+
+  return null;
+}
 
 window.addEventListener('message', (event) => {
-  if (event.data.type === 'CONFIG') {
-    earlyConfigMessage = event.data;
-    
-    // If ApiProvider is already ready, deliver the message immediately
-    if (apiProviderInstance) {
-      apiProviderInstance.handleConfigMessage(event.data);
-    }
+  if (event?.data?.type === 'CONFIG') {
+    captureConfigMessage(event.data as PlatformConfigMessage);
   }
 });
 
-// Function to register ApiProvider and deliver any early messages
-function registerApiProvider(apiProvider: any) {
-  apiProviderInstance = apiProvider;
-  
-  // Deliver any early CONFIG message if we have one
-  if (earlyConfigMessage) {
-    apiProviderInstance.handleConfigMessage(earlyConfigMessage);
-    earlyConfigMessage = null; // Clear after delivery
-  }
+const initialConfig = resolveInitialConfig();
+if (initialConfig) {
+  captureConfigMessage(initialConfig);
 }
 
 function showErrorBoundary(message: string) {
@@ -78,16 +140,17 @@ async function initializeApp(retryCount = 0) {
     
     const initPromise = (async () => {
       // Dynamically import components with retry logic
-      let ApiProvider, SurveyApp, createErrorBoundary;
-      
+      let spaApiProviderModule: any;
+      let SurveyApp: any;
+      let createErrorBoundary: any;
+
       try {
-        const apiProviderModule = await import('./utils/api-provider.js');
-        ApiProvider = apiProviderModule.ApiProvider;
+        spaApiProviderModule = await import('spa-api-provider');
       } catch (error) {
-        console.error('Failed to load ApiProvider:', error);
-        throw new Error('Failed to load API provider module');
+        console.error('Failed to load spa-api-provider:', error);
+        throw new Error('Failed to load platform API provider module');
       }
-      
+
       try {
         const surveyAppModule = await import('./components/survey-app.js');
         SurveyApp = surveyAppModule.SurveyApp;
@@ -103,46 +166,80 @@ async function initializeApp(retryCount = 0) {
         console.error('Failed to load ErrorBoundary:', error);
         throw new Error('Failed to load error boundary module');
       }
-      
-      // Create API provider
-      const apiProvider = new ApiProvider();
-      
-      // Register the API provider with the global message listener
-      registerApiProvider(apiProvider);
-      
+
+      const { ApiProvider, useApi } = spaApiProviderModule;
+      const ReactInstance = window.React;
+
+      if (!ApiProvider || !useApi) {
+        throw new Error('spa-api-provider did not export expected modules');
+      }
+
+      const ConfigBridge = () => {
+        const { updateProviderConfig } = useApi();
+        const platformConfigState = ReactInstance.useState(pendingConfigMessage as PlatformConfigMessage | null);
+        const platformConfig = platformConfigState[0] as PlatformConfigMessage | null;
+        const setPlatformConfig = platformConfigState[1] as (config: PlatformConfigMessage | null) => void;
+
+        ReactInstance.useEffect(() => {
+          const unsubscribe = subscribeToPlatformConfig((config) => {
+            if (config?.url && config?.token) {
+              try {
+                updateProviderConfig(config.url, config.token);
+              } catch (error) {
+                console.error('Failed to update provider configuration:', error);
+              }
+            }
+            setPlatformConfig(config);
+          });
+
+          return unsubscribe;
+        }, [updateProviderConfig]);
+
+        return ReactInstance.createElement(SurveyApp, { platformConfig });
+      };
+
       // Create ErrorBoundary component
       const ErrorBoundary = createErrorBoundary();
-      
+
       // Create and render the survey app
       const root = document.getElementById('root');
-      
+
       if (!root) {
         throw new Error('Root element not found');
       }
-      
+
       // Use React 18 createRoot API instead of deprecated render
       const reactRoot = (window.ReactDOM as any).createRoot(root);
-      
-      // Render with error boundary
-      const app = window.React.createElement(ErrorBoundary, null,
-        window.React.createElement(SurveyApp, { apiProvider })
+
+      // Render with error boundary and provider
+      const app = ReactInstance.createElement(
+        ErrorBoundary,
+        null,
+        ReactInstance.createElement(
+          ApiProvider,
+          {
+            apiUrl: pendingConfigMessage?.url,
+            token: pendingConfigMessage?.token,
+          },
+          ReactInstance.createElement(ConfigBridge)
+        )
       );
-      
+
       reactRoot.render(app);
-      
+
       // Hide loading indicator
       const loadingIndicator = document.getElementById('loading-indicator');
       if (loadingIndicator) {
         loadingIndicator.style.display = 'none';
       }
-      
+
       console.log('Survey app initialized successfully');
     })();
     
     // Race between initialization and timeout
     await Promise.race([initPromise, timeoutPromise]);
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to initialize app:', error);
     
     if (retryCount < MAX_RETRIES) {
@@ -153,9 +250,10 @@ async function initializeApp(retryCount = 0) {
     
     // Show specific error message based on error type
     let errorMessage = 'Failed to load the survey application. Please refresh the page.';
-    if (error.message.includes('timeout')) {
+    const errorMessageText = error instanceof Error ? error.message : String(error ?? '');
+    if (errorMessageText.includes('timeout')) {
       errorMessage = 'The application is taking too long to load. Please check your internet connection and refresh the page.';
-    } else if (error.message.includes('module')) {
+    } else if (errorMessageText.includes('module')) {
       errorMessage = 'Failed to load application modules. Please refresh the page.';
     }
     

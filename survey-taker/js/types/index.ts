@@ -69,8 +69,20 @@ export interface SurveyState {
 }
 
 // Component Props Types
+export interface PlatformConfigMessage {
+  type?: string;
+  token?: string;
+  url?: string;
+  exerciseId?: string;
+  appInstanceId?: string;
+  organizationId?: string;
+  survey?: Survey;
+  surveyConfig?: Survey;
+  [key: string]: unknown;
+}
+
 export interface SurveyAppProps {
-  apiProvider: ApiProvider;
+  platformConfig?: PlatformConfigMessage | null;
 }
 
 export interface QuestionRendererProps {
@@ -130,33 +142,6 @@ export interface QuestionProgress {
   current: number;
   total: number;
   percentage: number;
-}
-
-// API Types
-export interface ApiProvider {
-  subscribe: (callback: (config: Survey | null) => void) => void;
-  getGameConfig: () => Survey | null;
-  isGameReady: () => boolean;
-  createAppData: (surveyData: {
-    surveyId: string;
-    answers: SurveyAnswers;
-    timestamp: string;
-    sessionId: string;
-  }) => Promise<any>;
-  getAppData: (options?: {
-    exerciseId?: string;
-    appInstanceId?: string;
-    surveyId?: string;
-  }) => Promise<any>;
-}
-
-export interface PlatformConfig {
-  token?: string;
-  url?: string;
-  exerciseId?: string;
-  appInstanceId?: string;
-  survey?: Survey;
-  surveyConfig?: Survey;
 }
 
 // Validation Types

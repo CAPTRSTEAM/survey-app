@@ -1,88 +1,45 @@
 # Survey Taker
 
-This directory contains the survey taker application - a standalone HTML/JavaScript app that can display and collect survey responses.
+This directory contains the survey taker application – a standalone HTML/JavaScript single page app that can run in the CAPTRS platform iframe or in a local standalone mode for testing.
 
-## Files
+## Key Files
 
-- `index.html` - The main survey taker application
-- `sample-survey.json` - Sample survey data for testing
-- `vite.config.ts` - Vite configuration for development
-- `package.json` - Dependencies and scripts
-- `survey-taker-production-spa-v21.zip` - **Latest platform deployment package**
-- `DATABASE_INTEGRATION.md` - **Database integration documentation**
+- `index.html` – entry point that bootstraps the React bundle from the CDN
+- `js/` – TypeScript sources (compiled by Vite)  
+- `sample-survey.json` – quick-start survey for standalone testing
+- `package.json` / `vite.config.ts` – tooling configuration
+- `survey-taker-production-spa-v31.zip` – **current production-ready bundle**
+- `DATABASE_INTEGRATION.md` – persistence and API usage details
+- `DEPLOYMENT_GUIDE.md` – clean deployment checklist
+- `TESTING_GUIDE.md` – automated + manual validation scenarios
 
-## Platform Integration
+## Platform Integration Overview
 
-The survey taker uses **spa-api-provider** for proper platform integration:
+The app now uses the official **`spa-api-provider` React context** instead of a custom provider. This keeps the integration aligned with the platform team’s latest expectations.
 
-### **🔧 API Provider Features:**
-- **Platform Configuration**: Receives `CONFIG` messages with platform credentials
-- **Game Starting Data**: Fetches survey configuration from `/api/gameStartingData`
-- **Survey Extraction**: Intelligently extracts survey data from platform response
-- **Robust Error Handling**: Gracefully handles API failures and missing parameters
-- **Fallback Support**: Uses sample survey if platform data unavailable
-- **Completion Reporting**: Sends survey completion data back to platform
-- **Database Integration**: **NEW!** Saves survey responses directly to database using `createAppData`
+- **Configuration bridge**: `js/app.ts` listens for platform `CONFIG` messages *and* supports local overrides via:
+  - `window.__SURVEY_APP_CONFIG__`
+  - `window.__SURVEY_APP_API_URL__` / `window.__SURVEY_APP_API_TOKEN__`
+  - Query parameters `?apiUrl=` and `?token=`
+  - Vite env variables `VITE_PLATFORM_API_URL` and `VITE_PLATFORM_API_TOKEN`
+- **Survey extraction**: `SurveyApp` inspects `spa-api-provider` context data (`appConfig`, inline `survey`, or `surveyConfig`) and normalises sections/questions before rendering.
+- **Data persistence**: On completion the app calls `createAppData` and `addEvent(AddEventDTOType.APP_FINISH)` from the provider context so responses are written to `/api/gameData` and the sequence finish count is updated.
+- **Fallback behaviour**: If database writes fail, the app still posts a `SURVEY_COMPLETE` message to the parent frame. Standalone users can upload JSON via the built-in file picker.
+- **Timeout UX**: If no survey loads within 15 seconds the user sees an accessible retry/quit screen.
 
-### **📡 Platform Communication:**
-1. **Receives**: `{ type: 'CONFIG', token, url, exerciseId?, appInstanceId?, survey?, surveyConfig? }`
-2. **Direct Survey**: Checks for survey data directly in CONFIG message
-3. **API Fallback**: Uses spa-api-provider pattern with `getCurrentGameConfig` (GET /api/gameConfig)
-4. **Parameter Handling**: Intelligently handles missing `exerciseId`/`appInstanceId`
-5. **Extracts**: Intelligently finds survey data in various response formats
-6. **Falls Back**: Uses sample survey if API fails or returns 400/403/404
-7. **Sends**: `{ type: 'SURVEY_COMPLETE', data: {...} }` on completion
-8. **Saves to DB**: **NEW!** Automatically saves survey responses to database via `/api/gameData`
+## Standalone Mode
 
-### **🗄️ Database Integration:**
-- **Automatic Saving**: Survey responses are automatically saved to the platform database
-- **API Endpoint**: Uses `POST /api/gameData` with proper authentication
-- **Data Structure**: Saves exerciseId, appInstanceId, surveyId, answers, timestamps, and session data
-- **Fallback Support**: Gracefully falls back to postMessage if database save fails
-- **Error Handling**: Comprehensive error handling with detailed logging
-- **Standards Compliant**: Follows the same pattern used in data-collect and other platform apps
+With no platform credentials the app drops into standalone mode:
 
-### **🛡️ Error Handling:**
-- **Missing Parameters**: Falls back to sample survey if `token` or `url` are missing
-- **API Failures**: Handles 400, 403, 404, and network errors gracefully
-- **Parameter Flexibility**: Works with or without `exerciseId`/`appInstanceId`
-- **CORS Issues**: Provides logging for platform integration troubleshooting
-- **No Survey Data**: Uses fallback survey if platform doesn't provide survey configuration
-- **Asset Loading**: Uses relative paths to avoid 403 errors on JavaScript files
-- **Database Failures**: **NEW!** Gracefully handles database save failures with fallback
-- **Timeout Errors**: **NEW!** Professional timeout error UI with retry/quit options
-- **Performance Issues**: **NEW!** Comprehensive performance fixes to prevent browser crashes
+1. Run `npm run dev` (default port 3001).
+2. Visit `http://localhost:3001`.
+3. Upload `sample-survey.json` or your own survey file.
 
-### **🔍 Survey Data Extraction:**
-- **Direct CONFIG**: Checks for `survey` or `surveyConfig` in CONFIG message
-- **API Response**: Uses `getCurrentGameConfig` (GET /api/gameConfig) - same as spa-api-provider
-- **Validation**: Ensures extracted data has valid survey structure
-- **Comprehensive Logging**: Shows exactly what data is found and where
-- **Flexible Formats**: Handles various platform response structures
-- **Parameter Validation**: Validates required parameters in CONFIG message
-- **Sections Support**: Automatically flattens sections structure into questions array
+You can also supply a public API token locally:
 
-### **🔧 Technical Fixes:**
-- **Relative Paths**: All assets use relative paths (`./assets/`) instead of absolute paths
-- **Self-Contained**: No external dependencies (removed Google Fonts)
-- **System Fonts**: Uses native system font stack for better compatibility
-- **Platform-Safe**: Designed to work within platform iframe restrictions
-- **spa-api-provider Compatible**: Uses same API calls as official spa-api-provider
-- **Sections Processing**: Handles nested sections structure from platform surveys
-- **Database Ready**: **NEW!** Includes createAppData function for persistent data storage
-- **Performance Optimized**: **NEW!** Fixed memory leaks and excessive re-renders
-- **Timeout Handling**: **NEW!** Professional error UI with retry/quit options
-- **Browser Stability**: **NEW!** Prevents browser crashes and hanging
-- **Code Refactoring**: **NEW!** Eliminated redundancy and improved maintainability
-- **API Optimization**: **NEW!** Reduced object allocations and improved performance
-
-### **⏱️ Timeout Error Handling:**
-- **15-Second Timeout**: Waits up to 15 seconds for CONFIG message from platform
-- **Professional UI**: Clean timeout error screen with clock icon and clear messaging
-- **User Options**: "Try Again" button to retry connection or "Quit" to close app
-- **Retry Logic**: Resets API provider and attempts connection again
-- **Graceful Fallback**: Falls back to sample survey if no timeout handler registered
-- **Helpful Messaging**: Explains possible causes and suggests checking connection
+```
+http://localhost:3001?apiUrl=http%3A%2F%2Flocalhost%3A3000&token=yourTokenHere
+```
 
 ## Usage
 
@@ -114,24 +71,16 @@ npm run test:coverage
 npm run build
 ```
 
-This creates a `dist` folder that can be zipped and uploaded to the platform.
+This creates a fresh `dist/` folder ready for deployment.
 
 ### Platform Deployment
-The latest `survey-taker-production-spa-v21.zip` file is ready for platform deployment. This zip file contains:
-- `index.html` - The main survey taker application with spa-api-provider
-- `assets/` - Compiled JavaScript and CSS files (using relative paths)
-- **NEW!** Timeout error handling with retry/quit options
-- **NEW!** Performance optimizations to prevent browser crashes
-- **NEW!** Refactored API provider with improved performance and maintainability
+1. Run `npm run build`.
+2. Zip the contents of `dist/` (see deployment scripts or use `Compress-Archive`).
+3. Upload the new archive – current standard name: `survey-taker-production-spa-v31.zip`.
+4. Configure the public survey in the platform. When the iframe sends a `CONFIG` message the app will auto-load, ingest, and persist responses through `spa-api-provider`.
 
-**To deploy to the platform:**
-1. Upload `survey-taker-production-spa-v21.zip` to the platform CMS
-2. Configure the survey data in the platform
-3. The app will automatically fetch survey configuration via spa-api-provider
-4. If API fails, it will gracefully fall back to sample survey
-5. **NEW!** Survey responses are automatically saved to the platform database
-6. **NEW!** Users get professional timeout error UI if connection fails
-7. **NEW!** Optimized API calls with reduced memory usage and faster performance
+For a deeper look at persistence, configuration precedence, and testing scenarios see:
 
-### Database Integration
-For detailed information about the new database integration feature, see [DATABASE_INTEGRATION.md](./DATABASE_INTEGRATION.md). 
+- [DATABASE_INTEGRATION.md](./DATABASE_INTEGRATION.md)
+- [TESTING_GUIDE.md](./TESTING_GUIDE.md)
+- [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)

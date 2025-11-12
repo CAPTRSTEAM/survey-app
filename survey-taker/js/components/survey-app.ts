@@ -1,6 +1,6 @@
 import React from 'react';
+import { useApi, AddEventDTOType } from 'spa-api-provider';
 import type { SurveyAppProps, Survey, SurveyAnswers, AppMode } from '../types/index.js';
-import { usePerformanceTracking, useRenderCount, useMemoryUsage } from '../hooks/use-performance-tracking.js';
 import { useDynamicPositioning } from '../utils/dynamic-positioning.js';
 import { useSurveyValidation } from '../utils/survey-validation.js';
 import { useAutoSave } from '../hooks/use-auto-save.js';
@@ -11,9 +11,75 @@ import { QuestionProgress as QuestionProgressComponent } from './question-progre
 // Ensure React is available for browser environment
 const ReactInstance = window.React || (window as any).React;
 
-export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
+const SURVEY_LOOKUP_PATHS = [
+    'survey',
+    'surveyConfig',
+    'gameConfig.survey',
+    'gameConfig.surveyConfig',
+    'appConfig.survey',
+    'appConfig.surveyConfig',
+    'configuration.survey',
+    'configuration.surveyConfig',
+    'data.survey',
+    'data.surveyConfig',
+    'gameConfig',
+    'appConfig',
+    'configuration',
+    'data',
+    'config',
+    'surveyDefinition'
+];
+
+function getNestedValue(obj: any, path: string) {
+    try {
+        return path.split('.').reduce((current, key) => {
+            return current && current[key] !== undefined ? current[key] : null;
+        }, obj);
+    } catch (error) {
+        console.error('Error accessing nested value:', error);
+        return null;
+    }
+}
+
+function isValidSurveyCandidate(obj: any): obj is Survey {
+    if (!obj || typeof obj !== 'object') {
+        return false;
+    }
+
+    const hasQuestions = Array.isArray(obj.questions) && obj.questions.length > 0;
+    const hasSections = Array.isArray(obj.sections) && obj.sections.length > 0;
+    const hasStructure = Boolean(obj.id && obj.title && (obj.welcome || obj.thankYou));
+
+    return hasQuestions || hasSections || hasStructure;
+}
+
+function extractSurveyFromData(data: any): Survey | null {
+    if (isValidSurveyCandidate(data)) {
+        return data;
+    }
+
+    for (const path of SURVEY_LOOKUP_PATHS) {
+        const candidate = getNestedValue(data, path);
+        if (candidate && isValidSurveyCandidate(candidate)) {
+            return candidate;
+        }
+    }
+
+    return null;
+}
+
+export const SurveyApp: React.FC<SurveyAppProps> = ({ platformConfig }) => {
     // Performance tracking disabled to prevent browser crashes
     
+    const {
+        providerConfig,
+        updateProviderConfig,
+        createAppData,
+        addEvent,
+        appConfig,
+        closeApp
+    } = useApi();
+
     // State management
     const [survey, setSurvey] = ReactInstance.useState(null as Survey | null);
     const [currentSectionIndex, setCurrentSectionIndex] = ReactInstance.useState(-1); // Start at -1 for welcome screen
@@ -24,8 +90,12 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     const [error, setError] = ReactInstance.useState(null as string | null);
     const [isTimeoutError, setIsTimeoutError] = ReactInstance.useState(false);
     const [surveyStartTime, setSurveyStartTime] = ReactInstance.useState(null as number | null);
+    const platformConfigState = ReactInstance.useState(platformConfig ?? null);
+    const resolvedPlatformConfig = platformConfigState[0] as SurveyAppProps['platformConfig'];
+    const setResolvedPlatformConfig = platformConfigState[1] as (config: SurveyAppProps['platformConfig']) => void;
 
     const fileInputRef = ReactInstance.useRef(null as HTMLInputElement | null);
+    const hasAnnouncedReadyRef = ReactInstance.useRef(false);
 
     // Custom hooks
     const dynamicStyles = useDynamicPositioning(currentSectionIndex);
@@ -35,32 +105,36 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
     // Auto-save functionality
     const { loadSavedAnswers, clearSavedAnswers } = useAutoSave(survey?.id || null, answers);
 
-    // Handle timeout error
-    const handleTimeoutError = ReactInstance.useCallback(() => {
-        setIsTimeoutError(true);
-        setAppMode('error');
-    }, []);
-
     // Handle retry after timeout
     const handleRetry = ReactInstance.useCallback(() => {
         setIsTimeoutError(false);
         setError(null);
         setAppMode('loading');
-        // Reset API provider and try again
-        if (apiProvider) {
-            apiProvider.reset();
+
+        if (providerConfig?.apiUrl && providerConfig?.token) {
+            try {
+                updateProviderConfig(providerConfig.apiUrl, providerConfig.token);
+            } catch (retryError) {
+                console.error('Failed to refresh provider configuration:', retryError);
+            }
         }
-    }, [apiProvider]);
+    }, [providerConfig, updateProviderConfig]);
 
     // Handle quit after timeout
     const handleQuit = ReactInstance.useCallback(() => {
         // Close the window or navigate away
+        try {
+            closeApp();
+        } catch (error) {
+            console.warn('Failed to invoke closeApp via provider:', error);
+        }
+
         if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'CLOSE_APP' }, '*');
         } else {
             window.close();
         }
-    }, []);
+    }, [closeApp]);
 
     // Handle survey file upload
     const handleSurveyLoad = ReactInstance.useCallback((surveyData: Survey) => {
@@ -160,68 +234,116 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         }
     }, []);
 
-    // Initialize app with API provider
     ReactInstance.useEffect(() => {
-        try {
-            // Check if running in iframe (platform mode)
-            if (window.parent !== window) {
-                setAppMode('platform');
-                
-                // Subscribe to API provider updates
-                apiProvider.subscribe((surveyConfig) => {
-                    
-                    if (surveyConfig) {
-                        // Validate survey structure
-                        const validationResult = validateSurvey(surveyConfig);
-                        
-                        if (validationResult.isValid) {
-                            const processedSurvey = processSurveyStructure(surveyConfig);
-                            setSurvey(processedSurvey);
-                            setError(null);
-                        } else {
-                            console.error('Survey validation failed:', validationResult.error);
-                            setError(`Invalid survey configuration: ${validationResult.error}`);
-                        }
-                    } else {
-                        console.warn('API provider callback received null/undefined surveyConfig');
-                    }
-                });
+        setResolvedPlatformConfig(platformConfig ?? null);
+    }, [platformConfig]);
 
-                // Register timeout handler
-                apiProvider.onTimeout = handleTimeoutError;
+    ReactInstance.useEffect(() => {
+        const embedded = window.parent && window.parent !== window;
 
-                // Send ready message to platform
-                try {
-                    window.parent.postMessage({
-                        type: 'SURVEY_APP_READY',
-                        message: 'Survey app is ready to receive configuration'
-                    }, '*');
-                } catch (error) {
-                    console.error('Error sending message to parent:', error);
-                }
-                
-                // Also try sending to top window if different from parent
-                if (window.top && window.top !== window) {
-                    try {
-                        window.top.postMessage({
-                            type: 'SURVEY_APP_READY',
-                            message: 'Survey app is ready to receive configuration'
-                        }, '*');
-                    } catch (error) {
-                        console.error('Error sending message to top window:', error);
-                    }
-                }
-                
-            } else {
-                // Standalone mode - show file upload or sample survey
-                setAppMode('standalone');
-                // Don't auto-load sample survey, let user choose
+        if (embedded || resolvedPlatformConfig || providerConfig) {
+            if (isTimeoutError) {
+                setIsTimeoutError(false);
             }
-        } catch (error) {
-            console.error('Error initializing survey app:', error);
-            setError('Failed to initialize survey application');
+            setAppMode('platform');
+        } else if (!isTimeoutError && appMode !== 'error') {
+            setAppMode('standalone');
         }
-    }, [apiProvider, validateSurvey, processSurveyStructure]);
+    }, [resolvedPlatformConfig, providerConfig, isTimeoutError, appMode]);
+
+    ReactInstance.useEffect(() => {
+        if (appMode !== 'platform') {
+            return;
+        }
+
+        if (hasAnnouncedReadyRef.current) {
+            return;
+        }
+
+        try {
+            window.parent?.postMessage({
+                type: 'SURVEY_APP_READY',
+                message: 'Survey app is ready to receive configuration'
+            }, '*');
+        } catch (messageError) {
+            console.error('Error sending message to parent window:', messageError);
+        }
+
+        if (window.top && window.top !== window) {
+            try {
+                window.top.postMessage({
+                    type: 'SURVEY_APP_READY',
+                    message: 'Survey app is ready to receive configuration'
+                }, '*');
+            } catch (topError) {
+                console.error('Error sending message to top window:', topError);
+            }
+        }
+
+        hasAnnouncedReadyRef.current = true;
+    }, [appMode]);
+
+    ReactInstance.useEffect(() => {
+        if (appMode !== 'platform' || survey) {
+            return;
+        }
+
+        const timeoutId = window.setTimeout(() => {
+            setIsTimeoutError(true);
+            setAppMode('error');
+        }, 15000);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [appMode, survey]);
+
+    const processSurveyFromSource = ReactInstance.useCallback((source: any, sourceName: string) => {
+        if (!source) {
+            return false;
+        }
+
+        const extractedSurvey = extractSurveyFromData(source);
+
+        if (!extractedSurvey) {
+            return false;
+        }
+
+        if (survey && extractedSurvey.id && survey.id === extractedSurvey.id) {
+            return true;
+        }
+
+        const validationResult = validateSurvey(extractedSurvey);
+
+        if (!validationResult.isValid) {
+            console.error(`Survey validation failed for ${sourceName}:`, validationResult.error);
+            setError(`Invalid survey configuration: ${validationResult.error}`);
+            return false;
+        }
+
+        const processedSurvey = processSurveyStructure(extractedSurvey);
+        setSurvey(processedSurvey);
+        setError(null);
+        setAppMode('platform');
+        return true;
+    }, [survey, validateSurvey, processSurveyStructure]);
+
+    ReactInstance.useEffect(() => {
+        if (appMode !== 'platform') {
+            return;
+        }
+
+        const sources: Array<[any, string]> = [
+            [resolvedPlatformConfig?.survey, 'platformConfig.survey'],
+            [resolvedPlatformConfig?.surveyConfig, 'platformConfig.surveyConfig'],
+            [resolvedPlatformConfig, 'platformConfig'],
+            [appConfig, 'appConfig']
+        ];
+
+        for (const [source, sourceName] of sources) {
+            if (processSurveyFromSource(source, sourceName)) {
+                return;
+            }
+        }
+    }, [appMode, resolvedPlatformConfig, appConfig, processSurveyFromSource]);
 
     const handleAnswerChange = ReactInstance.useCallback((questionId: string, value: any) => {
         setAnswers((prev: SurveyAnswers) => ({ ...prev, [questionId]: value }));
@@ -231,15 +353,25 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         setIsSubmitting(true);
         
         try {
-            // Clear saved answers on completion
             clearSavedAnswers();
             
-            // Send completion data to platform
             if (appMode === 'platform') {
-                // Calculate time spent in seconds
                 const timeSpent = surveyStartTime ? Math.round((Date.now() - surveyStartTime) / 1000) : 0;
-                
-                const surveyData = {
+                const timestamp = new Date().toISOString();
+                const sessionId = `session_${Date.now()}`;
+
+                const exerciseId = (resolvedPlatformConfig?.exerciseId as string)
+                    ?? (getNestedValue(appConfig, 'exerciseId') as string)
+                    ?? 'public-survey';
+                const appInstanceId = (resolvedPlatformConfig?.appInstanceId as string)
+                    ?? (getNestedValue(appConfig, 'appInstanceId') as string)
+                    ?? (getNestedValue(appConfig, 'gameConfigId') as string)
+                    ?? survey?.id
+                    ?? 'public-survey-instance';
+                const organizationId = (resolvedPlatformConfig?.organizationId as string)
+                    ?? exerciseId;
+
+                const surveyPayload = {
                     surveyId: survey?.id,
                     surveyTitle: survey?.title,
                     surveyDescription: survey?.description,
@@ -250,27 +382,44 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                         sections: survey.sections
                     } : null,
                     answers,
-                    timestamp: new Date().toISOString(),
-                    sessionId: `session_${Date.now()}`,
-                    timeSpent: timeSpent
+                    timestamp,
+                    sessionId,
+                    timeSpent
+                };
+
+                const payload = {
+                    exerciseId,
+                    gameConfigId: appInstanceId,
+                    organizationId,
+                    data: JSON.stringify({
+                        ...surveyPayload,
+                        completedAt: new Date().toISOString(),
+                        status: 'completed',
+                        type: 'survey-completion'
+                    })
                 };
 
                 try {
-                    // Try to save survey data to database using createAppData
-                    await apiProvider.createAppData(surveyData);
-                    
-                    // Send APP_FINISHED event to increment finishCount and activate next item
+                    await createAppData(JSON.stringify(payload));
+
                     try {
-                        await apiProvider.sendAppFinishedEvent();
+                        await addEvent({
+                            type: AddEventDTOType.APP_FINISH,
+                            data: JSON.stringify({
+                                appInstanceId,
+                                exerciseId,
+                                completedAt: new Date().toISOString(),
+                                status: 'completed'
+                            })
+                        });
                     } catch (eventError) {
-                        console.warn('Failed to send APP_FINISHED event:', eventError);
-                        // Continue with completion even if event fails
+                        console.warn('Failed to send APP_FINISH event:', eventError);
                     }
                 } catch (dbError) {
-                    // Fallback to postMessage if database save fails
+                    console.error('Error saving survey data through spa-api-provider:', dbError);
                     window.parent.postMessage({
                         type: 'SURVEY_COMPLETE',
-                        data: surveyData
+                        data: surveyPayload
                     }, '*');
                 }
             }
@@ -282,7 +431,7 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [appMode, survey?.id, answers, clearSavedAnswers, apiProvider]);
+    }, [appMode, survey, answers, clearSavedAnswers, surveyStartTime, resolvedPlatformConfig, appConfig, createAppData, addEvent]);
 
     // Navigation helpers
     const canNavigateNext = ReactInstance.useCallback(() => {
@@ -579,6 +728,23 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ apiProvider }) => {
                 ReactInstance.createElement('div', { className: 'thank-you-screen' },
                     ReactInstance.createElement('h1', { className: 'survey-title' }, survey.thankYou.title),
                     ReactInstance.createElement('p', { className: 'thank-you-message' }, survey.thankYou.message),
+                    ReactInstance.createElement('button', {
+                        onClick: () => {
+                            try {
+                                closeApp();
+                            } catch (error) {
+                                console.warn('Failed to invoke closeApp via provider:', error);
+                                if (window.parent && window.parent !== window) {
+                                    window.parent.postMessage({ type: 'CLOSE_APP' }, '*');
+                                } else {
+                                    window.close();
+                                }
+                            }
+                        },
+                        className: 'button button--primary',
+                        style: { marginTop: 'var(--space-6)' },
+                        'aria-label': 'Close the survey'
+                    }, 'Close App'),
                     survey.settings?.branding && ReactInstance.createElement('div', { className: 'branding' },
                         survey.settings.branding.poweredBy && 
                             ReactInstance.createElement('div', { className: 'powered-by' }, survey.settings.branding.poweredBy)

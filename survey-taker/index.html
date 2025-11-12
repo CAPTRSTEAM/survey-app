@@ -8,47 +8,6 @@
     <link rel="stylesheet" href="./styles/components.css">
     <link rel="stylesheet" href="./styles/responsive.css">
     
-    <!-- Load React and ReactDOM from CDN with error handling -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js" 
-            onerror="handleReactLoadError()"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
-            onerror="handleReactLoadError()"></script>
-    
-    <script>
-        function handleReactLoadError() {
-            console.error('Failed to load React dependencies');
-            document.getElementById('error-boundary').style.display = 'flex';
-            document.querySelector('#error-boundary .error-content p').textContent = 
-                'Failed to load required dependencies. Please check your internet connection and refresh the page.';
-        }
-        
-        // Check if React loaded successfully with retry limit
-        let reactCheckAttempts = 0;
-        const MAX_REACT_CHECKS = 50; // 5 seconds max (50 * 100ms)
-        
-        function checkReactAvailability() {
-            reactCheckAttempts++;
-            
-            if (!window.React || !window.ReactDOM) {
-                if (reactCheckAttempts < MAX_REACT_CHECKS) {
-                    setTimeout(checkReactAvailability, 100);
-                    return;
-                } else {
-                    console.error('React failed to load after maximum attempts');
-                    handleReactLoadError();
-                    return;
-                }
-            }
-            
-            // React is ready, trigger app initialization
-            if (window.initializeAppWhenReady) {
-                window.initializeAppWhenReady();
-            }
-        }
-        
-        // Start checking after a short delay
-        setTimeout(checkReactAvailability, 100);
-    </script>
 </head>
 <body>
     <div id="root">
@@ -69,9 +28,6 @@
         </div>
     </div>
 
-    <script>
-        // Removed debug logging
-    </script>
-    <script type="module" src="./js/app.ts?v=3"></script>
+    <script type="module" src="./js/app.ts"></script>
 </body>
 </html> 

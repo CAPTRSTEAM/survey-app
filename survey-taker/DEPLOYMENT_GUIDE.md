@@ -47,13 +47,10 @@ cd survey-taker
 
 ### Step 3: Manual Verification
 
-After deployment, verify these files exist on your server:
+After deployment, verify the server only contains files generated in the most recent `dist/` build:
 - ✅ `index.html`
-- ✅ `assets/survey-app.B0uF0GgV.js`
-- ✅ `assets/index.r5ms2_j1.js`
-- ✅ `assets/error-boundary.GxYbDaxA.js`
-- ✅ `assets/api-provider.BT93VPKF.js`
-- ✅ `assets/index.QrT27xo1.css`
+- ✅ `assets/` directory with **only** the latest hashed files (e.g. `survey-app.[hash].js`, `index.[hash].js`, `error-boundary.[hash].js`, `index.[hash].css`)
+- 🚫 No legacy hashes from previous releases.
 
 ## 🔍 Post-Deployment Testing
 
@@ -67,13 +64,13 @@ Open Developer Tools → Network tab and verify:
 - **No 404 errors** for missing files
 - **All assets load successfully**
 
+### 3. Validate Platform Behaviour
+1. Upload the latest build (e.g. `survey-taker-production-spa-v31.zip`) to the CAPTRS CMS.
+2. Launch a survey in platform mode and confirm the iframe receives a fresh `CONFIG` message.
+3. Complete a survey run and verify `/api/gameData` and `/api/events` calls succeed.
+
 ### 3. Expected File Hashes
-After successful deployment, you should see:
-```
-survey-app.B0uF0GgV.js    ← NEW hash
-index.r5ms2_j1.js         ← NEW hash  
-error-boundary.GxYbDaxA.js ← NEW hash
-```
+Hashes change every build. If you continue to see older filenames (for example `survey-app.DybwZhtg.js`) the cleanup step failed.
 
 ## 🚫 What NOT to Do
 

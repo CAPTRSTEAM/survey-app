@@ -33,30 +33,29 @@ The tests cover:
 ### 1. **Platform Mode Testing**
 
 #### Setup
-1. Deploy the survey app to the platform
-2. Ensure platform provides valid `token` and `url` in CONFIG message
-3. Verify platform supports `/api/gameData` endpoint
+1. Deploy the survey app to the platform (or run locally with `?apiUrl=&token=` overrides).
+2. Confirm `token` and `url` reach the iframe (watch for the CONFIG message or provider update logs).
+3. Ensure `/api/gameData` **and** `/api/events` are reachable.
 
 #### Test Cases
 
 **A. Successful Survey Completion**
-1. Complete a survey with various question types
-2. Verify console shows: "Survey data saved to database successfully via /api/gameData endpoint"
-3. Check platform database for saved survey data
-4. Verify data structure matches expected GameDataDTO format
+1. Complete a survey with multiple question types.
+2. Verify the Network tab shows `POST /api/gameData` and `POST /api/events` with 2xx responses.
+3. Inspect the `data` payload to confirm it contains the survey structure, answers, timestamps, and session metadata.
+4. Spot-check the platform database for the saved record.
 
 **B. Partial Survey Completion**
-1. Start a survey but don't complete all questions
-2. Verify `createAppData` is NOT called
-3. Complete the survey
-4. Verify `createAppData` IS called with complete data
+1. Start a survey but stop before the final section.
+2. Confirm no `/api/gameData` call is triggered.
+3. Complete the survey.
+4. Confirm `/api/gameData` is now called with full data.
 
 **C. Database Failure Fallback**
-1. Temporarily disable platform database
-2. Complete a survey
-3. Verify console shows: "Database endpoint not yet implemented, using postMessage fallback"
-4. Verify fallback postMessage is sent
-5. Check platform receives survey completion data
+1. Simulate a failing database (return 500 from `/api/gameData`).
+2. Complete a survey.
+3. Watch for a single warning in the console.
+4. Confirm `window.parent.postMessage({ type: 'SURVEY_COMPLETE', … })` fires and the thank-you screen still appears.
 
 ### 2. **Answer Type Testing**
 
@@ -166,26 +165,12 @@ The app provides clean logging:
 - [ ] API response time
 - [ ] Overall completion time
 
-### **NEW! API Provider Performance Testing (v21)**
-With the recent refactoring, test these performance improvements:
-
-#### **Helper Method Performance**
-- [ ] `_validatePlatformConfig()` execution time
-- [ ] `_createHeaders()` object creation efficiency
-- [ ] `_createBasePayload()` reuse patterns
-- [ ] `_handleResponse()` parsing performance
-
-#### **Memory Usage Testing**
-- [ ] Object allocation reduction (should be ~50% less)
-- [ ] Memory leak prevention
-- [ ] Garbage collection efficiency
-- [ ] Bundle size verification (should be 8.52 kB or smaller)
-
-#### **Error Handling Performance**
-- [ ] Empty response handling speed
-- [ ] Non-JSON response parsing
-- [ ] Network timeout handling
-- [ ] Fallback mechanism efficiency
+### Provider-Specific Checks
+- [ ] CONFIG message arrives within 15 seconds (otherwise timeout UI appears)
+- [ ] Query parameter overrides (`?apiUrl=&token=`) correctly initialise `spa-api-provider`
+- [ ] Global overrides (`window.__SURVEY_APP_CONFIG__`) pick up automatically
+- [ ] `POST /api/events` failure still allows survey completion (thank-you screen visible)
+- [ ] Standalone mode never attempts authenticated requests
 
 ## 🔧 **Testing Environment Setup**
 

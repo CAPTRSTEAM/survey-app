@@ -392,7 +392,7 @@ const RankingQuestion: React.FC<QuestionRendererProps> = ({ question, answer, on
             },
                 isComplete 
                     ? `All ${totalOptions} options ranked`
-                    : `${Object.keys(localRankings).length} of ${totalOptions} options ranked`
+                    : `${Object.keys(localRankingsRef.current).length} of ${totalOptions} options ranked`
             ),
             ReactInstance.createElement('div', { className: 'ranking-list' },
                 sortedOptions.map((option) => {

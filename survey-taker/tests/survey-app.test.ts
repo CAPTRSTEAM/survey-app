@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
 
 // Mock the components for testing
 vi.mock('../js/components/survey-app', () => ({
-  SurveyApp: ({ apiProvider }: any) => React.createElement('div', { 'data-testid': 'survey-app' }, 'Survey App')
+  SurveyApp: ({ platformConfig }: any) => React.createElement('div', { 'data-testid': 'survey-app' }, JSON.stringify(platformConfig))
 }));
 
 vi.mock('../js/components/question-renderer', () => ({
@@ -12,16 +11,16 @@ vi.mock('../js/components/question-renderer', () => ({
 }));
 
 describe('Survey App', () => {
-  it('should render without crashing', () => {
-    const mockApiProvider = {
-      subscribe: vi.fn(),
-      getGameConfig: vi.fn(),
-      isGameReady: vi.fn(),
-      createAppData: vi.fn()
+  it('should accept platform configuration parameters', () => {
+    const platformConfig = {
+      url: 'http://localhost:3000',
+      token: 'test-token-123',
+      exerciseId: 'exercise-001'
     };
 
-    // This is a basic test to ensure the app can be imported and rendered
-    expect(mockApiProvider).toBeDefined();
+    expect(platformConfig.url).toContain('http');
+    expect(platformConfig.token).toBe('test-token-123');
+    expect(platformConfig.exerciseId).toBeDefined();
   });
 
   it('should handle survey data correctly', () => {
@@ -84,7 +83,6 @@ describe('Auto Save', () => {
 });
 
 describe('Database Integration', () => {
-  let mockApiProvider: any;
   let mockFetch: any;
 
   beforeEach(() => {
@@ -95,31 +93,19 @@ describe('Database Integration', () => {
     mockFetch = vi.fn();
     global.fetch = mockFetch;
     
-    // Create mock API provider
-    mockApiProvider = {
-      subscribe: vi.fn(),
-      getGameConfig: vi.fn(),
-      isGameReady: vi.fn(),
-      createAppData: vi.fn(),
-      getAppData: vi.fn()
-    };
   });
 
   it('should support createAppData functionality', () => {
-    const surveyData = {
-      surveyId: 'test-survey-123',
-      answers: { 'q1': 'Test answer' },
-      timestamp: '2024-01-01T00:00:00.000Z',
-      sessionId: 'session_123'
+    const payload = {
+      exerciseId: 'exercise-123',
+      gameConfigId: 'app-instance-456',
+      organizationId: 'org-789',
+      data: JSON.stringify({ surveyId: 'test-survey-123' })
     };
 
-    // Test that createAppData method exists and can be called
-    expect(mockApiProvider.createAppData).toBeDefined();
-    expect(typeof mockApiProvider.createAppData).toBe('function');
-    
-    // Test that it can be called with survey data
-    mockApiProvider.createAppData(surveyData);
-    expect(mockApiProvider.createAppData).toHaveBeenCalledWith(surveyData);
+    expect(payload.exerciseId).toBe('exercise-123');
+    expect(payload.gameConfigId).toBe('app-instance-456');
+    expect(typeof payload.data).toBe('string');
   });
 
   it('should handle createAppData parameters correctly', () => {
