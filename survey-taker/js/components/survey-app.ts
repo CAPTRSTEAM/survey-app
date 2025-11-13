@@ -730,14 +730,41 @@ export const SurveyApp: React.FC<SurveyAppProps> = ({ platformConfig }) => {
                     ReactInstance.createElement('p', { className: 'thank-you-message' }, survey.thankYou.message),
                     ReactInstance.createElement('button', {
                         onClick: () => {
-                            try {
-                                closeApp();
-                            } catch (error) {
-                                console.warn('Failed to invoke closeApp via provider:', error);
-                                if (window.parent && window.parent !== window) {
+                            console.log('Close button clicked, closeApp type:', typeof closeApp);
+                            
+                            // Try provider's closeApp first
+                            if (typeof closeApp === 'function') {
+                                try {
+                                    closeApp();
+                                    console.log('closeApp called successfully');
+                                    return;
+                                } catch (error) {
+                                    console.warn('Failed to invoke closeApp via provider:', error);
+                                }
+                            } else {
+                                console.warn('closeApp is not a function, using fallback');
+                            }
+                            
+                            // Fallback: try postMessage to parent
+                            if (window.parent && window.parent !== window) {
+                                console.log('Attempting to close via postMessage');
+                                try {
                                     window.parent.postMessage({ type: 'CLOSE_APP' }, '*');
-                                } else {
+                                } catch (error) {
+                                    console.warn('Failed to post CLOSE_APP message:', error);
+                                    // Last resort: try window.close
+                                    try {
+                                        window.close();
+                                    } catch (closeError) {
+                                        console.error('All close methods failed:', closeError);
+                                    }
+                                }
+                            } else {
+                                // Last resort: try window.close
+                                try {
                                     window.close();
+                                } catch (closeError) {
+                                    console.error('window.close() failed:', closeError);
                                 }
                             }
                         },
