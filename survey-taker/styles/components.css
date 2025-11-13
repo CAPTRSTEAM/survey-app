@@ -504,12 +504,22 @@
 
 .likert-scale .likert-options {
     display: flex !important;
-    flex-direction: row !important; /* Force horizontal layout */
+    flex-direction: row !important; /* Force horizontal layout on desktop */
     gap: var(--space-4); /* Space between options */
     flex-wrap: wrap; /* Allow wrapping on smaller screens */
     width: 100% !important;
     justify-content: space-between !important; /* Distribute options evenly */
     align-items: stretch; /* Stretch options to fill height */
+}
+
+/* Mobile: Stack Likert options vertically */
+@media (max-width: 768px) {
+    .likert-scale .likert-options {
+        flex-direction: column !important;
+        gap: var(--space-3);
+        align-items: stretch;
+        justify-content: flex-start !important;
+    }
 }
 
 .likert-scale .likert-option {
@@ -529,6 +539,18 @@
     min-width: 0 !important; /* Allow flex items to shrink below content size */
     justify-content: center; /* Center content within each option */
     text-align: center; /* Center text */
+}
+
+/* Mobile: Full width stacked options */
+@media (max-width: 768px) {
+    .likert-scale .likert-option {
+        flex: none !important;
+        width: 100%;
+        min-width: 100%;
+        justify-content: flex-start;
+        text-align: left;
+        padding: var(--space-3) var(--space-4);
+    }
 }
 
 .likert-scale .likert-option:hover {
@@ -552,6 +574,14 @@
     white-space: nowrap; /* Prevent text wrapping within option */
     flex: 1; /* Allow label to grow */
     text-align: center; /* Center the text */
+}
+
+/* Mobile: Allow text wrapping */
+@media (max-width: 768px) {
+    .likert-scale .likert-label {
+        white-space: normal;
+        text-align: left;
+    }
 }
 
 .likert-scale .likert-input {
@@ -592,6 +622,19 @@ div.likert-scale > div.likert-options > label.likert-option {
     display: flex !important;
     flex: 1 !important;
     flex-direction: row !important;
+}
+
+/* Mobile: Override to stack vertically */
+@media (max-width: 768px) {
+    div.likert-scale > div.likert-options {
+        flex-direction: column !important;
+    }
+
+    div.likert-scale > div.likert-options > label.likert-option {
+        flex: none !important;
+        width: 100%;
+        min-width: 100%;
+    }
 }
 
 /* Star Rating */

@@ -48,6 +48,7 @@
 
     .questions-container {
         padding: var(--space-3) var(--container-padding);
+        padding-bottom: calc(var(--footer-height) + var(--space-12));
     }
 
     .question-card {
@@ -56,16 +57,19 @@
 
     .question-header {
         gap: var(--space-3);
+        flex-wrap: wrap;
     }
 
     .question-number {
         width: 28px;
         height: 28px;
         font-size: var(--font-size-xs);
+        flex-shrink: 0;
     }
 
     .question-text {
         font-size: var(--font-size-base);
+        line-height: var(--line-height-relaxed);
     }
 
     .option-group--grid {
@@ -97,21 +101,31 @@
     }
 
     .likert-options {
-        gap: var(--space-2);
+        flex-direction: column !important;
+        gap: var(--space-3);
+        align-items: stretch;
     }
 
     .likert-option {
         font-size: var(--font-size-sm);
-        padding: var(--space-2) var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        flex: none !important;
+        width: 100%;
+        min-width: 100%;
+        justify-content: flex-start;
+        text-align: left;
     }
 
     .likert-label {
         font-size: var(--font-size-sm);
+        white-space: normal;
+        text-align: left;
     }
 
     .likert-input {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
     }
 
     .star-rating {
@@ -349,6 +363,7 @@
 
     .questions-container {
         padding: var(--space-2) var(--container-padding);
+        padding-bottom: calc(var(--footer-height) + var(--space-10));
     }
 
     .question-card {
@@ -501,40 +516,54 @@
 /* Additional responsive breakpoints for Likert options */
 @media (max-width: 768px) {
     .likert-options {
+        flex-direction: column !important;
         gap: var(--space-3);
-        flex-wrap: wrap;
-        justify-content: space-between; /* Maintain even distribution */
+        align-items: stretch;
         width: 100%;
     }
 
     .likert-option {
-        min-width: 0; /* Remove fixed min-width to allow better flex behavior */
-        padding: var(--space-2) var(--space-2);
-        flex: 1; /* Maintain flex growth */
+        flex: none !important;
+        width: 100%;
+        min-width: 100%;
+        padding: var(--space-3) var(--space-4);
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    .likert-label {
+        white-space: normal;
+        text-align: left;
     }
 }
 
 @media (max-width: 480px) {
     .likert-options {
-        gap: var(--space-2);
-        flex-direction: row; /* Keep horizontal even on small screens */
-        justify-content: space-between; /* Maintain even distribution */
+        flex-direction: column !important;
+        gap: var(--space-3);
+        align-items: stretch;
         width: 100%;
     }
 
     .likert-option {
-        min-width: 0; /* Remove fixed min-width to allow better flex behavior */
+        flex: none !important;
+        width: 100%;
+        min-width: 100%;
         font-size: var(--font-size-sm);
-        padding: var(--space-1) var(--space-2);
-        flex: 1; /* Maintain flex growth */
+        padding: var(--space-3) var(--space-4);
+        justify-content: flex-start;
+        text-align: left;
     }
 
     .likert-label {
         font-size: var(--font-size-sm);
+        white-space: normal;
+        text-align: left;
     }
 
     .likert-input {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
     }
 }
