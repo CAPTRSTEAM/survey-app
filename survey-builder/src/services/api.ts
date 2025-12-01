@@ -6,7 +6,8 @@ import { SurveyResponse } from "../types/survey";
 // 3. Environment variable (VITE_API_BASE_URL or VITE_PLATFORM_API_URL)
 // 4. Current origin (for apps deployed on same server as API)
 // 5. localhost:8080 (for local development)
-const getApiBaseUrl = (): string => {
+// Returns null if API URL cannot be determined (e.g., GitHub Pages without configuration)
+const getApiBaseUrl = (): string | null => {
   // Priority 1: Window global (for platform integration)
   if (typeof window !== "undefined") {
     const globalUrl =
@@ -54,18 +55,16 @@ const getApiBaseUrl = (): string => {
       hostname.includes("githubusercontent.com");
 
     // Check if we're on localhost (development)
-    const isLocalhost =
-      hostname === "localhost" || hostname === "127.0.0.1";
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
 
     if (isGitHubPages) {
       // GitHub Pages doesn't have a backend - need explicit API URL
-      // For now, fall back to a default or show error
-      const fallback = "http://localhost:8080"; // This won't work, but at least it's explicit
+      // Return null to indicate API is not configured (don't try to connect)
       console.warn(
         "[API] GitHub Pages detected - API URL must be configured via window.__CAPTRS_API_URL__ or URL parameter"
       );
-      console.log("[API] Fallback to:", fallback);
-      return fallback;
+      console.log("[API] API URL not configured - will use localStorage only");
+      return null;
     }
 
     if (isLocalhost && import.meta.env.DEV) {
@@ -88,6 +87,11 @@ const getApiBaseUrl = (): string => {
 
 const API_BASE_URL = getApiBaseUrl();
 const API_PREFIX = "/api";
+
+// Helper to check if API is configured
+export const isApiConfigured = (): boolean => {
+  return API_BASE_URL !== null;
+};
 
 // Cache API health check to avoid repeated failed requests
 let apiHealthCache: { available: boolean; timestamp: number } | null = null;
@@ -191,6 +195,11 @@ const mapGameDataToSurveyResponse = (
 export const fetchSurveyResponses = async (
   params?: ResponseQueryParams
 ): Promise<SurveyResponse[]> => {
+  // If API URL is not configured, throw error to trigger fallback
+  if (!API_BASE_URL) {
+    throw new Error("API URL not configured");
+  }
+
   try {
     let url: string;
     let queryParams = new URLSearchParams();
