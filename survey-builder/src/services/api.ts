@@ -89,16 +89,33 @@ const getApiBaseUrl = (): string | null => {
 let API_BASE_URL: string | null = getApiBaseUrl();
 const API_PREFIX = "/api";
 
-// Listen for platform CONFIG messages (like survey-taker does)
+// Listen for platform CONFIG messages (like spa-api-provider does)
 if (typeof window !== "undefined") {
+  // Send READY message to parent (like spa-api-provider does)
+  if (window.parent !== window) {
+    try {
+      window.parent.postMessage({ type: "READY" }, "*");
+      console.log("[API] Sent READY message to parent window");
+    } catch (e) {
+      // Cross-origin - can't send message
+    }
+  }
+
+  // Listen for CONFIG messages from platform
   window.addEventListener("message", (event) => {
-    // Check for CONFIG message from platform
+    // Check for CONFIG message from platform (same format as spa-api-provider expects)
     if (event?.data?.type === "CONFIG" && event.data?.url) {
       const newApiUrl = event.data.url;
       console.log("[API] Received CONFIG message with API URL:", newApiUrl);
       API_BASE_URL = newApiUrl;
       // Clear cache so health check runs again
       apiHealthCache = null;
+      
+      // Also store token if provided (for future auth support)
+      if (event.data.token) {
+        // Could store token for auth headers
+        console.log("[API] Received token in CONFIG message");
+      }
     }
   });
 
