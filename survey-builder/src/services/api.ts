@@ -351,6 +351,12 @@ export const getResponseCount = async (
 export const checkApiHealth = async (
   forceCheck: boolean = false
 ): Promise<boolean> => {
+  // If API URL is not configured, return false immediately
+  if (!API_BASE_URL) {
+    console.log("[API Health Check] API URL not configured - skipping health check");
+    return false;
+  }
+
   // Check cache first
   if (!forceCheck && apiHealthCache) {
     const age = Date.now() - apiHealthCache.timestamp;
