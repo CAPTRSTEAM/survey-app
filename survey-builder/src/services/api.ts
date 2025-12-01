@@ -1,31 +1,81 @@
 import { SurveyResponse } from "../types/survey";
 
-// Determine API base URL:
-// 1. Use environment variable if set
-// 2. Use current origin (for deployed apps on same server)
-// 3. Fall back to localhost:8080 for local development
+// Determine API base URL with multiple fallback options:
+// 1. Window global variable (for platform integration)
+// 2. URL parameter (apiUrl or api_url)
+// 3. Environment variable (VITE_API_BASE_URL or VITE_PLATFORM_API_URL)
+// 4. Current origin (for apps deployed on same server as API)
+// 5. localhost:8080 (for local development)
 const getApiBaseUrl = (): string => {
-  // Priority 1: Environment variable (explicit override)
-  if (import.meta.env.VITE_API_BASE_URL) {
-    console.log("[API] Using VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
-    return import.meta.env.VITE_API_BASE_URL;
+  // Priority 1: Window global (for platform integration)
+  if (typeof window !== "undefined") {
+    const globalUrl =
+      (window as any).__SURVEY_APP_API_URL__ ||
+      (window as any).__CAPTRS_API_URL__ ||
+      (window as any).apiUrl;
+    if (globalUrl) {
+      console.log("[API] Using window global API URL:", globalUrl);
+      return globalUrl;
+    }
+
+    // Priority 2: URL parameter (allows runtime configuration)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlParam = urlParams.get("apiUrl") || urlParams.get("api_url");
+    if (urlParam) {
+      console.log("[API] Using URL parameter API URL:", urlParam);
+      return urlParam;
+    }
   }
 
-  // Priority 2: Use current origin when running in browser
+  // Priority 3: Environment variable (build-time configuration)
+  if (import.meta.env.VITE_API_BASE_URL) {
+    console.log(
+      "[API] Using VITE_API_BASE_URL:",
+      import.meta.env.VITE_API_BASE_URL
+    );
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  if (import.meta.env.VITE_PLATFORM_API_URL) {
+    console.log(
+      "[API] Using VITE_PLATFORM_API_URL:",
+      import.meta.env.VITE_PLATFORM_API_URL
+    );
+    return import.meta.env.VITE_PLATFORM_API_URL;
+  }
+
+  // Priority 4: Use current origin when running in browser
   if (typeof window !== "undefined" && window.location) {
     const origin = window.location.origin;
-    // Only use localhost:8080 if we're actually on localhost AND in dev mode
-    if (
-      (window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1") &&
-      import.meta.env.DEV
-    ) {
+    const hostname = window.location.hostname;
+
+    // Check if we're on GitHub Pages (static hosting, no backend)
+    const isGitHubPages =
+      hostname.includes("github.io") ||
+      hostname.includes("githubusercontent.com");
+
+    // Check if we're on localhost (development)
+    const isLocalhost =
+      hostname === "localhost" || hostname === "127.0.0.1";
+
+    if (isGitHubPages) {
+      // GitHub Pages doesn't have a backend - need explicit API URL
+      // For now, fall back to a default or show error
+      const fallback = "http://localhost:8080"; // This won't work, but at least it's explicit
+      console.warn(
+        "[API] GitHub Pages detected - API URL must be configured via window.__CAPTRS_API_URL__ or URL parameter"
+      );
+      console.log("[API] Fallback to:", fallback);
+      return fallback;
+    }
+
+    if (isLocalhost && import.meta.env.DEV) {
       // For local dev, use localhost:8080
       const localDevUrl = "http://localhost:8080";
       console.log("[API] Local dev mode, using:", localDevUrl);
       return localDevUrl;
     }
-    // For deployed apps (or production builds), always use same origin
+
+    // For other deployed apps, use same origin (assumes API is on same server)
     console.log("[API] Using current origin:", origin);
     return origin;
   }
