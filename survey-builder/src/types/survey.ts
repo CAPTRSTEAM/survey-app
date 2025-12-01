@@ -51,6 +51,13 @@ export interface Survey {
   sections: Section[];
   createdAt: string;
   updatedAt: string;
+  // Metadata for platform integration
+  metadata?: {
+    gameConfigId?: string;
+    exerciseId?: string;
+    organizationId?: string;
+    [key: string]: any;
+  };
 }
 
 export interface SurveyLibrary {

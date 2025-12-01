@@ -66,6 +66,13 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
   const [useAPI, setUseAPI] = useState(true);
   const [apiConfigDialogOpen, setApiConfigDialogOpen] = useState(false);
   const [apiUrlInput, setApiUrlInput] = useState("");
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [gameConfigIdFilter, setGameConfigIdFilter] = useState<string>(
+    survey.metadata?.gameConfigId || ""
+  );
+  const [exerciseIdFilter, setExerciseIdFilter] = useState<string>(
+    survey.metadata?.exerciseId || ""
+  );
 
   // Check API availability and load responses
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
@@ -93,12 +100,14 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         let surveyResponses: SurveyResponse[];
         if (apiHealth && useAPI) {
           try {
-            // Try to extract exerciseId/gameConfigId from survey metadata if available
-            // For now, just search by surveyId
+            // Use gameConfigId/exerciseId from survey metadata or filter inputs
+            const exerciseId = exerciseIdFilter || survey.metadata?.exerciseId;
+            const gameConfigId = gameConfigIdFilter || survey.metadata?.gameConfigId;
+            
             surveyResponses = await loadResponsesFromAPI(
               survey.id,
-              undefined,
-              undefined,
+              exerciseId,
+              gameConfigId,
               true
             );
           } catch (error) {
@@ -632,6 +641,64 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
             disabled={!apiUrlInput.trim()}
           >
             Save & Connect
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog
+        open={filterDialogOpen}
+        onClose={() => setFilterDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Filter Survey Results</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Filter results by Game Config ID or Exercise ID. These IDs are used to identify
+            which survey instance to query in the platform. Leave empty to search all instances
+            with this survey ID.
+          </Typography>
+          <TextField
+            label="Game Config ID"
+            value={gameConfigIdFilter}
+            onChange={(e) => setGameConfigIdFilter(e.target.value)}
+            placeholder="e.g., 11ee9a08d96eb0d5b17e02425a0573cc"
+            fullWidth
+            sx={{ mt: 2 }}
+            helperText="The gameConfigId from the platform (optional)"
+          />
+          <TextField
+            label="Exercise ID"
+            value={exerciseIdFilter}
+            onChange={(e) => setExerciseIdFilter(e.target.value)}
+            placeholder="e.g., exercise-123"
+            fullWidth
+            sx={{ mt: 2 }}
+            helperText="The exerciseId from the platform (optional)"
+          />
+          {survey.metadata?.gameConfigId && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              This survey has a stored Game Config ID: {survey.metadata.gameConfigId}
+            </Alert>
+          )}
+          {survey.metadata?.exerciseId && (
+            <Alert severity="info" sx={{ mt: 1 }}>
+              This survey has a stored Exercise ID: {survey.metadata.exerciseId}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFilterDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setFilterDialogOpen(false);
+              // Refresh data with new filters
+              setRefreshKey((prev) => prev + 1);
+            }}
+            variant="contained"
+          >
+            Apply Filters
           </Button>
         </DialogActions>
       </Dialog>
