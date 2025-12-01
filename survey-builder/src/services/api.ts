@@ -1,8 +1,36 @@
 import { SurveyResponse } from "../types/survey";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+// Determine API base URL:
+// 1. Use environment variable if set
+// 2. Use current origin (for deployed apps on same server)
+// 3. Fall back to localhost:8080 for local development
+const getApiBaseUrl = (): string => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // If running in browser, use current origin (same server as the app)
+  if (typeof window !== "undefined" && window.location) {
+    // Check if we're on localhost (development)
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      // For local dev, try to use the configured port or default to 8080
+      return import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+    }
+    // For deployed apps, use the same origin
+    return window.location.origin;
+  }
+  
+  // Fallback for SSR or other environments
+  return "http://localhost:8080";
+};
+
+const API_BASE_URL = getApiBaseUrl();
 const API_PREFIX = "/api";
+
+// Log the API base URL for debugging (only in development)
+if (import.meta.env.DEV) {
+  console.log("[API] Using API base URL:", API_BASE_URL);
+}
 
 // Cache API health check to avoid repeated failed requests
 let apiHealthCache: { available: boolean; timestamp: number } | null = null;
@@ -281,7 +309,9 @@ export const checkApiHealth = async (
     }
 
     // Use minimal request to check health
-    const response = await fetch(`${API_BASE_URL}${API_PREFIX}/gameData`, {
+    const healthCheckUrl = `${API_BASE_URL}${API_PREFIX}/gameData`;
+    console.log("[API Health Check] Checking:", healthCheckUrl);
+    const response = await fetch(healthCheckUrl, {
       method: "GET",
       headers,
       signal: controller.signal,
