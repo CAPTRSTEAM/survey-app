@@ -8,6 +8,21 @@ const API_PREFIX = "/api";
 let apiHealthCache: { available: boolean; timestamp: number } | null = null;
 const API_HEALTH_CACHE_DURATION = 60000; // 1 minute cache
 
+// Try to get auth token from window (if running in platform context)
+const getAuthToken = (): string | null => {
+  // Check if we're in a platform context with auth
+  if (typeof window !== "undefined") {
+    // Try to get token from various possible locations
+    const token =
+      (window as any).__CAPTRS_TOKEN__ ||
+      (window as any).token ||
+      localStorage.getItem("captrs_token") ||
+      sessionStorage.getItem("captrs_token");
+    return token;
+  }
+  return null;
+};
+
 export interface GameDataDTO {
   id: string;
   data: any; // JSON data containing survey response
@@ -122,17 +137,40 @@ export const fetchSurveyResponses = async (
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
+    // Try to get auth token
+    const token = getAuthToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    // Add auth header if token is available
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
+    // Handle authentication errors gracefully
+    if (response.status === 401 || response.status === 403) {
+      console.warn(
+        "[API] Authentication required. Response status:",
+        response.status
+      );
+      throw new Error("Authentication required");
+    }
+
     if (!response.ok) {
+      console.error(
+        "[API] Request failed:",
+        response.status,
+        response.statusText
+      );
       throw new Error(
         `API request failed: ${response.status} ${response.statusText}`
       );
@@ -229,34 +267,64 @@ export const checkApiHealth = async (
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1500); // 1.5 second timeout (fast fail)
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+    // Try to get auth token
+    const token = getAuthToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    // Add auth header if token is available
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
 
     // Use minimal request to check health
     const response = await fetch(`${API_BASE_URL}${API_PREFIX}/gameData`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       signal: controller.signal,
       cache: "no-cache",
-    }).catch(() => {
-      // Immediately catch network errors - don't let them propagate
+    }).catch((error) => {
+      // Log network errors for debugging
+      console.log("[API Health Check] Network error:", error.message);
       return null;
     });
 
     clearTimeout(timeoutId);
 
-    const isAvailable = response !== null && response.ok;
+    if (!response) {
+      console.log("[API Health Check] No response received");
+      apiHealthCache = {
+        available: false,
+        timestamp: Date.now(),
+      };
+      return false;
+    }
+
+    // Check response status - 200-299 is ok, 401/403 means API exists but needs auth
+    const isAvailable = response.status >= 200 && response.status < 300;
+    const needsAuth = response.status === 401 || response.status === 403;
+
+    console.log(
+      `[API Health Check] Status: ${response.status}, Available: ${isAvailable}, Needs Auth: ${needsAuth}`
+    );
+
+    // If we get 401/403, the API is available but needs authentication
+    // For now, we'll consider it available (user can authenticate separately)
+    const finalAvailable = isAvailable || needsAuth;
 
     // Cache the result
     apiHealthCache = {
-      available: isAvailable,
+      available: finalAvailable,
       timestamp: Date.now(),
     };
 
-    return isAvailable;
+    return finalAvailable;
   } catch (error) {
-    // All errors are expected when backend is not running - cache as unavailable
+    // Log unexpected errors
+    console.log("[API Health Check] Exception:", error);
     apiHealthCache = {
       available: false,
       timestamp: Date.now(),

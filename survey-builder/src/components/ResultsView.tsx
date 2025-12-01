@@ -76,6 +76,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         // Check if API is available (with silent error handling)
         // Don't await in a try-catch - let checkApiHealth handle errors internally
         const apiHealth = await checkApiHealth();
+        console.log("[ResultsView] API Health Check Result:", apiHealth);
         setApiAvailable(apiHealth);
 
         // Load responses from platform API or fallback to localStorage
@@ -91,9 +92,22 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
               true
             );
           } catch (error) {
-            // Silently fall back to localStorage - connection errors are expected
+            // Log the error for debugging
+            console.log("[ResultsView] API fetch error:", error);
+            // Check if it's an auth error
+            if (
+              error instanceof Error &&
+              error.message === "Authentication required"
+            ) {
+              console.warn(
+                "[ResultsView] Authentication required for API access"
+              );
+              // Still fall back to localStorage, but keep useAPI true so user can retry after auth
+            } else {
+              // For other errors, disable API usage
+              setUseAPI(false);
+            }
             surveyResponses = getResponsesForSurvey(survey.id);
-            setUseAPI(false);
           }
         } else {
           surveyResponses = getResponsesForSurvey(survey.id);
@@ -257,6 +271,19 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         {apiAvailable && useAPI ? (
           <Alert severity="success" sx={{ mb: 3 }}>
             Connected to platform API
+            <Button
+              size="small"
+              onClick={() => {
+                // Clear cache and retry
+                import("../services/api").then(({ clearApiHealthCache }) => {
+                  clearApiHealthCache();
+                  setRefreshKey((prev) => prev + 1);
+                });
+              }}
+              sx={{ ml: 1 }}
+            >
+              Refresh
+            </Button>
           </Alert>
         ) : (
           <Alert severity="info" sx={{ mb: 3 }}>
@@ -264,12 +291,30 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
             {apiAvailable && (
               <Button
                 size="small"
-                onClick={() => setUseAPI(true)}
+                onClick={() => {
+                  import("../services/api").then(({ clearApiHealthCache }) => {
+                    clearApiHealthCache();
+                    setUseAPI(true);
+                    setRefreshKey((prev) => prev + 1);
+                  });
+                }}
                 sx={{ ml: 1 }}
               >
                 Connect to Platform API
               </Button>
             )}
+            <Button
+              size="small"
+              onClick={() => {
+                import("../services/api").then(({ clearApiHealthCache }) => {
+                  clearApiHealthCache();
+                  setRefreshKey((prev) => prev + 1);
+                });
+              }}
+              sx={{ ml: 1 }}
+            >
+              Retry Connection
+            </Button>
           </Alert>
         )}
 
