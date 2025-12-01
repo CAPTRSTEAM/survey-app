@@ -85,12 +85,49 @@ const getApiBaseUrl = (): string | null => {
   return fallback;
 };
 
-const API_BASE_URL = getApiBaseUrl();
+// Dynamic API base URL - can be updated at runtime
+let API_BASE_URL: string | null = getApiBaseUrl();
 const API_PREFIX = "/api";
+
+// Listen for platform CONFIG messages (like survey-taker does)
+if (typeof window !== "undefined") {
+  window.addEventListener("message", (event) => {
+    // Check for CONFIG message from platform
+    if (event?.data?.type === "CONFIG" && event.data?.url) {
+      const newApiUrl = event.data.url;
+      console.log("[API] Received CONFIG message with API URL:", newApiUrl);
+      API_BASE_URL = newApiUrl;
+      // Clear cache so health check runs again
+      apiHealthCache = null;
+    }
+  });
+
+  // Also check parent window for API URL (if embedded in iframe)
+  try {
+    if (window.parent !== window) {
+      const parentUrl =
+        (window.parent as any).__CAPTRS_API_URL__ ||
+        (window.parent as any).__SURVEY_APP_API_URL__;
+      if (parentUrl && !API_BASE_URL) {
+        console.log("[API] Found API URL in parent window:", parentUrl);
+        API_BASE_URL = parentUrl;
+      }
+    }
+  } catch (e) {
+    // Cross-origin iframe - can't access parent
+  }
+}
 
 // Helper to check if API is configured
 export const isApiConfigured = (): boolean => {
   return API_BASE_URL !== null;
+};
+
+// Helper to update API URL at runtime (for platform integration)
+export const setApiBaseUrl = (url: string | null): void => {
+  API_BASE_URL = url;
+  // Clear cache so health check runs again
+  apiHealthCache = null;
 };
 
 // Cache API health check to avoid repeated failed requests
@@ -353,7 +390,9 @@ export const checkApiHealth = async (
 ): Promise<boolean> => {
   // If API URL is not configured, return false immediately
   if (!API_BASE_URL) {
-    console.log("[API Health Check] API URL not configured - skipping health check");
+    console.log(
+      "[API Health Check] API URL not configured - skipping health check"
+    );
     return false;
   }
 

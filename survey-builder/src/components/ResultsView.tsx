@@ -75,7 +75,15 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
       try {
         // Check if API is available (with silent error handling)
         // Don't await in a try-catch - let checkApiHealth handle errors internally
-        const apiHealth = await checkApiHealth();
+        // Also check for runtime API URL updates (platform may provide it after page load)
+        let apiHealth = await checkApiHealth();
+        
+        // If API not available, wait a bit and check again (platform might send CONFIG message)
+        if (!apiHealth && typeof window !== "undefined") {
+          await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms
+          apiHealth = await checkApiHealth(true); // Force check
+        }
+        
         console.log("[ResultsView] API Health Check Result:", apiHealth);
         setApiAvailable(apiHealth);
 
