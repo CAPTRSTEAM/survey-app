@@ -22,13 +22,15 @@ import { exportSurveyWithSections } from '../utils/surveyUtils'
 import { SurveyLibraryView } from './SurveyLibraryView'
 import { SurveyWizard } from './SurveyWizard'
 import { PreviewMode } from './PreviewMode'
+import { ResultsView } from './ResultsView'
 
 const SurveyBuilder: React.FC = () => {
   const { surveys, loading, deleteSurvey, duplicateSurvey } = useSurveyContext()
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null)
-  const [view, setView] = useState<'library' | 'wizard'>('library')
+  const [view, setView] = useState<'library' | 'wizard' | 'results'>('library')
   const [refreshKey, setRefreshKey] = useState(0)
   const [previewSurvey, setPreviewSurvey] = useState<Survey | null>(null)
+  const [resultsSurvey, setResultsSurvey] = useState<Survey | null>(null)
   const [snackbar, setSnackbar] = useState<{
     open: boolean
     message: string
@@ -64,6 +66,17 @@ const SurveyBuilder: React.FC = () => {
 
   const handlePreviewSurvey = (survey: Survey) => {
     setPreviewSurvey(survey)
+  }
+
+  const handleViewResults = (survey: Survey) => {
+    setResultsSurvey(survey)
+    setView('results')
+  }
+
+  const handleResultsBack = () => {
+    setView('library')
+    setResultsSurvey(null)
+    setRefreshKey(prev => prev + 1) // Refresh to show updated stats
   }
 
   const handleDeleteSurvey = (survey: Survey) => {
@@ -162,6 +175,15 @@ const SurveyBuilder: React.FC = () => {
         survey={selectedSurvey}
         onComplete={handleWizardComplete}
         onCancel={handleWizardCancel}
+      />
+    )
+  }
+
+  if (view === 'results' && resultsSurvey) {
+    return (
+      <ResultsView
+        survey={resultsSurvey}
+        onBack={handleResultsBack}
       />
     )
   }
@@ -290,6 +312,7 @@ const SurveyBuilder: React.FC = () => {
             onDelete={handleDeleteSurvey}
             onExport={handleExportSurvey}
             onPreview={handlePreviewSurvey}
+            onViewResults={handleViewResults}
           />
         </Box>
 

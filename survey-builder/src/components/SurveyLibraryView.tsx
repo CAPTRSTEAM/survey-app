@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Box,
   Typography,
@@ -16,7 +17,8 @@ import {
   Delete as DeleteIcon,
   ContentCopy as CopyIcon,
   Download as DownloadIcon,
-  Visibility as PreviewIcon
+  Visibility as PreviewIcon,
+  BarChart as BarChartIcon
 } from '@mui/icons-material'
 
 import { Survey } from '../types/survey'
@@ -29,6 +31,7 @@ interface SurveyLibraryViewProps {
   onDelete: (survey: Survey) => void
   onExport: (survey: Survey) => void
   onPreview: (survey: Survey) => void
+  onViewResults: (survey: Survey) => void
 }
 
 export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
@@ -37,7 +40,8 @@ export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
   onDuplicate,
   onDelete,
   onExport,
-  onPreview
+  onPreview,
+  onViewResults
 }) => {
   if (surveys.length === 0) {
     return (
@@ -128,6 +132,16 @@ export const SurveyLibraryView: React.FC<SurveyLibraryViewProps> = ({
                       onClick={() => onPreview(survey)}
                     >
                       <PreviewIcon />
+                    </IconButton>
+                  </Tooltip>
+                  
+                  <Tooltip title="View Results">
+                    <IconButton
+                      size="small"
+                      color="success"
+                      onClick={() => onViewResults(survey)}
+                    >
+                      <BarChartIcon />
                     </IconButton>
                   </Tooltip>
                   

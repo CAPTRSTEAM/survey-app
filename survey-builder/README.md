@@ -9,6 +9,7 @@ A modern React-based survey builder application with a multi-step wizard interfa
 - **Multi-Step Wizard**: Guided survey creation with 5 intuitive steps
 - **Section Support**: Create multiple question sections with titles and descriptions
 - **localStorage Persistence**: Surveys are automatically saved locally
+- **Platform API Integration**: Fetch survey responses directly from the platform database
 
 ### **Question Types**
 - **Text Input**: Free-form text responses
@@ -33,6 +34,7 @@ A modern React-based survey builder application with a multi-step wizard interfa
 - **React Context + useReducer**: Reliable state management
 - **Vite**: Fast development and build tooling
 - **localStorage**: Client-side persistence
+- **Platform API**: Integration with CAPTRS platform `/api/gameData` endpoints
 
 ## 📁 Project Structure
 
@@ -69,6 +71,7 @@ survey-builder/
 ### Prerequisites
 - Node.js 18+ 
 - npm or yarn
+- CAPTRS platform backend running (for API integration)
 
 ### Installation
 ```bash
@@ -76,11 +79,23 @@ cd survey-builder
 npm install
 ```
 
+### Configuration
+
+Set the platform API base URL (optional, defaults to `http://localhost:8080`):
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
 ### Development
 ```bash
 npm run dev
 ```
 The application will be available at `http://localhost:5173`
+
+### Platform API Integration
+
+The Survey Builder can fetch survey responses directly from the platform database using the existing `/api/gameData` endpoints. See [PLATFORM_API_INTEGRATION.md](./PLATFORM_API_INTEGRATION.md) for details.
 
 ### Build for Production
 ```bash
