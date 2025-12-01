@@ -5,32 +5,39 @@ import { SurveyResponse } from "../types/survey";
 // 2. Use current origin (for deployed apps on same server)
 // 3. Fall back to localhost:8080 for local development
 const getApiBaseUrl = (): string => {
+  // Priority 1: Environment variable (explicit override)
   if (import.meta.env.VITE_API_BASE_URL) {
+    console.log("[API] Using VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
-  // If running in browser, use current origin (same server as the app)
+
+  // Priority 2: Use current origin when running in browser
   if (typeof window !== "undefined" && window.location) {
-    // Check if we're on localhost (development)
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-      // For local dev, try to use the configured port or default to 8080
-      return import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+    const origin = window.location.origin;
+    // Only use localhost:8080 if we're actually on localhost AND in dev mode
+    if (
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1") &&
+      import.meta.env.DEV
+    ) {
+      // For local dev, use localhost:8080
+      const localDevUrl = "http://localhost:8080";
+      console.log("[API] Local dev mode, using:", localDevUrl);
+      return localDevUrl;
     }
-    // For deployed apps, use the same origin
-    return window.location.origin;
+    // For deployed apps (or production builds), always use same origin
+    console.log("[API] Using current origin:", origin);
+    return origin;
   }
-  
+
   // Fallback for SSR or other environments
-  return "http://localhost:8080";
+  const fallback = "http://localhost:8080";
+  console.log("[API] Fallback to:", fallback);
+  return fallback;
 };
 
 const API_BASE_URL = getApiBaseUrl();
 const API_PREFIX = "/api";
-
-// Log the API base URL for debugging (only in development)
-if (import.meta.env.DEV) {
-  console.log("[API] Using API base URL:", API_BASE_URL);
-}
 
 // Cache API health check to avoid repeated failed requests
 let apiHealthCache: { available: boolean; timestamp: number } | null = null;
