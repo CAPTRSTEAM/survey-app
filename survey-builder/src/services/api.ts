@@ -24,7 +24,24 @@ const getApiBaseUrl = (): string | null => {
     const urlParam = urlParams.get("apiUrl") || urlParams.get("api_url");
     if (urlParam) {
       console.log("[API] Using URL parameter API URL:", urlParam);
+      // Store in localStorage for future use
+      try {
+        localStorage.setItem("captrs_api_url", urlParam);
+      } catch (e) {
+        // localStorage might not be available
+      }
       return urlParam;
+    }
+
+    // Priority 2.5: localStorage (for standalone app configuration)
+    try {
+      const storedUrl = localStorage.getItem("captrs_api_url");
+      if (storedUrl) {
+        console.log("[API] Using stored API URL from localStorage:", storedUrl);
+        return storedUrl;
+      }
+    } catch (e) {
+      // localStorage might not be available
     }
   }
 
@@ -59,11 +76,18 @@ const getApiBaseUrl = (): string | null => {
 
     if (isGitHubPages) {
       // GitHub Pages doesn't have a backend - need explicit API URL
-      // Return null to indicate API is not configured (don't try to connect)
+      // But don't return null - check if we have a configured URL first
+      // If no URL is configured, we'll still return null but with a helpful message
+      // The user can configure via URL parameter, window global, or env variable
       console.warn(
-        "[API] GitHub Pages detected - API URL must be configured via window.__CAPTRS_API_URL__ or URL parameter"
+        "[API] GitHub Pages detected - API URL should be configured via:"
       );
-      console.log("[API] API URL not configured - will use localStorage only");
+      console.warn("  - URL parameter: ?apiUrl=https://your-platform-url.com");
+      console.warn("  - Window global: window.__CAPTRS_API_URL__ = 'https://your-platform-url.com'");
+      console.warn("  - Environment variable: VITE_API_BASE_URL=https://your-platform-url.com");
+      
+      // If we still don't have an API URL at this point, return null
+      // But we've already checked window globals and URL params above, so this should be rare
       return null;
     }
 
@@ -110,7 +134,7 @@ if (typeof window !== "undefined") {
       API_BASE_URL = newApiUrl;
       // Clear cache so health check runs again
       apiHealthCache = null;
-      
+
       // Also store token if provided (for future auth support)
       if (event.data.token) {
         // Could store token for auth headers
@@ -140,9 +164,25 @@ export const isApiConfigured = (): boolean => {
   return API_BASE_URL !== null;
 };
 
-// Helper to update API URL at runtime (for platform integration)
+// Helper to update API URL at runtime (for platform integration or manual configuration)
 export const setApiBaseUrl = (url: string | null): void => {
   API_BASE_URL = url;
+  // Store in localStorage for standalone app
+  if (typeof window !== "undefined" && url) {
+    try {
+      localStorage.setItem("captrs_api_url", url);
+      console.log("[API] Stored API URL in localStorage:", url);
+    } catch (e) {
+      // localStorage might not be available
+    }
+  } else if (typeof window !== "undefined" && !url) {
+    try {
+      localStorage.removeItem("captrs_api_url");
+      console.log("[API] Removed API URL from localStorage");
+    } catch (e) {
+      // localStorage might not be available
+    }
+  }
   // Clear cache so health check runs again
   apiHealthCache = null;
 };

@@ -64,6 +64,8 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
   const [loading, setLoading] = useState(true);
   const [apiAvailable, setApiAvailable] = useState(false);
   const [useAPI, setUseAPI] = useState(true);
+  const [apiConfigDialogOpen, setApiConfigDialogOpen] = useState(false);
+  const [apiUrlInput, setApiUrlInput] = useState("");
 
   // Check API availability and load responses
   const [responses, setResponses] = useState<SurveyResponse[]>([]);
@@ -296,6 +298,18 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         ) : (
           <Alert severity="info" sx={{ mb: 3 }}>
             Using local storage (Platform API unavailable or disabled).
+            <Button
+              size="small"
+              onClick={() => {
+                // Load current API URL from localStorage
+                const currentUrl = localStorage.getItem("captrs_api_url") || "";
+                setApiUrlInput(currentUrl);
+                setApiConfigDialogOpen(true);
+              }}
+              sx={{ ml: 1 }}
+            >
+              Configure API URL
+            </Button>
             {apiAvailable && (
               <Button
                 size="small"
@@ -571,6 +585,53 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
             disabled={!importFile || importing}
           >
             {importing ? "Importing..." : "Import"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* API Configuration Dialog */}
+      <Dialog
+        open={apiConfigDialogOpen}
+        onClose={() => setApiConfigDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Configure Platform API URL</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Enter the base URL of your CAPTRS platform API (e.g., https://api.captrs.com or http://localhost:8080).
+            This will be saved in your browser's local storage.
+          </Typography>
+          <TextField
+            label="API Base URL"
+            value={apiUrlInput}
+            onChange={(e) => setApiUrlInput(e.target.value)}
+            placeholder="https://api.captrs.com"
+            fullWidth
+            sx={{ mt: 2 }}
+            helperText="The base URL without /api suffix"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setApiConfigDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={async () => {
+              if (apiUrlInput.trim()) {
+                // Remove trailing slash if present
+                const cleanUrl = apiUrlInput.trim().replace(/\/$/, "");
+                // Set the API URL
+                const { setApiBaseUrl, clearApiHealthCache } = await import("../services/api");
+                setApiBaseUrl(cleanUrl);
+                clearApiHealthCache();
+                setApiConfigDialogOpen(false);
+                // Refresh to test the connection
+                setRefreshKey((prev) => prev + 1);
+              }
+            }}
+            variant="contained"
+            disabled={!apiUrlInput.trim()}
+          >
+            Save & Connect
           </Button>
         </DialogActions>
       </Dialog>
