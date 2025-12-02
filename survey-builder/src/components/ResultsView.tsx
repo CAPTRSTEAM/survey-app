@@ -86,13 +86,13 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         // Don't await in a try-catch - let checkApiHealth handle errors internally
         // Also check for runtime API URL updates (platform may provide it after page load)
         let apiHealth = await checkApiHealth();
-        
+
         // If API not available, wait a bit and check again (platform might send CONFIG message)
         if (!apiHealth && typeof window !== "undefined") {
           await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms
           apiHealth = await checkApiHealth(true); // Force check
         }
-        
+
         console.log("[ResultsView] API Health Check Result:", apiHealth);
         setApiAvailable(apiHealth);
 
@@ -102,8 +102,9 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
           try {
             // Use gameConfigId/exerciseId from survey metadata or filter inputs
             const exerciseId = exerciseIdFilter || survey.metadata?.exerciseId;
-            const gameConfigId = gameConfigIdFilter || survey.metadata?.gameConfigId;
-            
+            const gameConfigId =
+              gameConfigIdFilter || survey.metadata?.gameConfigId;
+
             surveyResponses = await loadResponsesFromAPI(
               survey.id,
               exerciseId,
@@ -178,9 +179,39 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
 
     try {
       if (importFile.name.endsWith(".csv")) {
-        await importResponsesFromCSV(importFile);
+        const importedResponses = await importResponsesFromCSV(importFile, survey.id);
+        console.log(`Imported ${importedResponses.length} responses`);
+        
+        // Filter to only responses for this survey
+        const surveyResponses = importedResponses.filter(r => r.surveyId === survey.id);
+        
+        if (surveyResponses.length === 0 && importedResponses.length > 0) {
+          setImportError(
+            `Imported ${importedResponses.length} responses, but none match survey ID "${survey.id}". ` +
+            `Found survey IDs: ${[...new Set(importedResponses.map(r => r.surveyId))].join(', ')}`
+          );
+        } else {
+          // Refresh the view to show imported data
+          setRefreshKey((prev) => prev + 1);
+          setImportDialogOpen(false);
+        }
       } else if (importFile.name.endsWith(".json")) {
-        await importResponsesFromFile(importFile);
+        const importedResponses = await importResponsesFromFile(importFile);
+        console.log(`Imported ${importedResponses.length} responses`);
+        
+        // Filter to only responses for this survey
+        const surveyResponses = importedResponses.filter(r => r.surveyId === survey.id);
+        
+        if (surveyResponses.length === 0 && importedResponses.length > 0) {
+          setImportError(
+            `Imported ${importedResponses.length} responses, but none match survey ID "${survey.id}". ` +
+            `Found survey IDs: ${[...new Set(importedResponses.map(r => r.surveyId))].join(', ')}`
+          );
+        } else {
+          // Refresh the view to show imported data
+          setRefreshKey((prev) => prev + 1);
+          setImportDialogOpen(false);
+        }
       } else {
         setImportError(
           "Unsupported file type. Please upload a CSV or JSON file."
@@ -608,8 +639,9 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         <DialogTitle>Configure Platform API URL</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Enter the base URL of your CAPTRS platform API (e.g., https://api.captrs.com or http://localhost:8080).
-            This will be saved in your browser's local storage.
+            Enter the base URL of your CAPTRS platform API (e.g.,
+            https://api.captrs.com or http://localhost:8080). This will be saved
+            in your browser's local storage.
           </Typography>
           <TextField
             label="API Base URL"
@@ -629,7 +661,9 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
                 // Remove trailing slash if present
                 const cleanUrl = apiUrlInput.trim().replace(/\/$/, "");
                 // Set the API URL
-                const { setApiBaseUrl, clearApiHealthCache } = await import("../services/api");
+                const { setApiBaseUrl, clearApiHealthCache } = await import(
+                  "../services/api"
+                );
                 setApiBaseUrl(cleanUrl);
                 clearApiHealthCache();
                 setApiConfigDialogOpen(false);
@@ -655,9 +689,9 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
         <DialogTitle>Filter Survey Results</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Filter results by Game Config ID or Exercise ID. These IDs are used to identify
-            which survey instance to query in the platform. Leave empty to search all instances
-            with this survey ID.
+            Filter results by Game Config ID or Exercise ID. These IDs are used
+            to identify which survey instance to query in the platform. Leave
+            empty to search all instances with this survey ID.
           </Typography>
           <TextField
             label="Game Config ID"
@@ -679,7 +713,8 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ survey, onBack }) => {
           />
           {survey.metadata?.gameConfigId && (
             <Alert severity="info" sx={{ mt: 2 }}>
-              This survey has a stored Game Config ID: {survey.metadata.gameConfigId}
+              This survey has a stored Game Config ID:{" "}
+              {survey.metadata.gameConfigId}
             </Alert>
           )}
           {survey.metadata?.exerciseId && (

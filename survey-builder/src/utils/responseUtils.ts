@@ -143,68 +143,159 @@ export const importResponsesFromFile = (file: File): Promise<SurveyResponse[]> =
   })
 }
 
+// Parse CSV line handling quoted fields with commas
+const parseCSVLine = (line: string): string[] => {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    const nextChar = line[i + 1]
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        current += '"'
+        i++ // Skip next quote
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator
+      result.push(current)
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  
+  // Add last field
+  result.push(current)
+  return result
+}
+
 // Import responses from CSV (platform export format)
-export const importResponsesFromCSV = (file: File): Promise<SurveyResponse[]> => {
+export const importResponsesFromCSV = (file: File, surveyId?: string): Promise<SurveyResponse[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string
         const lines = content.split('\n').filter(line => line.trim())
-        const headers = lines[0].split(',')
         
-        const responses: SurveyResponse[] = []
-        
-        // Find the data column (usually contains JSON)
-        const dataIndex = headers.findIndex(h => h.toLowerCase().includes('data'))
-        
-        if (dataIndex === -1) {
-          reject(new Error('Could not find data column in CSV'))
+        if (lines.length < 2) {
+          reject(new Error('CSV file must have at least a header row and one data row'))
           return
         }
         
-        // Parse each row
+        // Parse header row
+        const headers = parseCSVLine(lines[0])
+        
+        // Find column indices
+        const dataIndex = headers.findIndex(h => h.trim().toUpperCase() === 'DATA')
+        const idIndex = headers.findIndex(h => h.trim().toUpperCase() === 'ID')
+        const exerciseIdIndex = headers.findIndex(h => h.trim().toUpperCase() === 'EXERCISE_ID')
+        const organizationIdIndex = headers.findIndex(h => h.trim().toUpperCase() === 'ORGANIZATION_ID')
+        const userIdIndex = headers.findIndex(h => h.trim().toUpperCase() === 'USER_ID')
+        const creationTsIndex = headers.findIndex(h => h.trim().toUpperCase() === 'CREATION_TS')
+        
+        if (dataIndex === -1) {
+          reject(new Error('Could not find DATA column in CSV. Expected columns: USER_ID, USERNAME, ORGANIZATION_ID, GAME_CONFIG_ID, CREATION_TS, DATA, ID, EXERCISE_ID, GAME_VERSION_ID'))
+          return
+        }
+        
+        const responses: SurveyResponse[] = []
+        
+        // Parse each data row
         for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(',')
-          if (values.length <= dataIndex) continue
+          const line = lines[i].trim()
+          if (!line) continue
           
           try {
-            // Extract JSON from data column (may be wrapped in quotes)
-            let dataStr = values[dataIndex]
+            const values = parseCSVLine(line)
+            if (values.length <= dataIndex) {
+              console.warn(`Row ${i} has insufficient columns, skipping`)
+              continue
+            }
+            
+            // Extract the DATA column value
+            let dataStr = values[dataIndex] || ''
+            
+            // Remove surrounding quotes if present
             if (dataStr.startsWith('"') && dataStr.endsWith('"')) {
               dataStr = dataStr.slice(1, -1)
             }
-            // Handle escaped JSON strings
+            
+            // Handle escaped quotes ("" -> ")
             dataStr = dataStr.replace(/""/g, '"')
             
-            // Parse nested JSON structure
+            // Parse the outer JSON structure
             const outerData = JSON.parse(dataStr)
-            const innerData = typeof outerData.data === 'string' 
-              ? JSON.parse(outerData.data) 
-              : outerData.data || outerData
             
-            if (innerData.answers) {
+            // Extract inner data (nested JSON string)
+            let innerData: any
+            if (outerData.data) {
+              // DATA column contains: {"data": "{...}", "exerciseId": "...", ...}
+              if (typeof outerData.data === 'string') {
+                innerData = JSON.parse(outerData.data)
+              } else {
+                innerData = outerData.data
+              }
+            } else {
+              innerData = outerData
+            }
+            
+            // Extract metadata from outer structure or CSV columns
+            const exerciseId = values[exerciseIdIndex] || outerData.exerciseId || ''
+            const organizationId = values[organizationIdIndex] || outerData.organizationId || ''
+            const userId = values[userIdIndex] || outerData.userId || ''
+            const responseId = values[idIndex] || `response_${Date.now()}_${i}`
+            
+            // Check if this response matches the survey (if surveyId provided)
+            if (surveyId && innerData.surveyId && innerData.surveyId !== surveyId) {
+              console.log(`Skipping row ${i}: surveyId mismatch (${innerData.surveyId} !== ${surveyId})`)
+              continue
+            }
+            
+            // Create SurveyResponse
+            if (innerData.answers || innerData.surveyId) {
               responses.push({
-                id: `response_${Date.now()}_${i}`,
-                surveyId: innerData.surveyId || '',
-                surveyTitle: innerData.surveyTitle || '',
+                id: responseId,
+                surveyId: innerData.surveyId || surveyId || '',
+                surveyTitle: innerData.surveyTitle || innerData.survey_title || '',
                 answers: innerData.answers || {},
-                timestamp: innerData.timestamp || new Date().toISOString(),
-                completedAt: innerData.completedAt,
-                sessionId: innerData.sessionId,
-                timeSpent: innerData.timeSpent,
-                status: innerData.status || 'completed'
+                timestamp: innerData.timestamp || (values[creationTsIndex] ? new Date(values[creationTsIndex]).toISOString() : new Date().toISOString()),
+                completedAt: innerData.completedAt || innerData.completed_at,
+                sessionId: innerData.sessionId || innerData.session_id,
+                timeSpent: innerData.timeSpent || innerData.time_spent,
+                status: (innerData.status || 'completed') as 'completed' | 'partial' | 'abandoned',
+                userId: userId || undefined,
+                organizationId: organizationId || undefined,
+                exerciseId: exerciseId || undefined
               })
+            } else {
+              console.warn(`Row ${i} does not contain survey response data, skipping`)
             }
           } catch (error) {
             console.warn(`Failed to parse row ${i}:`, error)
+            // Continue processing other rows
             continue
           }
         }
         
+        if (responses.length === 0) {
+          reject(new Error('No valid survey responses found in CSV file. Please check the file format.'))
+          return
+        }
+        
+        // Save responses to localStorage
         const existingResponses = loadAllResponses()
         const newResponses = [...existingResponses, ...responses]
         saveResponses(newResponses)
+        
+        console.log(`Successfully imported ${responses.length} survey responses from CSV`)
         resolve(responses)
       } catch (error) {
         reject(new Error('Failed to parse CSV file: ' + (error as Error).message))
