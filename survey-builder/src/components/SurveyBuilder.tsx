@@ -236,7 +236,7 @@ const SurveyBuilder: React.FC = () => {
       </Box>
 
       {/* Main Content with top padding for fixed header */}
-      <Container maxWidth="lg" sx={{ py: 4, pt: 16, display: 'flex', justifyContent: 'center' }}>
+      <Container maxWidth="lg" sx={{ py: 4, pt: 24, display: 'flex', justifyContent: 'center' }}>
         {/* Survey Library Box - Centered */}
         <Box sx={{ 
           backgroundColor: 'background.paper',
